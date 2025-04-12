@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/BackgroundImage10.png</file>
+        <file>LGPLv3.pdf</file>
+        <file>UserManual.pdf</file>
+    </qresource>
+</RCC>
