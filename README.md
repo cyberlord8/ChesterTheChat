@@ -4,7 +4,6 @@
 
 ![image](https://github.com/user-attachments/assets/90fa9de0-e48f-4091-b269-6c783037a71c)
 
-
 ---
 
 ## 🚀 Features
@@ -47,20 +46,15 @@ Each instance creates its own `.ini` file (`instance_1_settings.ini`, `instance_
 | ![image](https://github.com/user-attachments/assets/609015a8-676e-4667-b261-88d220bbc8a6) | ![image](https://github.com/user-attachments/assets/9456f8d0-5244-4ea0-9128-69f61fa085ce) | ![image](https://github.com/user-attachments/assets/c5d58f64-9c4b-436d-852f-d860ad255839)
  |
 
-> Add your screenshots in `docs/screenshots/`.
-
 ---
 
 ## 📘 License
-
-This project is licensed under the LGPL v3 license. See [LGPLv3.pdf](LGPLv3.pdf) for details.
 
 ---
 
 ## 🙌 Acknowledgements
 
 - Developed using the **Qt Framework**
-- Licensed fonts, icons, and backgrounds (if applicable)
 - Based on C++ best practices and Qt design patterns
 
 ---
