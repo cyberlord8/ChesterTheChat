@@ -64,5 +64,5 @@ Licensed under the [GNU LGPL v3](https://www.gnu.org/licenses/lgpl-3.0.html).
 
 ## 🧠 About the Author
 
-Developed by [Your Name or Handle] — if you use this project or find it helpful, give it a ⭐ on GitHub or drop a message!
+Developed by cyberlord8 — if you use this project or find it helpful, give it a ⭐ on GitHub or drop a message!
 
