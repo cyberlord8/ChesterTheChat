@@ -2,7 +2,8 @@
 
 **Chester The Chat** is a lightweight IP/UDP-based local network chat application built with the Qt Framework (C++). It's designed to support multiple instances on the same machine, each with isolated configuration, making it ideal for local testing or LAN-based messaging scenarios.
 
-![Screenshot Placeholder](docs/screenshots/main_window.png)
+![image](https://github.com/user-attachments/assets/90fa9de0-e48f-4091-b269-6c783037a71c)
+
 
 ---
 
@@ -43,7 +44,10 @@ Each instance creates its own `.ini` file (`instance_1_settings.ini`, `instance_
 
 | Chat Window | Network Configuration | Style Sheet Example |
 |-------------|------------------------|---------------------|
-| ![](docs/screenshots/chat.png) | ![](docs/screenshots/network.png) | ![](docs/screenshots/style.png) |
+| ![image](https://github.com/user-attachments/assets/609015a8-676e-4667-b261-88d220bbc8a6)
+ | ![image](https://github.com/user-attachments/assets/9456f8d0-5244-4ea0-9128-69f61fa085ce)
+ | ![image](https://github.com/user-attachments/assets/c5d58f64-9c4b-436d-852f-d860ad255839)
+ |
 
 > Add your screenshots in `docs/screenshots/`.
 
