@@ -44,9 +44,7 @@ Each instance creates its own `.ini` file (`instance_1_settings.ini`, `instance_
 
 | Chat Window | Network Configuration | Style Sheet Example |
 |-------------|------------------------|---------------------|
-| ![image](https://github.com/user-attachments/assets/609015a8-676e-4667-b261-88d220bbc8a6)
- | ![image](https://github.com/user-attachments/assets/9456f8d0-5244-4ea0-9128-69f61fa085ce)
- | ![image](https://github.com/user-attachments/assets/c5d58f64-9c4b-436d-852f-d860ad255839)
+| ![image](https://github.com/user-attachments/assets/609015a8-676e-4667-b261-88d220bbc8a6) | ![image](https://github.com/user-attachments/assets/9456f8d0-5244-4ea0-9128-69f61fa085ce) | ![image](https://github.com/user-attachments/assets/c5d58f64-9c4b-436d-852f-d860ad255839)
  |
 
 > Add your screenshots in `docs/screenshots/`.
