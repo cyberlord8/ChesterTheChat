@@ -16,6 +16,9 @@
 - 💾 Persistent settings per instance (`instance_X_settings.ini`).
 - 🛠️ Built with Qt (C++), cross-platform compatible.
 
+## User Manual
+[UserManual.pdf](https://github.com/user-attachments/files/19722192/UserManual.pdf)
+
 ---
 
 ## 🛠️ Build Instructions
