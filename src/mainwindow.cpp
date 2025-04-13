@@ -154,8 +154,6 @@ void MainWindow::writeSettings()
     settings.endGroup();
 }
 
-
-
 void MainWindow::readSettings()
 {
 #ifdef DEBUG_MODE
@@ -192,9 +190,9 @@ void MainWindow::readSettings()
         configSettings.isLoopback      = settings.value("isLoopback", true).toBool();
         configSettings.ttlValue        = settings.value("ttlValue", 5).toUInt();
         configSettings.localUDPNetwork = settings.value("localUDPNetwork", "ANY").toString();
-        configSettings.localUDPPort    = settings.value("localUDPPort", "6068").toString();
-        configSettings.groupAddress    = settings.value("groupAddress", "224.0.0.1").toString();
-        configSettings.remoteUDPPort   = settings.value("remoteUDPPort", "6068").toString();
+        configSettings.localUDPPort    = settings.value("localUDPPort", "9999").toString();
+        configSettings.groupAddress    = settings.value("groupAddress", "224.0.0.2").toString();
+        configSettings.remoteUDPPort   = settings.value("remoteUDPPort", "9999").toString();
     }
     settings.endGroup();
 }
@@ -247,7 +245,7 @@ void MainWindow::on_actionAbout_Qt_triggered()
 }
 
 void MainWindow::openResourceFile(const QString fileName){
-    const QString resourcePath = ":" + fileName;
+    const QString resourcePath = ":/resources" + fileName;
     const QString targetPath = qApp->applicationDirPath() + fileName;
 
     QFile resourceFile(resourcePath);
@@ -256,21 +254,21 @@ void MainWindow::openResourceFile(const QString fileName){
     // Remove old file if it exists
     if (existingFile.exists()) {
         if (!existingFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther)) {
-            qDebug() << "Failed to change permissions on existing license file:" << existingFile.errorString();
+            qDebug() << "Failed to change permissions on existing file:" << existingFile.errorString();
         }
 
         if (existingFile.remove()) {
-            qDebug() << "Removed old license file.";
+            qDebug() << "Removed old file.";
         } else {
-            qDebug() << "ERROR - Cannot remove license file:" << existingFile.errorString();
+            qDebug() << "ERROR - Cannot remove file:" << existingFile.errorString();
         }
     } else {
-        qDebug() << "No existing license file found.";
+        qDebug() << "No existing file found.";
     }
 
-    // Copy the license file from resources
+    // Copy the file from resources
     if (!resourceFile.copy(targetPath)) {
-        qDebug() << "Error copying license file to:" << targetPath;
+        qDebug() << "Error copying file to:" << targetPath;
         qDebug() << "Reason:" << resourceFile.errorString();
     }
 
