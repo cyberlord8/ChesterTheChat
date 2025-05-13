@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>593</width>
+    <width>784</width>
     <height>378</height>
    </rect>
   </property>
@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabChat">
        <attribute name="title">
@@ -90,6 +90,13 @@
            <widget class="QLineEdit" name="lineEditChatText">
             <property name="toolTip">
              <string>Enter text and press enter or press Send button to send message</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonCreateTestMsg">
+            <property name="text">
+             <string>Test</string>
             </property>
            </widget>
           </item>
@@ -587,8 +594,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>593</width>
-     <height>21</height>
+     <width>784</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
