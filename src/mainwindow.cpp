@@ -347,16 +347,16 @@ void MainWindow::setBackgroundImage()
 {
     if (configSettings.b_displayBackgroundImage) {
         const QString style = QStringLiteral(
-            "QPlainTextEdit { "
+            "QtextEditChat { "
             "background-image: url(:/images/BackgroundImage10.png); "
             "background-repeat: no-repeat; "
             "background-position: center; "
             "}"
             );
-        ui->plainTextEdit->setStyleSheet(style);
+        ui->textEditChat->setStyleSheet(style);
     } else {
         // Clear background if option is disabled
-        ui->plainTextEdit->setStyleSheet(QString());
+        ui->textEditChat->setStyleSheet(QString());
     }
 }
 
@@ -439,7 +439,7 @@ void MainWindow::on_pushButtonSend_clicked()
     const quint16 port = ui->lineEditRemoteUDPPort->text().toUShort(&portOk);
 
     if (!portOk) {
-        ui->plainTextEdit->appendPlainText(tr("Invalid UDP port."));
+        ui->textEditChat->append(tr("Invalid UDP port."));
         return;
     }
 
@@ -447,12 +447,12 @@ void MainWindow::on_pushButtonSend_clicked()
 
     if (returnSize == rawData.size()) {
         lastSentData = rawData;
-        ui->plainTextEdit->appendPlainText(displayMessage);
+        ui->textEditChat->append(displayMessage);
         ui->lineEditChatText->clear();
     } else {
         const QString error = tr("%1 - ERROR writing to UDP socket: %2")
         .arg(Q_FUNC_INFO, sendUDPSocket->errorString());
-        ui->plainTextEdit->appendPlainText(error);
+        ui->textEditChat->append(error);
     }
 }
 
@@ -464,7 +464,7 @@ bool MainWindow::bindRecvUDPSocket(const QHostAddress localAddress,
     if (!recvUDPSocket->bind(localAddress, port, QUdpSocket::ReuseAddressHint)) {
         const QString error = tr("%1 - ERROR: Failed to bind UDP socket on %2:%3 - %4")
         .arg(Q_FUNC_INFO, localAddress.toString(), QString::number(port), recvUDPSocket->errorString());
-        ui->plainTextEdit->appendPlainText(error);
+        ui->textEditChat->append(error);
         return false;
     }
 
@@ -474,7 +474,7 @@ bool MainWindow::bindRecvUDPSocket(const QHostAddress localAddress,
         recvUDPSocket->setSocketOption(QAbstractSocket::MulticastLoopbackOption, enableLoopback);
 
         if (!recvUDPSocket->joinMulticastGroup(groupAddress)) {
-            ui->plainTextEdit->appendPlainText(tr("Warning: Failed to join multicast group: ") + groupAddress.toString());
+            ui->textEditChat->append(tr("Warning: Failed to join multicast group: ") + groupAddress.toString());
         }
     }
 
@@ -486,7 +486,7 @@ bool MainWindow::bindRecvUDPSocket(const QHostAddress localAddress,
         signalConnected = true;
     }
 
-    ui->plainTextEdit->appendPlainText("Recv socket bound... OK.");
+    ui->textEditChat->append("Recv socket bound... OK.");
     return true;
 }
 
@@ -496,7 +496,7 @@ bool MainWindow::bindSendUDPSocket(const QHostAddress localAddress)
     if (!sendUDPSocket->bind(localAddress, 0, QUdpSocket::ReuseAddressHint)) {
         const QString error = tr("%1 - ERROR: Failed to bind UDP send socket on %2 - %3")
         .arg(Q_FUNC_INFO, localAddress.toString(), sendUDPSocket->errorString());
-        ui->plainTextEdit->appendPlainText(error);
+        ui->textEditChat->append(error);
         return false;
     }
 
@@ -509,7 +509,7 @@ bool MainWindow::bindSendUDPSocket(const QHostAddress localAddress)
         sendUDPSocket->setSocketOption(QAbstractSocket::MulticastTtlOption, ttl);
     }
 
-    ui->plainTextEdit->appendPlainText("Send socket bound... OK.");
+    ui->textEditChat->append("Send socket bound... OK.");
     return true;
 }
 
@@ -519,7 +519,7 @@ void MainWindow::on_pushButtonConnect_clicked()
     bool portOk = false;
     const quint16 port = ui->lineEditLocalUDPPort->text().toUShort(&portOk);
     if (!portOk || port == 0) {
-        ui->plainTextEdit->appendPlainText(tr("Invalid local UDP port."));
+        ui->textEditChat->append(tr("Invalid local UDP port."));
         return;
     }
 
@@ -537,13 +537,13 @@ void MainWindow::on_pushButtonConnect_clicked()
     bool sendBound = bindSendUDPSocket(localAddress);
 
     if (recvBound && sendBound) {
-        ui->plainTextEdit->appendPlainText(tr("Connection established."));
+        ui->textEditChat->append(tr("Connection established."));
         ui->pushButtonConnect->setEnabled(false);
         ui->pushButtonDisconnect->setEnabled(true);
         ui->frameUDPParameters->setEnabled(false);
         ui->tabWidget->setCurrentIndex(0);
     } else {
-        ui->plainTextEdit->appendPlainText(tr("Failed to bind one or both sockets."));
+        ui->textEditChat->append(tr("Failed to bind one or both sockets."));
     }
 }
 
@@ -567,7 +567,7 @@ void MainWindow::slotProcessPendingDatagrams()
         const QString timestamp = QDateTime::currentDateTimeUtc().toString("dd MMM - hh:mm:ss");
         const QString processedText = QString("Rcvd: %1 - %2").arg(timestamp, QString::fromUtf8(datagram));
 
-        ui->plainTextEdit->appendPlainText(processedText);
+        ui->textEditChat->append(processedText);
     }
 }
 
@@ -585,7 +585,7 @@ void MainWindow::on_pushButtonDisconnect_clicked()
     if (recvUDPSocket && recvUDPSocket->state() == QAbstractSocket::BoundState) {
         if (ui->checkBoxMulticast->isChecked()) {
             if (!recvUDPSocket->leaveMulticastGroup(groupAddress)) {
-                ui->plainTextEdit->appendPlainText(tr("Warning: Failed to leave multicast group: ") + groupAddress.toString());
+                ui->textEditChat->append(tr("Warning: Failed to leave multicast group: ") + groupAddress.toString());
             }
         }
         recvUDPSocket->close();
@@ -600,7 +600,7 @@ void MainWindow::on_pushButtonDisconnect_clicked()
     ui->pushButtonDisconnect->setEnabled(false);
     ui->frameUDPParameters->setEnabled(true);
 
-    ui->plainTextEdit->appendPlainText(tr("Disconnected from network."));
+    ui->textEditChat->append(tr("Disconnected from network."));
 }
 
 void MainWindow::on_checkBoxMulticast_clicked(bool checked)
@@ -731,7 +731,7 @@ void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
     updateSetting(configSettings.b_displayBackgroundImage, checked);
 
     if(checked){
-        ui->plainTextEdit->setStyleSheet("QPlainTextEdit { "
+        ui->textEditChat->setStyleSheet("QtextEditChat { "
                                          "background-image: url(:/images/BackgroundImage10.png); "
                                          "background-repeat: no-repeat; "
                                          "background-position: center; "
@@ -739,7 +739,7 @@ void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 
     }
     else{
-        ui->plainTextEdit->setStyleSheet("QPlainTextEdit { "
+        ui->textEditChat->setStyleSheet("QtextEditChat { "
                                          "background-image: url(); "
                                          "background-repeat: no-repeat; "
                                          "background-position: center; "

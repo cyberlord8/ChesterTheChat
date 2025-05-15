@@ -43,17 +43,7 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QPlainTextEdit" name="plainTextEdit">
-            <property name="font">
-             <font>
-              <family>Consolas</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
+           <widget class="QTextEdit" name="textEditChat"/>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -640,16 +630,16 @@
   <connection>
    <sender>pushButtonClear</sender>
    <signal>clicked()</signal>
-   <receiver>plainTextEdit</receiver>
+   <receiver>textEditChat</receiver>
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>714</x>
-     <y>493</y>
+     <x>516</x>
+     <y>297</y>
     </hint>
     <hint type="destinationlabel">
-     <x>640</x>
-     <y>432</y>
+     <x>491</x>
+     <y>244</y>
     </hint>
    </hints>
   </connection>
