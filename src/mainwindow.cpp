@@ -762,3 +762,9 @@ void MainWindow::updateSetting(T &settingRef, const T &newValue)
         writeSettings();
     }
 }
+
+void MainWindow::on_pushButtonTestMsg_clicked()
+{
+    static uint msgNumber = 1;
+    ui->lineEditChatText->setText(QString("Test %1").arg(msgNumber++));
+}

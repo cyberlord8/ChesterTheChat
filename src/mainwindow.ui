@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabChat">
        <attribute name="title">
@@ -90,6 +90,13 @@
            <widget class="QLineEdit" name="lineEditChatText">
             <property name="toolTip">
              <string>Enter text and press enter or press Send button to send message</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonTestMsg">
+            <property name="text">
+             <string>Test</string>
             </property>
            </widget>
           </item>

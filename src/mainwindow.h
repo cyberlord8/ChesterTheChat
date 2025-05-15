@@ -111,6 +111,8 @@ private slots:
     void on_lineEditUserName_textChanged(const QString &arg1);
 
 
+    void on_pushButtonTestMsg_clicked();
+
 private:
     Ui::MainWindow *ui;
     /**
