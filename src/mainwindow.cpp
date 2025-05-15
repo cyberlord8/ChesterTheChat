@@ -537,13 +537,13 @@ void MainWindow::on_pushButtonConnect_clicked()
     bool sendBound = bindSendUDPSocket(localAddress);
 
     if (recvBound && sendBound) {
-        ui->textEditChat->append(tr("Connection established."));
+        ui->textEditChat->append(tr("Connection established.\n\n"));
         ui->pushButtonConnect->setEnabled(false);
         ui->pushButtonDisconnect->setEnabled(true);
         ui->frameUDPParameters->setEnabled(false);
         ui->tabWidget->setCurrentIndex(0);
     } else {
-        ui->textEditChat->append(tr("Failed to bind one or both sockets."));
+        ui->textEditChat->append(tr("Failed to bind one or both sockets.\n\n"));
     }
 }
 
@@ -600,7 +600,7 @@ void MainWindow::on_pushButtonDisconnect_clicked()
     ui->pushButtonDisconnect->setEnabled(false);
     ui->frameUDPParameters->setEnabled(true);
 
-    ui->textEditChat->append(tr("Disconnected from network."));
+    ui->textEditChat->append(tr("Disconnected from network.\n\n"));
 }
 
 void MainWindow::on_checkBoxMulticast_clicked(bool checked)
