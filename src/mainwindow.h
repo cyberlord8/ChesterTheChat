@@ -3,6 +3,9 @@
 
 #include "globals.h"
 
+#include "chatformatter.h"
+#include "udpchatsocketmanager.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -18,10 +21,6 @@ public:
     ~MainWindow();
 
 private slots:
-    /**
-    * @brief slotProcessPendingDatagrams
-    */
-    void slotProcessPendingDatagrams();
     /**
     * @brief on_actionAbout_triggered
     */
@@ -110,12 +109,13 @@ private slots:
     */
     void on_lineEditUserName_textChanged(const QString &arg1);
 
-
     void on_pushButtonTestMsg_clicked();
 
 private:
     Ui::MainWindow *ui;
-    QMap<QString, QColor> userColorMap;
+
+    ChatFormatter *m_formatter = nullptr;
+    UdpChatSocketManager *udpManager = nullptr;
 
     /**
     * @brief instanceID
@@ -129,36 +129,12 @@ private:
     * @brief configSettings
     */
     Settings configSettings;
-    /**
-    * @brief sendUDPSocket
-    */
-    QUdpSocket *sendUDPSocket = nullptr;
-    /**
-    * @brief recvUDPSocket
-    */
-    QUdpSocket *recvUDPSocket = nullptr;
-    /**
-    * @brief lastSentData
-    */
-    QByteArray lastSentData;
+
     /**
     * @brief QStyleSheetMap
     */
     QMap<QString, QString> QStyleSheetMap;
-    /**
-    * @brief bindRecvUDPSocket
-    * @param localAddress
-    * @param groupAddress
-    * @param port
-    * @return
-    */
-    bool bindRecvUDPSocket(const QHostAddress localAddress, const QHostAddress groupAddress, const quint16 port);
-    /**
-     * @brief bindSendUDPSocket
-     * @param localAddress
-     * @return
-     */
-    bool bindSendUDPSocket(const QHostAddress localAddress);
+
     /**
      * @brief fillNetworkWidgets
      */
@@ -191,10 +167,7 @@ private:
      * @brief setBackgroundImage
      */
     void setBackgroundImage();
-    /**
-     * @brief createSockets
-     */
-    void createSockets();
+
     /**
     * @brief acquireInstanceId
     * @return
@@ -221,9 +194,6 @@ private:
     * @param fileName
     */
     void openResourceFile(const QString fileName);
-    void appendMessage(const QString &user, const QString &message, const QDateTime &timestamp, bool isSent);
-    QColor generateColorForUser(const QString &user);
-    bool isDarkTheme() const;
 };
 
 #endif // MAINWINDOW_H

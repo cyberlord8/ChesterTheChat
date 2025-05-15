@@ -24,10 +24,14 @@ FORMS += \
     src/mainwindow.ui
 
 HEADERS += \
+    src/chatformatter.h \
     src/globals.h \
     src/mainwindow.h \
+    src/udpchatsocketmanager.h \
     src/version.h
 
 SOURCES += \
+    src/chatformatter.cpp \
     src/main.cpp \
-    src/mainwindow.cpp
+    src/mainwindow.cpp \
+    src/udpchatsocketmanager.cpp
