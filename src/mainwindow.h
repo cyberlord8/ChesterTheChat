@@ -115,6 +115,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QMap<QString, QColor> userColorMap;
+
     /**
     * @brief instanceID
     */
@@ -219,6 +221,9 @@ private:
     * @param fileName
     */
     void openResourceFile(const QString fileName);
+    void appendMessage(const QString &user, const QString &message, const QDateTime &timestamp, bool isSent);
+    QColor generateColorForUser(const QString &user);
+    bool isDarkTheme() const;
 };
 
 #endif // MAINWINDOW_H
