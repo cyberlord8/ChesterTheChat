@@ -762,9 +762,3 @@ void MainWindow::updateSetting(T &settingRef, const T &newValue)
         writeSettings();
     }
 }
-
-void MainWindow::on_pushButtonCreateTestMsg_clicked()
-{
-    static uint increment = 1;
-    ui->lineEditChatText->setText(QStringLiteral("Test %1").arg(increment++));
-}
