@@ -455,7 +455,6 @@ QColor MainWindow::generateColorForUser(const QString &user)
     return QColor::fromHsv(hue, sat, val);
 }//generateColorForUser
 
-
 bool MainWindow::isDarkTheme() const
 {
     // QColor bg = palette().color(QPalette::Base);
@@ -475,7 +474,7 @@ void MainWindow::appendMessage(const QString &user, const QString &message, cons
     cursor.insertBlock(blockFormat);
 
     // Assign or retrieve user color
-    QColor userColor = isSent ? QColor("#3399FF") : userColorMap.value(user);
+    QColor userColor = isSent ? QColor(51, 153, 255) : userColorMap.value(user);
     if (!isSent && !userColorMap.contains(user)) {
         userColor = generateColorForUser(user);
         userColorMap.insert(user, userColor);
