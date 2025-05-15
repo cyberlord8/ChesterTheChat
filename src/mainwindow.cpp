@@ -474,7 +474,7 @@ void MainWindow::appendMessage(const QString &user, const QString &message, cons
     cursor.insertBlock(blockFormat);
 
     // Assign or retrieve user color
-    QColor userColor = isSent ? QColor(51, 153, 255) : userColorMap.value(user);
+    QColor userColor = isSent ? QColorConstants::Cyan : userColorMap.value(user);
     if (!isSent && !userColorMap.contains(user)) {
         userColor = generateColorForUser(user);
         userColorMap.insert(user, userColor);
@@ -503,7 +503,7 @@ void MainWindow::appendMessage(const QString &user, const QString &message, cons
     QFont timeFont;
     timeFont.setPointSize(8);
     timeFormat.setFont(timeFont);
-    cursor.insertText(timestamp.toString("hh:mm:ss") + "\n\n", timeFormat);
+    cursor.insertText(timestamp.toString("hh:mm") + "\n", timeFormat);
 
     ui->textEditChat->setTextCursor(cursor); // Scroll to bottom
 }//appendMessage
