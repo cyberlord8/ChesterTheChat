@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
 #ifdef WIN32
-    qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
+    qputenv("QT_QPA_PLATFORM", "windows:darkmode=1");
 #endif
     QApplication a(argc, argv);
     MainWindow w;

@@ -557,22 +557,29 @@
             </layout>
            </item>
            <item>
-            <widget class="QCheckBox" name="checkBoxDisplayBackgroundImage">
-             <property name="toolTip">
-              <string>Display Chester The Chat image as background in chat window</string>
-             </property>
-             <property name="text">
-              <string>Display Background Image</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="checkBoxLoadStyleSheet">
              <property name="toolTip">
               <string>Load stylesheet on application start</string>
              </property>
              <property name="text">
               <string>Load Stylesheet on start</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBoxDisplayBackgroundImage">
+             <property name="toolTip">
+              <string>Display Chester The Chat image as background in chat window</string>
+             </property>
+             <property name="text">
+              <string>Display Background Image</string>
              </property>
             </widget>
            </item>

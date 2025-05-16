@@ -5,6 +5,8 @@
 
 #include "chatformatter.h"
 #include "udpchatsocketmanager.h"
+#include "settingsmanager.h"
+#include "toastnotification.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,6 +21,83 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+private:
+    Ui::MainWindow *ui;
+
+    ChatFormatter *m_formatter = nullptr;
+    UdpChatSocketManager *udpManager = nullptr;
+
+    /**
+    * @brief instanceID
+    */
+    int instanceID = 0;
+    /**
+    * @brief isApplicationStarting
+    */
+    bool isApplicationStarting = false;
+    /**
+    * @brief configSettings
+    */
+    Settings configSettings;
+    SettingsManager *settingsManager = nullptr;
+
+    /**
+    * @brief QStyleSheetMap
+    */
+    QMap<QString, QString> QStyleSheetMap;
+
+    /**
+     * @brief fillNetworkWidgets
+     */
+    void fillNetworkWidgets();
+    /**
+     * @brief updateUIWidgets
+     */
+    void updateUIWidgets();
+    /**
+     * @brief loadQStyleSheetFolder
+     */
+    void loadQStyleSheetFolder();
+    /**
+     * @brief loadStyleSheet
+     */
+    void loadStyleSheet();
+    /**
+     * @brief setStyleSheet
+     */
+    void setStyleSheet();
+    /**
+     * @brief setBackgroundImage
+     */
+    void setBackgroundImage();
+
+    /**
+    * @brief acquireInstanceId
+    * @return
+    */
+    int acquireInstanceId();
+    /**
+    * @brief releaseInstanceId
+    * @param instanceId
+    */
+    void releaseInstanceId(int instanceId);
+    /**
+    * @brief setAppWindowTitle
+    */
+    void setAppWindowTitle();
+    // /**
+    // * @brief updateSetting
+    // * @param settingRef
+    // * @param newValue
+    // */
+    // template<typename T>
+    // void updateSetting(T &settingRef, const T &newValue);
+    /**
+    * @brief openResourceFile
+    * @param fileName
+    */
+    void openResourceFile(const QString fileName);
 
 private slots:
     /**
@@ -110,90 +189,6 @@ private slots:
     void on_lineEditUserName_textChanged(const QString &arg1);
 
     void on_pushButtonTestMsg_clicked();
-
-private:
-    Ui::MainWindow *ui;
-
-    ChatFormatter *m_formatter = nullptr;
-    UdpChatSocketManager *udpManager = nullptr;
-
-    /**
-    * @brief instanceID
-    */
-    int instanceID = 0;
-    /**
-    * @brief isApplicationStarting
-    */
-    bool isApplicationStarting = false;
-    /**
-    * @brief configSettings
-    */
-    Settings configSettings;
-
-    /**
-    * @brief QStyleSheetMap
-    */
-    QMap<QString, QString> QStyleSheetMap;
-
-    /**
-     * @brief fillNetworkWidgets
-     */
-    void fillNetworkWidgets();
-    /**
-     * @brief writeSettings
-     */
-    void writeSettings();
-    /**
-     * @brief readSettings
-     */
-    void readSettings();
-    /**
-     * @brief updateUIWidgets
-     */
-    void updateUIWidgets();
-    /**
-     * @brief loadQStyleSheetFolder
-     */
-    void loadQStyleSheetFolder();
-    /**
-     * @brief loadStyleSheet
-     */
-    void loadStyleSheet();
-    /**
-     * @brief setStyleSheet
-     */
-    void setStyleSheet();
-    /**
-     * @brief setBackgroundImage
-     */
-    void setBackgroundImage();
-
-    /**
-    * @brief acquireInstanceId
-    * @return
-    */
-    int acquireInstanceId();
-    /**
-    * @brief releaseInstanceId
-    * @param instanceId
-    */
-    void releaseInstanceId(int instanceId);
-    /**
-    * @brief setAppWindowTitle
-    */
-    void setAppWindowTitle();
-    /**
-    * @brief updateSetting
-    * @param settingRef
-    * @param newValue
-    */
-    template<typename T>
-    void updateSetting(T &settingRef, const T &newValue);
-    /**
-    * @brief openResourceFile
-    * @param fileName
-    */
-    void openResourceFile(const QString fileName);
 };
 
 #endif // MAINWINDOW_H

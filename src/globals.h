@@ -45,17 +45,17 @@
 #define APP_LICENSE "Green Radio Software Solutions (GRSS) grants anyone license to use this software for personal use."
 #define qt_LICENSE "LGPLv3"
 
-struct Settings {
-    bool isMulticast;
-    bool isLoopback;
-    quint8 ttlValue;
-    QString localUDPNetwork;
-    QString localUDPPort;
-    QString groupAddress;
-    QString remoteUDPPort;
-    bool b_loadStyleSheet;
-    QString styleSheetFilename;
-    bool b_displayBackgroundImage;
-};
+// struct Settings {
+//     bool isMulticast;
+//     bool isLoopback;
+//     quint8 ttlValue;
+//     QString localUDPNetwork;
+//     QString localUDPPort;
+//     QString groupAddress;
+//     QString remoteUDPPort;
+//     bool b_loadStyleSheet;
+//     QString styleSheetFilename;
+//     bool b_displayBackgroundImage;
+// };
 
 #endif // GLOBALS_H

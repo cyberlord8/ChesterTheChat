@@ -6,6 +6,10 @@
 #include <QColor>
 #include <QString>
 #include <QDateTime>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
+
+#include "settingsmanager.h"
 
 class QTextEdit;
 
@@ -15,17 +19,10 @@ class ChatFormatter : public QObject
 public:
     explicit ChatFormatter(QObject *parent = nullptr);
 
-    // The only public API: append a chat line to a QTextEdit
-    void appendMessage(QTextEdit *textEdit,
-                       const QString &user,
-                       const QString &message,
-                       const QDateTime &timestamp,
-                       bool isSent);
+    void appendMessage(QTextEdit *textEdit, const QString &user, const QString &message, const QDateTime &timestamp, bool isDarkThemed, bool isSent);
 
 private:
     QColor generateColorForUser(const QString &user);
-    bool isDarkTheme(const QTextEdit *textEdit) const;
-
     QMap<QString, QColor> userColorMap;
 };
 

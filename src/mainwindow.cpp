@@ -112,89 +112,89 @@ int MainWindow::acquireInstanceId()
     return newId;
 } //acquireInstanceId
 
-void MainWindow::writeSettings()
-{
-#ifdef DEBUG_MODE
-    qDebug() << Q_FUNC_INFO;
-#endif
+// void MainWindow::writeSettings()
+// {
+// #ifdef DEBUG_MODE
+//     qDebug() << Q_FUNC_INFO;
+// #endif
 
-    const QString settingsFile = QCoreApplication::applicationDirPath() + QString("/instance_%1_settings.ini").arg(instanceID);
+//     const QString settingsFile = QCoreApplication::applicationDirPath() + QString("/instance_%1_settings.ini").arg(instanceID);
 
-    QSettings settings(settingsFile, QSettings::IniFormat, this);
+//     QSettings settings(settingsFile, QSettings::IniFormat, this);
 
-    // Application Group
-    settings.beginGroup("Application");
-    {
-        settings.setValue("geometry", saveGeometry());
-        settings.setValue("windowState", saveState());
-        settings.setValue("userName", ui->lineEditUserName->text());
-    }
-    settings.endGroup();
+//     // Application Group
+//     settings.beginGroup("Application");
+//     {
+//         settings.setValue("geometry", saveGeometry());
+//         settings.setValue("windowState", saveState());
+//         settings.setValue("userName", ui->lineEditUserName->text());
+//     }
+//     settings.endGroup();
 
-    // StyleSheet Group
-    settings.beginGroup("StyleSheet");
-    {
-        settings.setValue("styleSheetFilename", configSettings.styleSheetFilename);
-        settings.setValue("loadStyleSheet", configSettings.b_loadStyleSheet);
-        settings.setValue("displayBackgroundImage", configSettings.b_displayBackgroundImage);
-    }
-    settings.endGroup();
+//     // StyleSheet Group
+//     settings.beginGroup("StyleSheet");
+//     {
+//         settings.setValue("styleSheetFilename", configSettings.styleSheetFilename);
+//         settings.setValue("loadStyleSheet", configSettings.b_loadStyleSheet);
+//         settings.setValue("displayBackgroundImage", configSettings.b_displayBackgroundImage);
+//     }
+//     settings.endGroup();
 
-    // Network Group
-    settings.beginGroup("Network");
-    {
-        settings.setValue("isMulticast", configSettings.isMulticast);
-        settings.setValue("isLoopback", configSettings.isLoopback);
-        settings.setValue("ttlValue", configSettings.ttlValue);
-        settings.setValue("localUDPNetwork", configSettings.localUDPNetwork);
-        settings.setValue("localUDPPort", configSettings.localUDPPort);
-        settings.setValue("groupAddress", configSettings.groupAddress);
-        settings.setValue("remoteUDPPort", configSettings.remoteUDPPort);
-    }
-    settings.endGroup();
-} //writeSettings
+//     // Network Group
+//     settings.beginGroup("Network");
+//     {
+//         settings.setValue("isMulticast", configSettings.isMulticast);
+//         settings.setValue("isLoopback", configSettings.isLoopback);
+//         settings.setValue("ttlValue", configSettings.ttlValue);
+//         settings.setValue("localUDPNetwork", configSettings.localUDPNetwork);
+//         settings.setValue("localUDPPort", configSettings.localUDPPort);
+//         settings.setValue("groupAddress", configSettings.groupAddress);
+//         settings.setValue("remoteUDPPort", configSettings.remoteUDPPort);
+//     }
+//     settings.endGroup();
+// } //writeSettings
 
-void MainWindow::readSettings()
-{
-#ifdef DEBUG_MODE
-    qDebug() << Q_FUNC_INFO;
-#endif
+// void MainWindow::readSettings()
+// {
+// #ifdef DEBUG_MODE
+//     qDebug() << Q_FUNC_INFO;
+// #endif
 
-    const QString settingsFile = QCoreApplication::applicationDirPath() + QString("/instance_%1_settings.ini").arg(instanceID);
+//     const QString settingsFile = QCoreApplication::applicationDirPath() + QString("/instance_%1_settings.ini").arg(instanceID);
 
-    QSettings settings(settingsFile, QSettings::IniFormat, this);
+//     QSettings settings(settingsFile, QSettings::IniFormat, this);
 
-    // Application Group
-    settings.beginGroup("Application");
-    {
-        restoreGeometry(settings.value("geometry").toByteArray());
-        restoreState(settings.value("windowState").toByteArray());
-        ui->lineEditUserName->setText(settings.value("userName", "Chester").toString());
-    }
-    settings.endGroup();
+//     // Application Group
+//     settings.beginGroup("Application");
+//     {
+//         restoreGeometry(settings.value("geometry").toByteArray());
+//         restoreState(settings.value("windowState").toByteArray());
+//         ui->lineEditUserName->setText(settings.value("userName", "Chester").toString());
+//     }
+//     settings.endGroup();
 
-    // StyleSheet Group
-    settings.beginGroup("StyleSheet");
-    {
-        configSettings.styleSheetFilename = settings.value("styleSheetFilename").toString();
-        configSettings.b_loadStyleSheet = settings.value("loadStyleSheet").toBool();
-        configSettings.b_displayBackgroundImage = settings.value("displayBackgroundImage").toBool();
-    }
-    settings.endGroup();
+//     // StyleSheet Group
+//     settings.beginGroup("StyleSheet");
+//     {
+//         configSettings.styleSheetFilename = settings.value("styleSheetFilename").toString();
+//         configSettings.b_loadStyleSheet = settings.value("loadStyleSheet").toBool();
+//         configSettings.b_displayBackgroundImage = settings.value("displayBackgroundImage").toBool();
+//     }
+//     settings.endGroup();
 
-    // Network Group
-    settings.beginGroup("Network");
-    {
-        configSettings.isMulticast = settings.value("isMulticast", true).toBool();
-        configSettings.isLoopback = settings.value("isLoopback", true).toBool();
-        configSettings.ttlValue = settings.value("ttlValue", 5).toUInt();
-        configSettings.localUDPNetwork = settings.value("localUDPNetwork", "ANY").toString();
-        configSettings.localUDPPort = settings.value("localUDPPort", "9999").toString();
-        configSettings.groupAddress = settings.value("groupAddress", "224.0.0.2").toString();
-        configSettings.remoteUDPPort = settings.value("remoteUDPPort", "9999").toString();
-    }
-    settings.endGroup();
-} //readSettings
+//     // Network Group
+//     settings.beginGroup("Network");
+//     {
+//         configSettings.isMulticast = settings.value("isMulticast", true).toBool();
+//         configSettings.isLoopback = settings.value("isLoopback", true).toBool();
+//         configSettings.ttlValue = settings.value("ttlValue", 5).toUInt();
+//         configSettings.localUDPNetwork = settings.value("localUDPNetwork", "ANY").toString();
+//         configSettings.localUDPPort = settings.value("localUDPPort", "9999").toString();
+//         configSettings.groupAddress = settings.value("groupAddress", "224.0.0.2").toString();
+//         configSettings.remoteUDPPort = settings.value("remoteUDPPort", "9999").toString();
+//     }
+//     settings.endGroup();
+// } //readSettings
 
 void MainWindow::on_actionAbout_triggered()
 {
@@ -311,21 +311,22 @@ void MainWindow::fillNetworkWidgets()
 
 void MainWindow::updateUIWidgets()
 {
+    ui->lineEditUserName->setText(configSettings.userName);
     // Networking settings
-    ui->checkBoxLoopback->setChecked(configSettings.isLoopback);
-    ui->checkBoxMulticast->setChecked(configSettings.isMulticast);
-    ui->spinBoxTTL->setValue(configSettings.ttlValue);
-    ui->comboBoxLocalUDPNetwork->setCurrentText(configSettings.localUDPNetwork);
-    ui->lineEditLocalUDPPort->setText(configSettings.localUDPPort);
-    ui->lineEditRemoteUDPNetwork->setText(configSettings.groupAddress);
-    ui->lineEditRemoteUDPPort->setText(configSettings.remoteUDPPort);
+    ui->checkBoxLoopback->setChecked(configSettings.b_loopback);
+    ui->checkBoxMulticast->setChecked(configSettings.b_multicast);
+    ui->spinBoxTTL->setValue(configSettings.udpTTL);
+    ui->comboBoxLocalUDPNetwork->setCurrentText(configSettings.localUDPAddress);
+    ui->lineEditLocalUDPPort->setText(QString::number(configSettings.localUDPPort));
+    ui->lineEditRemoteUDPNetwork->setText(configSettings.remoteUDPAddress);
+    ui->lineEditRemoteUDPPort->setText(QString::number(configSettings.remoteUDPPort));
 
     // UI appearance
     ui->checkBoxDisplayBackgroundImage->setChecked(configSettings.b_displayBackgroundImage);
 
     // Style sheet settings
     ui->checkBoxLoadStyleSheet->setChecked(configSettings.b_loadStyleSheet);
-    ui->comboBoxSelectStyleSheet->setCurrentText(configSettings.styleSheetFilename);
+    ui->comboBoxSelectStyleSheet->setCurrentText(configSettings.stylesheetName);
 } //updateUIWidgets
 
 void MainWindow::setStyleSheet()
@@ -333,13 +334,13 @@ void MainWindow::setStyleSheet()
     if (!configSettings.b_loadStyleSheet)
         return;
 
-    const QString styleKey = QStyleSheetMap.key(configSettings.styleSheetFilename);
+    const QString styleKey = QStyleSheetMap.key(configSettings.stylesheetName);
 
     if (!styleKey.isEmpty()) {
         ui->comboBoxSelectStyleSheet->setCurrentText(styleKey);
         loadStyleSheet();
     } else {
-        qWarning() << "Style sheet not found in map for filename:" << configSettings.styleSheetFilename;
+        qWarning() << "Style sheet not found in map for filename:" << configSettings.stylesheetName;
     }
 } //setStyleSheet
 
@@ -350,9 +351,11 @@ void MainWindow::setBackgroundImage()
                                              "border-image: url(:/images/BackgroundImage10.png); "
                                              "}");
         ui->textEditChat->setStyleSheet(style);
+        // m_formatter->setForceDarkMode(true); // image is dark
     } else {
         // Clear background if option is disabled
         ui->textEditChat->setStyleSheet(QString());
+        // m_formatter->setForceDarkMode(false); // image is light
     }
 } //setBackgroundImage
 
@@ -362,11 +365,26 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Load configuration
+    instanceID = acquireInstanceId();
+    settingsManager = new SettingsManager(instanceID, QCoreApplication::applicationDirPath(), this);
+    settingsManager->load(configSettings);
+    restoreGeometry(settingsManager->loadGeometry());
+
     udpManager = new UdpChatSocketManager(this);
 
     // Connect signal to append messages
+    // connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
+    //     m_formatter->appendMessage(ui->textEditChat, user, msg, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, false);
+    // });
     connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
-        m_formatter->appendMessage(ui->textEditChat, user, msg, QDateTime::currentDateTimeUtc(), false);
+        m_formatter->appendMessage(ui->textEditChat, user, msg, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, false);
+
+        // Flash taskbar icon if not in view
+        if (isMinimized() || !isVisible() || !isActiveWindow()) {
+            QApplication::alert(this, 3000); // flash for 3 seconds
+            new ToastNotification(QString("%1: %2").arg(user, msg), this); // auto-deletes on close
+        }
     });
 
     m_formatter = new ChatFormatter(this);
@@ -374,9 +392,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Prevent event handlers from reacting during initial setup
     isApplicationStarting = true;
 
-    // Load configuration
-    instanceID = acquireInstanceId();
-    readSettings();
+    // readSettings();
 
     // Load styles and appearance
     loadQStyleSheetFolder();
@@ -403,10 +419,13 @@ MainWindow::~MainWindow()
     qDebug() << Q_FUNC_INFO << "- Shutting down and saving settings.";
 #endif
 
-    writeSettings();
+    settingsManager->save(configSettings);
+    settingsManager->saveGeometry(saveGeometry());
+
     releaseInstanceId(instanceID);
 
     delete m_formatter;
+    delete settingsManager;
     delete ui;
     ui = nullptr;
 } //MainWindow
@@ -440,7 +459,7 @@ void MainWindow::on_pushButtonSend_clicked()
     if (returnSize == rawData.size()) {
         // lastSentData = rawData;
         // appendMessage(userName, messageText, QDateTime::currentDateTimeUtc(), true);
-        m_formatter->appendMessage(ui->textEditChat, userName, messageText, QDateTime::currentDateTimeUtc(), true);
+        m_formatter->appendMessage(ui->textEditChat, userName, messageText, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, true);
         ui->lineEditChatText->clear();
     } else {
         const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
@@ -511,7 +530,7 @@ void MainWindow::on_checkBoxMulticast_clicked(bool checked)
     if (isApplicationStarting)
         return;
 
-    updateSetting(configSettings.isMulticast, checked);
+    SettingsManager::update(configSettings.b_multicast, checked);
 
 } //on_checkBoxMulticast_clicked
 
@@ -520,7 +539,7 @@ void MainWindow::on_checkBoxLoopback_clicked(bool checked)
     if (isApplicationStarting)
         return;
 
-    updateSetting(configSettings.isLoopback, checked);
+    SettingsManager::update(configSettings.b_loopback, checked);
 
 } //on_checkBoxLoopback_clicked
 
@@ -529,7 +548,7 @@ void MainWindow::on_comboBoxLocalUDPNetwork_currentTextChanged(const QString &ar
     if (isApplicationStarting)
         return;
 
-    updateSetting(configSettings.localUDPNetwork, arg1);
+    SettingsManager::update(configSettings.localUDPAddress, arg1);
 
 } //on_comboBoxLocalUDPNetwork_currentTextChanged
 
@@ -538,7 +557,7 @@ void MainWindow::on_lineEditLocalUDPPort_textChanged(const QString &arg1)
     if (isApplicationStarting)
         return;
 
-    updateSetting(configSettings.localUDPPort, arg1);
+    SettingsManager::update(configSettings.localUDPPort, arg1.toUShort());
 
 } //on_lineEditLocalUDPPort_textChanged
 
@@ -547,7 +566,7 @@ void MainWindow::on_lineEditRemoteUDPNetwork_textChanged(const QString &arg1)
     if (isApplicationStarting)
         return;
 
-    updateSetting(configSettings.groupAddress, arg1);
+    SettingsManager::update(configSettings.remoteUDPAddress, arg1);
 
 } //on_lineEditRemoteUDPNetwork_textChanged
 
@@ -556,7 +575,7 @@ void MainWindow::on_lineEditRemoteUDPPort_textChanged(const QString &arg1)
     if (isApplicationStarting)
         return;
 
-    updateSetting(configSettings.remoteUDPPort, arg1);
+    SettingsManager::update(configSettings.remoteUDPPort, arg1.toUShort());
 
 } //on_lineEditRemoteUDPPort_textChanged
 
@@ -565,7 +584,7 @@ void MainWindow::on_spinBoxTTL_valueChanged(int arg1)
     if (isApplicationStarting)
         return;
 
-    updateSetting(configSettings.ttlValue, static_cast<quint8>(arg1));
+    SettingsManager::update(configSettings.udpTTL, arg1);
 
 } //on_spinBoxTTL_valueChanged
 
@@ -575,10 +594,10 @@ void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &a
         return;
     }
 
-    configSettings.styleSheetFilename = QStyleSheetMap.value(arg1);
-
+    // configSettings.stylesheetName = QStyleSheetMap.value(arg1);
+    settingsManager->update(configSettings.stylesheetName, QStyleSheetMap.value(arg1));
     loadStyleSheet();
-    writeSettings();
+    settingsManager->save(configSettings);
 } //on_comboBoxSelectStyleSheet_currentTextChanged
 
 void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
@@ -587,7 +606,7 @@ void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
         return;
     }
 
-    updateSetting(configSettings.b_loadStyleSheet, checked);
+    SettingsManager::update(configSettings.b_loadStyleSheet, checked);
 
 } //on_checkBoxLoadStyleSheet_clicked
 
@@ -610,18 +629,49 @@ void MainWindow::loadQStyleSheetFolder()
 void MainWindow::loadStyleSheet()
 {
     QFile styleSheetFile;
-    styleSheetFile.setFileName(configSettings.styleSheetFilename);
+    styleSheetFile.setFileName(configSettings.stylesheetName);
+
     if (!styleSheetFile.exists()) {
         qApp->setStyleSheet("");
         ui->checkBoxLoadStyleSheet->setChecked(false);
-        return; //then return
+        return;
     }
+
     styleSheetFile.open(QFile::ReadOnly);
     QString styleSheetString = QLatin1String(styleSheetFile.readAll());
     styleSheetFile.close();
-    configSettings.styleSheetFilename = styleSheetFile.fileName();
-    QTimer::singleShot(0, [=] { qApp->setStyleSheet(styleSheetString); }); //
-} //loadStyleSheet
+    configSettings.stylesheetName = styleSheetFile.fileName();
+
+    // Detect theme from comment in stylesheet
+    QRegularExpression themeRegex(R"(/\*\s*theme:\s*(dark|light)\s*\*/)", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match = themeRegex.match(styleSheetString);
+    if (match.hasMatch()) {
+        QString theme = match.captured(1).toLower();
+        configSettings.b_isDarkThemed = (theme == "dark");
+    } else {
+        configSettings.b_isDarkThemed = false; // Default to light if not specified
+    }
+
+    QTimer::singleShot(0, [=] {
+        qApp->setStyleSheet(styleSheetString);
+    });
+}//
+
+// void MainWindow::loadStyleSheet()
+// {
+//     QFile styleSheetFile;
+//     styleSheetFile.setFileName(configSettings.stylesheetName);
+//     if (!styleSheetFile.exists()) {
+//         qApp->setStyleSheet("");
+//         ui->checkBoxLoadStyleSheet->setChecked(false);
+//         return; //then return
+//     }
+//     styleSheetFile.open(QFile::ReadOnly);
+//     QString styleSheetString = QLatin1String(styleSheetFile.readAll());
+//     styleSheetFile.close();
+//     configSettings.stylesheetName = styleSheetFile.fileName();
+//     QTimer::singleShot(0, [=] { qApp->setStyleSheet(styleSheetString); }); //
+// } //loadStyleSheet
 
 void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 {
@@ -629,37 +679,42 @@ void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
         return;
     }
 
-    updateSetting(configSettings.b_displayBackgroundImage, checked);
+    SettingsManager::update(configSettings.b_displayBackgroundImage, checked);
+    settingsManager->save(configSettings);
 
     if (checked) {
         const QString style = QStringLiteral("QTextEdit#textEditChat { "
                                              "border-image: url(:/images/BackgroundImage10.png); "
                                              "}");
         ui->textEditChat->setStyleSheet(style);
+        // m_formatter->setForceDarkMode(true); // image is dark
     } else {
         const QString style = QStringLiteral("QTextEdit#textEditChat { "
                                              "border-image: none; "
                                              "}");
         ui->textEditChat->setStyleSheet(style);
+        // m_formatter->setForceDarkMode(false); // image is dark
     }
 } //on_checkBoxDisplayBackgroundImage_clicked
 
 void MainWindow::on_lineEditUserName_textChanged(const QString &arg1)
 {
+    Q_UNUSED(arg1);
+
     if (isApplicationStarting)
         return;
 
     setAppWindowTitle();
 } //on_lineEditUserName_textChanged
 
-template<typename T>
-void MainWindow::updateSetting(T &settingRef, const T &newValue)
-{
-    if (settingRef != newValue) {
-        settingRef = newValue;
-        writeSettings();
-    }
-} //updateSetting
+// template<typename T>
+// void MainWindow::update(T &settingRef, const T &newValue)
+// {
+//     if (settingRef != newValue) {
+//         settingRef = newValue;
+//         writeSettings();
+//     }
+// } //SettingsManager::update
 
 void MainWindow::on_pushButtonTestMsg_clicked()
 {
