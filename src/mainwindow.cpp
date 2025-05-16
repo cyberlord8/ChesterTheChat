@@ -10,7 +10,6 @@ void MainWindow::setAppWindowTitle()
     QString titleSuffix;
 
     if (version.contains("alpha", Qt::CaseInsensitive)) {
-        // Trim seconds from build date: assumes format "YYYY-MM-DD HH:MM:SS"
         QString buildDate = tr(BUILDDATE);
         int lastColonIndex = buildDate.lastIndexOf(':');
         if (lastColonIndex != -1) {
@@ -111,90 +110,6 @@ int MainWindow::acquireInstanceId()
     lock.unlock();
     return newId;
 } //acquireInstanceId
-
-// void MainWindow::writeSettings()
-// {
-// #ifdef DEBUG_MODE
-//     qDebug() << Q_FUNC_INFO;
-// #endif
-
-//     const QString settingsFile = QCoreApplication::applicationDirPath() + QString("/instance_%1_settings.ini").arg(instanceID);
-
-//     QSettings settings(settingsFile, QSettings::IniFormat, this);
-
-//     // Application Group
-//     settings.beginGroup("Application");
-//     {
-//         settings.setValue("geometry", saveGeometry());
-//         settings.setValue("windowState", saveState());
-//         settings.setValue("userName", ui->lineEditUserName->text());
-//     }
-//     settings.endGroup();
-
-//     // StyleSheet Group
-//     settings.beginGroup("StyleSheet");
-//     {
-//         settings.setValue("styleSheetFilename", configSettings.styleSheetFilename);
-//         settings.setValue("loadStyleSheet", configSettings.b_loadStyleSheet);
-//         settings.setValue("displayBackgroundImage", configSettings.b_displayBackgroundImage);
-//     }
-//     settings.endGroup();
-
-//     // Network Group
-//     settings.beginGroup("Network");
-//     {
-//         settings.setValue("isMulticast", configSettings.isMulticast);
-//         settings.setValue("isLoopback", configSettings.isLoopback);
-//         settings.setValue("ttlValue", configSettings.ttlValue);
-//         settings.setValue("localUDPNetwork", configSettings.localUDPNetwork);
-//         settings.setValue("localUDPPort", configSettings.localUDPPort);
-//         settings.setValue("groupAddress", configSettings.groupAddress);
-//         settings.setValue("remoteUDPPort", configSettings.remoteUDPPort);
-//     }
-//     settings.endGroup();
-// } //writeSettings
-
-// void MainWindow::readSettings()
-// {
-// #ifdef DEBUG_MODE
-//     qDebug() << Q_FUNC_INFO;
-// #endif
-
-//     const QString settingsFile = QCoreApplication::applicationDirPath() + QString("/instance_%1_settings.ini").arg(instanceID);
-
-//     QSettings settings(settingsFile, QSettings::IniFormat, this);
-
-//     // Application Group
-//     settings.beginGroup("Application");
-//     {
-//         restoreGeometry(settings.value("geometry").toByteArray());
-//         restoreState(settings.value("windowState").toByteArray());
-//         ui->lineEditUserName->setText(settings.value("userName", "Chester").toString());
-//     }
-//     settings.endGroup();
-
-//     // StyleSheet Group
-//     settings.beginGroup("StyleSheet");
-//     {
-//         configSettings.styleSheetFilename = settings.value("styleSheetFilename").toString();
-//         configSettings.b_loadStyleSheet = settings.value("loadStyleSheet").toBool();
-//         configSettings.b_displayBackgroundImage = settings.value("displayBackgroundImage").toBool();
-//     }
-//     settings.endGroup();
-
-//     // Network Group
-//     settings.beginGroup("Network");
-//     {
-//         configSettings.isMulticast = settings.value("isMulticast", true).toBool();
-//         configSettings.isLoopback = settings.value("isLoopback", true).toBool();
-//         configSettings.ttlValue = settings.value("ttlValue", 5).toUInt();
-//         configSettings.localUDPNetwork = settings.value("localUDPNetwork", "ANY").toString();
-//         configSettings.localUDPPort = settings.value("localUDPPort", "9999").toString();
-//         configSettings.groupAddress = settings.value("groupAddress", "224.0.0.2").toString();
-//         configSettings.remoteUDPPort = settings.value("remoteUDPPort", "9999").toString();
-//     }
-//     settings.endGroup();
-// } //readSettings
 
 void MainWindow::on_actionAbout_triggered()
 {
@@ -351,11 +266,8 @@ void MainWindow::setBackgroundImage()
                                              "border-image: url(:/images/BackgroundImage10.png); "
                                              "}");
         ui->textEditChat->setStyleSheet(style);
-        // m_formatter->setForceDarkMode(true); // image is dark
     } else {
-        // Clear background if option is disabled
         ui->textEditChat->setStyleSheet(QString());
-        // m_formatter->setForceDarkMode(false); // image is light
     }
 } //setBackgroundImage
 
@@ -373,11 +285,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     udpManager = new UdpChatSocketManager(this);
 
-    // Connect signal to append messages
-    // connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
-    //     m_formatter->appendMessage(ui->textEditChat, user, msg, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, false);
-    // });
-    connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
+   connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
         m_formatter->appendMessage(ui->textEditChat, user, msg, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, false);
 
         // Flash taskbar icon if not in view
@@ -392,8 +300,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Prevent event handlers from reacting during initial setup
     isApplicationStarting = true;
 
-    // readSettings();
-
     // Load styles and appearance
     loadQStyleSheetFolder();
     setStyleSheet();
@@ -401,7 +307,6 @@ MainWindow::MainWindow(QWidget *parent)
     setAppWindowTitle();
 
     // Initialize networking
-    // createSockets();
     fillNetworkWidgets();
 
     // Sync config to UI
@@ -453,12 +358,9 @@ void MainWindow::on_pushButtonSend_clicked()
         return;
     }
 
-    // const qint64 returnSize = sendUDPSocket->writeDatagram(rawData, groupAddress, port);
     const qint64 returnSize = udpManager->sendMessage(rawData, groupAddress, port);
 
     if (returnSize == rawData.size()) {
-        // lastSentData = rawData;
-        // appendMessage(userName, messageText, QDateTime::currentDateTimeUtc(), true);
         m_formatter->appendMessage(ui->textEditChat, userName, messageText, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, true);
         ui->lineEditChatText->clear();
     } else {
@@ -657,22 +559,6 @@ void MainWindow::loadStyleSheet()
     });
 }//
 
-// void MainWindow::loadStyleSheet()
-// {
-//     QFile styleSheetFile;
-//     styleSheetFile.setFileName(configSettings.stylesheetName);
-//     if (!styleSheetFile.exists()) {
-//         qApp->setStyleSheet("");
-//         ui->checkBoxLoadStyleSheet->setChecked(false);
-//         return; //then return
-//     }
-//     styleSheetFile.open(QFile::ReadOnly);
-//     QString styleSheetString = QLatin1String(styleSheetFile.readAll());
-//     styleSheetFile.close();
-//     configSettings.stylesheetName = styleSheetFile.fileName();
-//     QTimer::singleShot(0, [=] { qApp->setStyleSheet(styleSheetString); }); //
-// } //loadStyleSheet
-
 void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 {
     if (isApplicationStarting) {
@@ -687,13 +573,11 @@ void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
                                              "border-image: url(:/images/BackgroundImage10.png); "
                                              "}");
         ui->textEditChat->setStyleSheet(style);
-        // m_formatter->setForceDarkMode(true); // image is dark
     } else {
         const QString style = QStringLiteral("QTextEdit#textEditChat { "
                                              "border-image: none; "
                                              "}");
         ui->textEditChat->setStyleSheet(style);
-        // m_formatter->setForceDarkMode(false); // image is dark
     }
 } //on_checkBoxDisplayBackgroundImage_clicked
 
@@ -706,15 +590,6 @@ void MainWindow::on_lineEditUserName_textChanged(const QString &arg1)
 
     setAppWindowTitle();
 } //on_lineEditUserName_textChanged
-
-// template<typename T>
-// void MainWindow::update(T &settingRef, const T &newValue)
-// {
-//     if (settingRef != newValue) {
-//         settingRef = newValue;
-//         writeSettings();
-//     }
-// } //SettingsManager::update
 
 void MainWindow::on_pushButtonTestMsg_clicked()
 {
