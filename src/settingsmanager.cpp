@@ -6,7 +6,6 @@ SettingsManager::SettingsManager(int instanceID, const QString &appPath, QObject
 
 void SettingsManager::load(Settings &s)
 {
-    // QSettings settings;
     const QString settingsFile = m_appPath +
                                  QString("/instance_%1_settings.ini").arg(m_instanceID);
 
@@ -27,7 +26,6 @@ void SettingsManager::load(Settings &s)
 
 void SettingsManager::save(const Settings &s)
 {
-    // QSettings settings;
     const QString settingsFile = m_appPath +
                                  QString("/instance_%1_settings.ini").arg(m_instanceID);
 

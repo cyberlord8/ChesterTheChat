@@ -30,7 +30,7 @@ HEADERS += \
     src/settingsmanager.h \
     src/udpchatsocketmanager.h \
     src/version.h \
-    toastnotification.h
+    src/toastnotification.h
 
 SOURCES += \
     src/chatformatter.cpp \
@@ -38,4 +38,4 @@ SOURCES += \
     src/mainwindow.cpp \
     src/settingsmanager.cpp \
     src/udpchatsocketmanager.cpp \
-    toastnotification.cpp
+    src/toastnotification.cpp
