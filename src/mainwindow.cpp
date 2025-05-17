@@ -354,7 +354,7 @@ void MainWindow::on_pushButtonSend_clicked()
     const quint16 port = ui->lineEditRemoteUDPPort->text().toUShort(&portOk);
 
     if (!portOk) {
-        ui->textEditChat->append(tr("Invalid UDP port."));
+        ui->labelStatus->setText("Invalid UDP port.");
         return;
     }
 
@@ -365,7 +365,8 @@ void MainWindow::on_pushButtonSend_clicked()
         ui->lineEditChatText->clear();
     } else {
         const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
-        ui->textEditChat->append(error);
+        // ui->textEditChat->append(error);
+        ui->labelStatus->setText(error);
     }
 } //on_pushButtonSend_clicked
 
@@ -378,7 +379,7 @@ void MainWindow::on_pushButtonConnect_clicked()
     bool portOk = false;
     const quint16 port = ui->lineEditLocalUDPPort->text().toUShort(&portOk);
     if (!portOk || port == 0) {
-        ui->textEditChat->append(tr("Invalid local UDP port."));
+        ui->labelStatus->setText(tr("Invalid local UDP port."));
         return;
     }
 
@@ -394,13 +395,13 @@ void MainWindow::on_pushButtonConnect_clicked()
     bool sendBound = udpManager->bindSendSocket(localAddress);
 
     if (recvBound && sendBound) {
-        ui->textEditChat->append(tr("Connection established.\n\n"));
+        ui->labelStatus->setText(tr("Connection established."));
         ui->pushButtonConnect->setEnabled(false);
         ui->pushButtonDisconnect->setEnabled(true);
         ui->frameUDPParameters->setEnabled(false);
         ui->tabWidget->setCurrentIndex(0);
     } else {
-        ui->textEditChat->append(tr("Failed to bind one or both sockets.\n\n"));
+        ui->labelStatus->setText(tr("Failed to bind one or both sockets.\n\n"));
     }
 } //on_pushButtonConnect_clicked
 
@@ -424,7 +425,7 @@ void MainWindow::on_pushButtonDisconnect_clicked()
     ui->pushButtonDisconnect->setEnabled(false);
     ui->frameUDPParameters->setEnabled(true);
 
-    ui->textEditChat->append(tr("Disconnected from network.\n\n"));
+    ui->labelStatus->setText(tr("Disconnected from network.\n\n"));
 } //on_pushButtonDisconnect_clicked
 
 void MainWindow::on_checkBoxMulticast_clicked(bool checked)
@@ -514,7 +515,7 @@ void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
 
 void MainWindow::loadQStyleSheetFolder()
 {
-    QString QStyleSheetFolder = QApplication::applicationDirPath() + "./QStyleSheets";
+    QString QStyleSheetFolder = QApplication::applicationDirPath() + "/../QStyleSheets";
     QDirIterator fileIterator(QStyleSheetFolder, QStringList() << "*.qss", QDir::Files, QDirIterator::Subdirectories);
 
     while (fileIterator.hasNext()) {
@@ -583,11 +584,11 @@ void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 
 void MainWindow::on_lineEditUserName_textChanged(const QString &arg1)
 {
-    Q_UNUSED(arg1);
 
     if (isApplicationStarting)
         return;
 
+    configSettings.userName = arg1;
     setAppWindowTitle();
 } //on_lineEditUserName_textChanged
 

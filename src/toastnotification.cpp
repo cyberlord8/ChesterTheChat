@@ -29,5 +29,5 @@ ToastNotification::ToastNotification(const QString &text, QWidget *parent)
     show();
 
     connect(&timer, &QTimer::timeout, this, &QWidget::close);
-    timer.start(3000);
+    timer.start(5000);
 }//

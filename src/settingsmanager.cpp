@@ -15,9 +15,9 @@ void SettingsManager::load(Settings &s)
     s.b_loadStyleSheet = settings.value("LoadStyleSheet", false).toBool();
     s.b_displayBackgroundImage = settings.value("DisplayBackgroundImage", false).toBool();
     s.localUDPAddress = settings.value("LocalUDPAddress", "0.0.0.0").toString();
-    s.remoteUDPAddress = settings.value("RemoteUDPAddress", "239.0.0.1").toString();
-    s.localUDPPort = settings.value("LocalUDPPort", 12345).toUInt();
-    s.remoteUDPPort = settings.value("RemoteUDPPort", 12345).toUInt();
+    s.remoteUDPAddress = settings.value("RemoteUDPAddress", "224.0.0.2").toString();
+    s.localUDPPort = settings.value("LocalUDPPort", 9999).toUInt();
+    s.remoteUDPPort = settings.value("RemoteUDPPort", 9999).toUInt();
     s.udpTTL = settings.value("UdpTTL", 5).toInt();
     s.b_multicast = settings.value("Multicast", true).toBool();
     s.b_loopback = settings.value("Loopback", true).toBool();
