@@ -30,9 +30,6 @@
 #include <QLockFile>
 
 
-
-
-
 #define APP_NAME "Chester the Chat"
 #define RELEASEDATE __DATE__
 #define BUILDDATE RELEASEDATE " - " __TIME__
@@ -45,17 +42,14 @@
 #define APP_LICENSE "Green Radio Software Solutions (GRSS) grants anyone license to use this software for personal use."
 #define qt_LICENSE "LGPLv3"
 
-// struct Settings {
-//     bool isMulticast;
-//     bool isLoopback;
-//     quint8 ttlValue;
-//     QString localUDPNetwork;
-//     QString localUDPPort;
-//     QString groupAddress;
-//     QString remoteUDPPort;
-//     bool b_loadStyleSheet;
-//     QString styleSheetFilename;
-//     bool b_displayBackgroundImage;
-// };
+
+struct Message {
+    QString user;
+    QString text;
+    QDateTime timestamp;
+    bool isSentByMe = false;
+};
+
+
 
 #endif // GLOBALS_H

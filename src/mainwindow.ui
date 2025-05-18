@@ -60,12 +60,16 @@
           <item>
            <widget class="QLabel" name="labelStatus">
             <property name="text">
-             <string/>
+             <string>Not Connected!</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QTextEdit" name="textEditChat"/>
+           <widget class="QTextEdit" name="textEditChat">
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
+            </property>
+           </widget>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">

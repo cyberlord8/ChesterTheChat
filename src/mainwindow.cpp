@@ -42,7 +42,6 @@ void MainWindow::releaseInstanceId(int instanceId)
 
     QSet<int> usedIds;
 
-    // Load current IDs
     QFile idFile(idsFilePath);
     if (idFile.exists() && idFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&idFile);
@@ -55,7 +54,6 @@ void MainWindow::releaseInstanceId(int instanceId)
         idFile.close();
     }
 
-    // Save updated IDs
     if (idFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         QTextStream out(&idFile);
         for (int id : std::as_const(usedIds)) {
@@ -81,7 +79,6 @@ int MainWindow::acquireInstanceId()
 
     QSet<int> usedIds;
 
-    // Load existing IDs
     QFile idFile(idsFilePath);
     if (idFile.exists() && idFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&idFile);
@@ -91,13 +88,11 @@ int MainWindow::acquireInstanceId()
         idFile.close();
     }
 
-    // Find the smallest unused ID
     int newId = 1;
     while (usedIds.contains(newId)) {
         ++newId;
     }
 
-    // Add the new ID and write back
     usedIds.insert(newId);
     if (idFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         QTextStream out(&idFile);
@@ -128,7 +123,6 @@ void MainWindow::on_actionAbout_triggered()
     const QString compileDate = QDate::fromString(tr(__DATE__), "MMM dd yyyy").toString("yyyy");
     const QString releaseDate = tr(__DATE__);
 
-    // About message body
     QString aboutText = tr(APP_LICENSE) + "\n";
     aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     aboutText += QString(" - %1 %2 %3\n").arg(COPYRIGHT, compileDate, COMPANY);
@@ -146,7 +140,6 @@ void MainWindow::on_actionAbout_triggered()
     aboutText += QString(" - %1%2\n").arg(tr("QT Library License: "), qt_LICENSE);
     aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 
-    // Show message box
     QMessageBox aboutBox(this);
     aboutBox.setWindowTitle(APP_NAME);
     aboutBox.setText(aboutText);
@@ -166,7 +159,6 @@ void MainWindow::openResourceFile(const QString fileName)
     QFile resourceFile(resourcePath);
     QFile existingFile(targetPath);
 
-    // Remove old file if it exists
     if (existingFile.exists()) {
         if (!existingFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther)) {
             qDebug() << "Failed to change permissions on existing file:" << existingFile.errorString();
@@ -181,13 +173,11 @@ void MainWindow::openResourceFile(const QString fileName)
         qDebug() << "No existing file found.";
     }
 
-    // Copy the file from resources
     if (!resourceFile.copy(targetPath)) {
         qDebug() << "Error copying file to:" << targetPath;
         qDebug() << "Reason:" << resourceFile.errorString();
     }
 
-    // Open the copied PDF
     QDesktopServices::openUrl(QUrl::fromLocalFile(targetPath));
 } //openResourceFile
 
@@ -227,7 +217,6 @@ void MainWindow::fillNetworkWidgets()
 void MainWindow::updateUIWidgets()
 {
     ui->lineEditUserName->setText(configSettings.userName);
-    // Networking settings
     ui->checkBoxLoopback->setChecked(configSettings.b_loopback);
     ui->checkBoxMulticast->setChecked(configSettings.b_multicast);
     ui->spinBoxTTL->setValue(configSettings.udpTTL);
@@ -236,10 +225,8 @@ void MainWindow::updateUIWidgets()
     ui->lineEditRemoteUDPNetwork->setText(configSettings.remoteUDPAddress);
     ui->lineEditRemoteUDPPort->setText(QString::number(configSettings.remoteUDPPort));
 
-    // UI appearance
     ui->checkBoxDisplayBackgroundImage->setChecked(configSettings.b_displayBackgroundImage);
 
-    // Style sheet settings
     ui->checkBoxLoadStyleSheet->setChecked(configSettings.b_loadStyleSheet);
     ui->comboBoxSelectStyleSheet->setCurrentText(configSettings.stylesheetName);
 } //updateUIWidgets
@@ -271,13 +258,106 @@ void MainWindow::setBackgroundImage()
     }
 } //setBackgroundImage
 
+void MainWindow::loadPage(int offset)
+{
+    if (isLoadingHistory)
+        return; // prevent reentrancy
+
+    isLoadingHistory = true;
+
+    int total = messageStore->messageCount();
+    if (total == 0) {
+        isLoadingHistory = false;
+        return;
+    }
+
+    int maxOffset = qMax(0, total - messagesPerPage);
+    offset = qBound(0, offset, maxOffset);
+
+    if (offset == currentOffset) {
+        isLoadingHistory = false;
+        return;
+    }
+
+    const QList<Message> messages = messageStore->fetchMessages(offset, messagesPerPage);
+
+    ui->textEditChat->clear();
+    for (const Message &msg : messages) {
+        m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
+    }
+
+    currentOffset = offset;
+    isLoadingHistory = false;
+} //loadPage
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->textEditChat->verticalScrollBar() && event->type() == QEvent::Type::Wheel && !isLoadingHistory) {
+        QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
+        const int delta = wheelEvent->angleDelta().y();
+        handleChatScroll(ui->textEditChat->verticalScrollBar(), delta < 0); // true if scrolling down
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
+
+void MainWindow::handleChatScroll(QScrollBar *scrollBar, bool scrollingDown)
+{
+    if (isLoadingHistory) {
+        return;
+    }
+
+    const int value = scrollBar->value();
+    const int min = scrollBar->minimum();
+    const int max = scrollBar->maximum();
+    const int total = messageStore->messageCount();
+
+    if (scrollingDown && value == max) {
+        if ((currentOffset + messagesPerPage) < total) {
+            loadPage(currentOffset + messagesPerPage);
+
+            QTimer::singleShot(0, [this]() {
+                QScrollBar *sb = ui->textEditChat->verticalScrollBar();
+                if ((currentOffset + messagesPerPage) < messageStore->messageCount()) {
+                    sb->setValue(sb->minimum() + 1);
+                }
+            });
+        }
+    }
+
+    if (!scrollingDown && value == min) {
+        if (currentOffset > 0) {
+            loadPage(currentOffset - messagesPerPage);
+
+            QTimer::singleShot(0, [this]() {
+                QScrollBar *sb = ui->textEditChat->verticalScrollBar();
+                if (currentOffset == 0 || messageStore->messageCount() < messagesPerPage) {
+                    sb->setValue(sb->minimum());
+                }
+            });
+        }
+    }
+} //
+
+void MainWindow::onChatScrollBarChanged(int value)
+{
+    static int lastScrollValue = -1;
+    if (lastScrollValue < 0) {
+        lastScrollValue = value;
+        return;
+    }
+
+    bool scrollingDown = value > lastScrollValue;
+    lastScrollValue = value;
+
+    handleChatScroll(ui->textEditChat->verticalScrollBar(), scrollingDown);
+} //
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    // Load configuration
     instanceID = acquireInstanceId();
     settingsManager = new SettingsManager(instanceID, QCoreApplication::applicationDirPath(), this);
     settingsManager->load(configSettings);
@@ -285,35 +365,51 @@ MainWindow::MainWindow(QWidget *parent)
 
     udpManager = new UdpChatSocketManager(this);
 
-   connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
-        m_formatter->appendMessage(ui->textEditChat, user, msg, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, false);
+    connect(ui->textEditChat->verticalScrollBar(), &QScrollBar::valueChanged, this, &MainWindow::onChatScrollBarChanged);
 
-        // Flash taskbar icon if not in view
+    connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
+        messageStore->insertMessage(user, msg, QDateTime::currentDateTimeUtc(), false);
+        m_formatter->appendMessage(ui->textEditChat, user, msg, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, false);
+        ui->textEditChat->moveCursor(QTextCursor::End);
+
         if (isMinimized() || !isVisible() || !isActiveWindow()) {
-            QApplication::alert(this, 3000); // flash for 3 seconds
+            QApplication::alert(this, 3000);                               // flash for 3 seconds
             new ToastNotification(QString("%1: %2").arg(user, msg), this); // auto-deletes on close
         }
     });
 
     m_formatter = new ChatFormatter(this);
 
-    // Prevent event handlers from reacting during initial setup
     isApplicationStarting = true;
 
-    // Load styles and appearance
     loadQStyleSheetFolder();
     setStyleSheet();
     setBackgroundImage();
     setAppWindowTitle();
 
-    // Initialize networking
     fillNetworkWidgets();
 
-    // Sync config to UI
     updateUIWidgets();
 
-    // UI startup state
     ui->tabWidget->setCurrentIndex(1);
+    ui->tabWidget->setTabEnabled(0, false); // Disable Chat tab
+    ui->textEditChat->verticalScrollBar()->installEventFilter(this);
+    ui->statusbar->addWidget(ui->labelStatus);
+
+    QString dbPath = QCoreApplication::applicationDirPath() + "/chat_messages.db";
+    messageStore = new MessageStore(dbPath, this);
+    if (!messageStore->open()) {
+        qCritical() << "Unable to load message database.";
+    }
+
+    const QList<Message> messages = messageStore->fetchLastMessages(20);
+
+    ui->textEditChat->clear();
+    for (const Message &msg : messages) {
+        m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
+    }
+
+    currentOffset = messageStore->messageCount() - messages.size();
 
     isApplicationStarting = false;
 } //MainWindow
@@ -331,6 +427,7 @@ MainWindow::~MainWindow()
 
     delete m_formatter;
     delete settingsManager;
+    delete messageStore;
     delete ui;
     ui = nullptr;
 } //MainWindow
@@ -361,11 +458,10 @@ void MainWindow::on_pushButtonSend_clicked()
     const qint64 returnSize = udpManager->sendMessage(rawData, groupAddress, port);
 
     if (returnSize == rawData.size()) {
+        messageStore->insertMessage(userName, messageText, QDateTime::currentDateTimeUtc(), true);
         m_formatter->appendMessage(ui->textEditChat, userName, messageText, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, true);
-        ui->lineEditChatText->clear();
     } else {
         const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
-        // ui->textEditChat->append(error);
         ui->labelStatus->setText(error);
     }
 } //on_pushButtonSend_clicked
@@ -375,7 +471,6 @@ void MainWindow::on_pushButtonConnect_clicked()
     if (!udpManager)
         return;
 
-    // Parse local UDP port
     bool portOk = false;
     const quint16 port = ui->lineEditLocalUDPPort->text().toUShort(&portOk);
     if (!portOk || port == 0) {
@@ -383,14 +478,11 @@ void MainWindow::on_pushButtonConnect_clicked()
         return;
     }
 
-    // Determine local bind address
     const QString localAddressText = ui->comboBoxLocalUDPNetwork->currentText();
     QHostAddress localAddress = (localAddressText == "ANY") ? QHostAddress(QHostAddress::AnyIPv4) : QHostAddress(localAddressText);
 
-    // Parse group (remote) address
     const QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
 
-    // Attempt to bind sockets
     bool recvBound = udpManager->bindReceiveSocket(localAddress, groupAddress, port);
     bool sendBound = udpManager->bindSendSocket(localAddress);
 
@@ -400,8 +492,9 @@ void MainWindow::on_pushButtonConnect_clicked()
         ui->pushButtonDisconnect->setEnabled(true);
         ui->frameUDPParameters->setEnabled(false);
         ui->tabWidget->setCurrentIndex(0);
+        ui->tabWidget->setTabEnabled(0, true);
     } else {
-        ui->labelStatus->setText(tr("Failed to bind one or both sockets.\n\n"));
+        ui->labelStatus->setText(tr("Failed to bind one or both sockets."));
     }
 } //on_pushButtonConnect_clicked
 
@@ -416,16 +509,15 @@ void MainWindow::on_pushButtonDisconnect_clicked()
 {
     const QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
 
-    // Leave multicast group (if bound and active)
     if (udpManager)
         udpManager->closeSockets();
 
-    // Update UI state
     ui->pushButtonConnect->setEnabled(true);
     ui->pushButtonDisconnect->setEnabled(false);
     ui->frameUDPParameters->setEnabled(true);
+    ui->tabWidget->setTabEnabled(0, false); // Disable Chat tab
 
-    ui->labelStatus->setText(tr("Disconnected from network.\n\n"));
+    ui->labelStatus->setText(tr("Disconnected from network."));
 } //on_pushButtonDisconnect_clicked
 
 void MainWindow::on_checkBoxMulticast_clicked(bool checked)
@@ -497,7 +589,6 @@ void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &a
         return;
     }
 
-    // configSettings.stylesheetName = QStyleSheetMap.value(arg1);
     settingsManager->update(configSettings.stylesheetName, QStyleSheetMap.value(arg1));
     loadStyleSheet();
     settingsManager->save(configSettings);
@@ -555,10 +646,8 @@ void MainWindow::loadStyleSheet()
         configSettings.b_isDarkThemed = false; // Default to light if not specified
     }
 
-    QTimer::singleShot(0, [=] {
-        qApp->setStyleSheet(styleSheetString);
-    });
-}//
+    QTimer::singleShot(0, [=] { qApp->setStyleSheet(styleSheetString); });
+} //
 
 void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 {
@@ -584,7 +673,6 @@ void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 
 void MainWindow::on_lineEditUserName_textChanged(const QString &arg1)
 {
-
     if (isApplicationStarting)
         return;
 

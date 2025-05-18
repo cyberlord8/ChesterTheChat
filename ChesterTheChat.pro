@@ -1,4 +1,4 @@
-QT       += core gui network
+QT       += core gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -24,6 +24,7 @@ FORMS += \
     src/mainwindow.ui
 
 HEADERS += \
+    src/messagestore.h \
     src/chatformatter.h \
     src/globals.h \
     src/mainwindow.h \
@@ -33,6 +34,7 @@ HEADERS += \
     src/toastnotification.h
 
 SOURCES += \
+    src/messagestore.cpp \
     src/chatformatter.cpp \
     src/main.cpp \
     src/mainwindow.cpp \

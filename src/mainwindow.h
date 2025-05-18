@@ -7,6 +7,12 @@
 #include "udpchatsocketmanager.h"
 #include "settingsmanager.h"
 #include "toastnotification.h"
+#include "messagestore.h"
+
+
+#include <QScrollBar>
+#include <QWheelEvent>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -27,6 +33,14 @@ private:
 
     ChatFormatter *m_formatter = nullptr;
     UdpChatSocketManager *udpManager = nullptr;
+
+    // Add member:
+    MessageStore *messageStore = nullptr;
+    int currentOffset = 0;
+    const int messagesPerPage = 20;
+
+    bool isLoadingHistory = false;
+    int previousScrollValue = -1;
 
     /**
     * @brief instanceID
@@ -86,19 +100,19 @@ private:
     * @brief setAppWindowTitle
     */
     void setAppWindowTitle();
-    // /**
-    // * @brief updateSetting
-    // * @param settingRef
-    // * @param newValue
-    // */
-    // template<typename T>
-    // void updateSetting(T &settingRef, const T &newValue);
+
     /**
     * @brief openResourceFile
     * @param fileName
     */
     void openResourceFile(const QString fileName);
 
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
+    // void loadPreviousMessages();
+    void loadPage(int offset);
+
+    void handleChatScroll(QScrollBar *scrollBar, bool scrollingDown);
 private slots:
     /**
     * @brief on_actionAbout_triggered
@@ -189,6 +203,7 @@ private slots:
     void on_lineEditUserName_textChanged(const QString &arg1);
 
     void on_pushButtonTestMsg_clicked();
+    void onChatScrollBarChanged(int value);
 };
 
 #endif // MAINWINDOW_H
