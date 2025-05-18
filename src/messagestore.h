@@ -19,8 +19,10 @@ public:
     int messageCount() const;
 
 private:
-    void initializeSchema();
+    bool initializeSchema();
     QSqlDatabase db;
+    void logDatabaseOpenError() const;
+    Message extractMessageFromQuery(const QSqlQuery &query) const;
 };
 
 #endif // MESSAGESTORE_H

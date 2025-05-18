@@ -33,6 +33,13 @@ private:
     QByteArray lastSentData;
     bool multicastEnabled = false;
     bool loopbackEnabled = true;
+    void cleanupReceiveSocket();
+    bool createAndBindReceiveSocket(const QHostAddress &localAddress, quint16 port);
+    void joinMulticastGroupSafely(const QHostAddress &groupAddress);
+    void cleanupSocket(QUdpSocket *&socket);
+    QByteArray receiveDatagram(QHostAddress &sender, quint16 &port);
+    bool isSelfEcho(const QByteArray &datagram) const;
+    std::pair<QString, QString> parseUserMessage(const QString &raw) const;
 };
 
 #endif // UDPCHATSOCKETMANAGER_H

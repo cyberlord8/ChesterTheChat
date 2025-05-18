@@ -1,0 +1,458 @@
+// void MainWindow::setAppWindowTitle()
+// {
+//     QString userName = ui->lineEditUserName->text();
+//     QString baseTitle = tr(APP_NAME) + QString(" - %1_%2").arg(QString::number(instanceID), userName);
+
+//     QString version = tr(VERSION);
+//     QString titleSuffix;
+
+//     if (version.contains("alpha", Qt::CaseInsensitive)) {
+//         QString buildDate = tr(BUILDDATE);
+//         int lastColonIndex = buildDate.lastIndexOf(':');
+//         if (lastColonIndex != -1) {
+//             buildDate = buildDate.left(lastColonIndex);
+//         }
+//         titleSuffix = QString(" - %1 - %2").arg(version, buildDate);
+//     } else if (version.contains("beta", Qt::CaseInsensitive)) {
+//         titleSuffix = QString(" - %1 - %2").arg(version, tr(RELEASEDATE));
+//     } else {
+//         titleSuffix = QString(" - %1").arg(tr(RELEASEDATE));
+//     }
+
+//     setWindowTitle(baseTitle + titleSuffix);
+// } //setAppWindowTitle
+
+// void MainWindow::releaseInstanceId(int instanceId)
+// {
+//     if (instanceId < 1)
+//         return;
+
+//     QString appDir = QCoreApplication::applicationDirPath();
+//     QString idsFilePath = appDir + "/instance_ids.txt";
+//     QString lockFilePath = appDir + "/instance_ids.lock";
+
+//     QLockFile lock(lockFilePath);
+//     if (!lock.tryLock(5000)) {
+//         qWarning("Could not lock instance_ids.txt for release");
+//         return;
+//     }
+
+//     QSet<int> usedIds;
+
+//     QFile idFile(idsFilePath);
+//     if (idFile.exists() && idFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+//         QTextStream in(&idFile);
+//         while (!in.atEnd()) {
+//             int id = in.readLine().toInt();
+//             if (id != instanceId) {
+//                 usedIds.insert(id);
+//             }
+//         }
+//         idFile.close();
+//     }
+
+//     if (idFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+//         QTextStream out(&idFile);
+//         for (int id : std::as_const(usedIds)) {
+//             out << id << "\n";
+//         }
+//         idFile.close();
+//     }
+
+//     lock.unlock();
+// } //releaseInstanceId
+
+// int MainWindow::acquireInstanceId()
+// {
+//     QString appDir = QCoreApplication::applicationDirPath();
+//     QString idsFilePath = appDir + "/instance_ids.txt";
+//     QString lockFilePath = appDir + "/instance_ids.lock";
+
+//     QLockFile lock(lockFilePath);
+//     if (!lock.tryLock(5000)) {
+//         qWarning("Could not lock instance_ids.txt");
+//         return -1;
+//     }
+
+//     QSet<int> usedIds;
+
+//     QFile idFile(idsFilePath);
+//     if (idFile.exists() && idFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+//         QTextStream in(&idFile);
+//         while (!in.atEnd()) {
+//             usedIds.insert(in.readLine().toInt());
+//         }
+//         idFile.close();
+//     }
+
+//     int newId = 1;
+//     while (usedIds.contains(newId)) {
+//         ++newId;
+//     }
+
+//     usedIds.insert(newId);
+//     if (idFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+//         QTextStream out(&idFile);
+//         for (int id : std::as_const(usedIds)) {
+//             out << id << "\n";
+//         }
+//         idFile.close();
+//     }
+
+//     lock.unlock();
+//     return newId;
+// } //acquireInstanceId
+
+// void MainWindow::on_actionAbout_triggered()
+// {
+//     QString compilerInfo;
+// #ifdef ENV32
+//     compilerInfo = QString("Qt %1 MinGW (32-bit)").arg(qVersion());
+// #else
+//     compilerInfo = QString("Qt %1 MinGW (64-bit)").arg(qVersion());
+// #endif
+
+//     QString version = VERSION;
+//     if (version.contains("alpha", Qt::CaseInsensitive) || version.contains("bravo", Qt::CaseInsensitive)) {
+//         version += " " + tr(__TIME__); // Append compile time if in alpha/bravo
+//     }
+
+//     const QString compileDate = QDate::fromString(tr(__DATE__), "MMM dd yyyy").toString("yyyy");
+//     const QString releaseDate = tr(__DATE__);
+
+//     QString aboutText = tr(APP_LICENSE) + "\n";
+//     aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+//     aboutText += QString(" - %1 %2 %3\n").arg(COPYRIGHT, compileDate, COMPANY);
+//     aboutText += QString(" - %1\n").arg(RIGHTS);
+//     aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+//     aboutText += QString(" - %1%2\n").arg(tr("Version: "), version);
+//     aboutText += QString(" - %1%2\n").arg(tr("Release date: "), releaseDate);
+//     aboutText += QString(" - %1%2\n").arg(tr("Compiler: "), compilerInfo);
+//     aboutText += QString(" - %1%2\n").arg(tr("Running on: "), SYSTEMINFO);
+//     aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+//     aboutText += QString("%1\n").arg(WARRANTY);
+//     aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+//     aboutText += tr("This product uses Qt Libraries:\n");
+//     aboutText += QString(" - %1\n").arg(qt_COPYRIGHT);
+//     aboutText += QString(" - %1%2\n").arg(tr("QT Library License: "), qt_LICENSE);
+//     aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+//     QMessageBox aboutBox(this);
+//     aboutBox.setWindowTitle(APP_NAME);
+//     aboutBox.setText(aboutText);
+//     aboutBox.exec();
+// } //on_actionAbout_triggered
+
+
+
+// void MainWindow::openResourceFile(const QString fileName)
+// {
+//     const QString resourcePath = ":/resources" + fileName;
+//     const QString targetPath = qApp->applicationDirPath() + fileName;
+
+//     QFile resourceFile(resourcePath);
+//     QFile existingFile(targetPath);
+
+//     if (existingFile.exists()) {
+//         if (!existingFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther)) {
+//             qDebug() << "Failed to change permissions on existing file:" << existingFile.errorString();
+//         }
+
+//         if (existingFile.remove()) {
+//             qDebug() << "Removed old file.";
+//         } else {
+//             qDebug() << "ERROR - Cannot remove file:" << existingFile.errorString();
+//         }
+//     } else {
+//         qDebug() << "No existing file found.";
+//     }
+
+//     if (!resourceFile.copy(targetPath)) {
+//         qDebug() << "Error copying file to:" << targetPath;
+//         qDebug() << "Reason:" << resourceFile.errorString();
+//     }
+
+//     QDesktopServices::openUrl(QUrl::fromLocalFile(targetPath));
+// } //openResourceFile
+
+
+// void MainWindow::fillNetworkWidgets()
+// {
+//     ui->comboBoxLocalUDPNetwork->addItem("ANY");
+
+//     const QList<QHostAddress> ipAddresses = QNetworkInterface::allAddresses();
+
+//     for (const QHostAddress &address : ipAddresses) {
+//         const QString ip = address.toString();
+
+//         // Skip IPv6
+//         if (ip.contains(":"))
+//             continue;
+
+//         // Skip link-local addresses (169.254.x.x)
+//         if (ip.startsWith("169.254"))
+//             continue;
+
+//         ui->comboBoxLocalUDPNetwork->addItem(ip);
+//     }
+// } //fillNetworkWidgets
+
+
+// void MainWindow::loadPage(int offset)
+// {
+//     if (isLoadingHistory)
+//         return; // prevent reentrancy
+
+//     isLoadingHistory = true;
+
+//     int total = messageStore->messageCount();
+//     if (total == 0) {
+//         isLoadingHistory = false;
+//         return;
+//     }
+
+//     int maxOffset = qMax(0, total - messagesPerPage);
+//     offset = qBound(0, offset, maxOffset);
+
+//     if (offset == currentOffset) {
+//         isLoadingHistory = false;
+//         return;
+//     }
+
+//     const QList<Message> messages = messageStore->fetchMessages(offset, messagesPerPage);
+
+//     ui->textEditChat->clear();
+//     for (const Message &msg : messages) {
+//         m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
+//     }
+
+//     currentOffset = offset;
+//     isLoadingHistory = false;
+// } //loadPage
+
+// void MainWindow::onChatScrollBarChanged(int value)
+// {
+//     static int lastScrollValue = -1;
+//     if (lastScrollValue < 0) {
+//         lastScrollValue = value;
+//         return;
+//     }
+
+//     bool scrollingDown = value > lastScrollValue;
+//     lastScrollValue = value;
+
+//     handleChatScroll(ui->textEditChat->verticalScrollBar(), scrollingDown);
+// } //onChatScrollBarChanged
+
+// MainWindow::MainWindow(QWidget *parent)
+//     : QMainWindow(parent)
+//     , ui(new Ui::MainWindow)
+// {
+//     ui->setupUi(this);
+
+//     instanceID = acquireInstanceId();
+//     settingsManager = new SettingsManager(instanceID, QCoreApplication::applicationDirPath(), this);
+//     settingsManager->load(configSettings);
+//     restoreGeometry(settingsManager->loadGeometry());
+
+//     udpManager = new UdpChatSocketManager(this);
+
+//     connect(ui->textEditChat->verticalScrollBar(), &QScrollBar::valueChanged, this, &MainWindow::onChatScrollBarChanged);
+
+//     connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
+//         messageStore->insertMessage(user, msg, QDateTime::currentDateTimeUtc(), false);
+//         m_formatter->appendMessage(ui->textEditChat, user, msg, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, false);
+//         ui->textEditChat->moveCursor(QTextCursor::End);
+
+//         if (isMinimized() || !isVisible() || !isActiveWindow()) {
+//             QApplication::alert(this, 3000);                               // flash for 3 seconds
+//             new ToastNotification(QString("%1: %2").arg(user, msg), this); // auto-deletes on close
+//         }
+//     });
+
+//     m_formatter = new ChatFormatter(this);
+
+//     isApplicationStarting = true;
+
+//     loadQStyleSheetFolder();
+//     setStyleSheet();
+//     setBackgroundImage();
+//     setAppWindowTitle();
+
+//     fillNetworkWidgets();
+
+//     updateUIWidgets();
+
+//     ui->tabWidget->setCurrentIndex(1);
+//     ui->tabWidget->setTabEnabled(0, false); // Disable Chat tab
+//     ui->textEditChat->verticalScrollBar()->installEventFilter(this);
+//     ui->statusbar->addWidget(ui->labelStatus);
+
+//     QString dbPath = QCoreApplication::applicationDirPath() + "/chat_messages.db";
+//     messageStore = new MessageStore(dbPath, this);
+//     if (!messageStore->open()) {
+//         qCritical() << "Unable to load message database.";
+//     }
+
+//     const QList<Message> messages = messageStore->fetchLastMessages(20);
+
+//     ui->textEditChat->clear();
+//     for (const Message &msg : messages) {
+//         m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
+//     }
+
+//     currentOffset = messageStore->messageCount() - messages.size();
+
+//     isApplicationStarting = false;
+// } //MainWindow
+
+// void MainWindow::on_pushButtonSend_clicked()
+// {
+//     if (!udpManager)
+//         return;
+
+//     const QString messageText = ui->lineEditChatText->text().trimmed();
+//     if (messageText.isEmpty())
+//         return;
+
+//     const QString userName = ui->lineEditUserName->text().trimmed();
+//     const QString timestamp = QDateTime::currentDateTimeUtc().toString("hh:mm");
+
+//     QByteArray rawData = QString("%1 - %2").arg(userName, messageText).toLocal8Bit();
+
+//     QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
+//     bool portOk = false;
+//     const quint16 port = ui->lineEditRemoteUDPPort->text().toUShort(&portOk);
+
+//     if (!portOk) {
+//         ui->labelStatus->setText("Invalid UDP port.");
+//         return;
+//     }
+
+//     const qint64 returnSize = udpManager->sendMessage(rawData, groupAddress, port);
+
+//     if (returnSize == rawData.size()) {
+//         messageStore->insertMessage(userName, messageText, QDateTime::currentDateTimeUtc(), true);
+//         m_formatter->appendMessage(ui->textEditChat, userName, messageText, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, true);
+//     } else {
+//         const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
+//         ui->labelStatus->setText(error);
+//     }
+// } //on_pushButtonSend_clicked
+
+
+// void MainWindow::on_pushButtonConnect_clicked()
+// {
+//     if (!udpManager)
+//         return;
+
+//     bool portOk = false;
+//     const quint16 port = ui->lineEditLocalUDPPort->text().toUShort(&portOk);
+//     if (!portOk || port == 0) {
+//         ui->labelStatus->setText(tr("Invalid local UDP port."));
+//         return;
+//     }
+
+//     const QString localAddressText = ui->comboBoxLocalUDPNetwork->currentText();
+//     QHostAddress localAddress = (localAddressText == "ANY") ? QHostAddress(QHostAddress::AnyIPv4) : QHostAddress(localAddressText);
+
+//     const QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
+
+//     bool recvBound = udpManager->bindReceiveSocket(localAddress, groupAddress, port);
+//     bool sendBound = udpManager->bindSendSocket(localAddress);
+
+//     if (recvBound && sendBound) {
+//         ui->labelStatus->setText(tr("Connection established."));
+//         ui->pushButtonConnect->setEnabled(false);
+//         ui->pushButtonDisconnect->setEnabled(true);
+//         ui->frameUDPParameters->setEnabled(false);
+//         ui->tabWidget->setCurrentIndex(0);
+//         ui->tabWidget->setTabEnabled(0, true);
+//     } else {
+//         ui->labelStatus->setText(tr("Failed to bind one or both sockets."));
+//     }
+// } //on_pushButtonConnect_clicked
+
+// void MainWindow::loadStyleSheet()
+// {
+//     QFile styleSheetFile;
+//     styleSheetFile.setFileName(configSettings.stylesheetName);
+
+//     if (!styleSheetFile.exists()) {
+//         qApp->setStyleSheet("");
+//         ui->checkBoxLoadStyleSheet->setChecked(false);
+//         return;
+//     }
+
+//     styleSheetFile.open(QFile::ReadOnly);
+//     QString styleSheetString = QLatin1String(styleSheetFile.readAll());
+//     styleSheetFile.close();
+//     configSettings.stylesheetName = styleSheetFile.fileName();
+
+//     // Detect theme from comment in stylesheet
+//     QRegularExpression themeRegex(R"(/\*\s*theme:\s*(dark|light)\s*\*/)", QRegularExpression::CaseInsensitiveOption);
+//     QRegularExpressionMatch match = themeRegex.match(styleSheetString);
+//     if (match.hasMatch()) {
+//         QString theme = match.captured(1).toLower();
+//         configSettings.b_isDarkThemed = (theme == "dark");
+//     } else {
+//         configSettings.b_isDarkThemed = false; // Default to light if not specified
+//     }
+
+//     QTimer::singleShot(0, [=] { qApp->setStyleSheet(styleSheetString); });
+// } //loadStyleSheet
+
+// QList<Message> MessageStore::fetchLastMessages(int count)
+// {
+//     QList<Message> messages;
+//     QSqlQuery query;
+
+//     query.prepare(R"(
+//         SELECT user, text, timestamp, is_sent
+//         FROM messages
+//         ORDER BY id DESC
+//         LIMIT ?
+//     )");
+//     query.addBindValue(count);
+
+//     if (query.exec()) {
+//         while (query.next()) {
+//             Message m;
+//             m.user = query.value(0).toString();
+//             m.text = query.value(1).toString();
+//             m.timestamp = QDateTime::fromString(query.value(2).toString(), Qt::ISODate);
+//             m.isSentByMe = query.value(3).toInt() == 1;
+//             messages.append(m);
+//         }
+//         std::reverse(messages.begin(), messages.end());  // Oldest to newest
+//     } else {
+//         qWarning() << "fetchLastMessages failed:" << query.lastError().text();
+//     }
+
+//     return messages;
+// }//fetchLastMessages
+
+// QList<Message> MessageStore::fetchMessages(int offset, int limit)
+// {
+//     QList<Message> messages;
+//     QSqlQuery query;
+//     query.prepare("SELECT user, text, timestamp, is_sent FROM messages ORDER BY id ASC LIMIT ? OFFSET ?");
+//     query.addBindValue(limit);
+//     query.addBindValue(offset);
+
+//     if (query.exec()) {
+//         while (query.next()) {
+//             Message m;
+//             m.user = query.value(0).toString();
+//             m.text = query.value(1).toString();
+//             m.timestamp = QDateTime::fromString(query.value(2).toString(), Qt::ISODate);
+//             m.isSentByMe = query.value(3).toInt() == 1;
+//             messages.append(m);
+//         }
+//     } else {
+//         qWarning() << "Failed to fetch messages:" << query.lastError().text();
+//     }
+
+//     return messages;
+// }//fetchMessages
+

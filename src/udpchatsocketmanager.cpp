@@ -15,95 +15,169 @@ UdpChatSocketManager::~UdpChatSocketManager()
 bool UdpChatSocketManager::bindSendSocket(const QHostAddress &localAddress)
 {
     if (sendSocket) {
+        sendSocket->close();
         delete sendSocket;
         sendSocket = nullptr;
     }
 
     sendSocket = new QUdpSocket(this);
-    return sendSocket->bind(localAddress, 0);
-}
 
-bool UdpChatSocketManager::bindReceiveSocket(const QHostAddress &localAddress, const QHostAddress &groupAddress, quint16 port)
-{
-    if (recvSocket) {
-        delete recvSocket;
-        recvSocket = nullptr;
+    const bool success = sendSocket->bind(localAddress, 0);
+
+    sendSocket->setSocketOption(QAbstractSocket::MulticastTtlOption, 5);
+    sendSocket->setSocketOption(QAbstractSocket::MulticastLoopbackOption, loopbackEnabled ? 1 : 0);
+
+    if (!success) {
+        qWarning().nospace() << "[UdpChatSocketManager] Failed to bind send socket on "
+                             << localAddress.toString() << ": " << sendSocket->errorString();
     }
 
-    recvSocket = new QUdpSocket(this);
-    if (!recvSocket->bind(localAddress, port, QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint)) {
-        return false;
-    }
+    return success;
+}//bindSendSocket
 
-    if (groupAddress.isMulticast()) {
-        recvSocket->joinMulticastGroup(groupAddress);
-    }
-
-    connect(recvSocket, &QUdpSocket::readyRead, this, &UdpChatSocketManager::processPendingDatagrams);
-    return true;
-}
-
-qint64 UdpChatSocketManager::sendMessage(const QByteArray &data, const QHostAddress &targetAddress, quint16 targetPort)
-{
-    if (!sendSocket) return -1;
-
-    lastSentData = data;
-    return sendSocket->writeDatagram(data, targetAddress, targetPort);
-}
-
-void UdpChatSocketManager::closeSockets()
+void UdpChatSocketManager::cleanupReceiveSocket()
 {
     if (recvSocket) {
         recvSocket->close();
         delete recvSocket;
         recvSocket = nullptr;
     }
-    if (sendSocket) {
-        sendSocket->close();
-        delete sendSocket;
-        sendSocket = nullptr;
+}//cleanupReceiveSocket
+
+bool UdpChatSocketManager::createAndBindReceiveSocket(const QHostAddress &localAddress, quint16 port)
+{
+    recvSocket = new QUdpSocket(this);
+
+    const bool success = recvSocket->bind(localAddress, port,
+                                          QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint);
+
+    if (!success) {
+        qCritical().nospace() << "[UdpChatSocketManager] Failed to bind receive socket on "
+                              << localAddress.toString() << ":" << port
+                              << " → " << recvSocket->errorString();
+        delete recvSocket;
+        recvSocket = nullptr;
     }
-}
+
+    return success;
+}//createAndBindReceiveSocket
+
+void UdpChatSocketManager::joinMulticastGroupSafely(const QHostAddress &groupAddress)
+{
+    if (!recvSocket->joinMulticastGroup(groupAddress)) {
+        qWarning().nospace() << "[UdpChatSocketManager] Failed to join multicast group "
+                             << groupAddress.toString() << ": " << recvSocket->errorString();
+    }
+}//joinMulticastGroupSafely
+
+bool UdpChatSocketManager::bindReceiveSocket(const QHostAddress &localAddress,
+                                             const QHostAddress &groupAddress,
+                                             quint16 port)
+{
+    cleanupReceiveSocket();
+
+    if (!createAndBindReceiveSocket(localAddress, port))
+        return false;
+
+    if (groupAddress.isMulticast())
+        joinMulticastGroupSafely(groupAddress);
+
+    connect(recvSocket, &QUdpSocket::readyRead,
+            this, &UdpChatSocketManager::processPendingDatagrams);
+
+    return true;
+}//bindReceiveSocket
+
+qint64 UdpChatSocketManager::sendMessage(const QByteArray &data, const QHostAddress &targetAddress, quint16 targetPort)
+{
+    if (!sendSocket) {
+        qWarning() << "[UdpChatSocketManager] Send failed: sendSocket is null.";
+        return -1;
+    }
+
+    lastSentData = data;
+    const qint64 bytesWritten = sendSocket->writeDatagram(data, targetAddress, targetPort);
+
+    if (bytesWritten == -1) {
+        qWarning().nospace() << "[UdpChatSocketManager] writeDatagram failed: "
+                             << sendSocket->errorString();
+    }
+
+    return bytesWritten;
+}//sendMessage
+
+void UdpChatSocketManager::cleanupSocket(QUdpSocket *&socket)
+{
+    if (socket) {
+        socket->close();
+        delete socket;
+        socket = nullptr;
+    }
+}//cleanupSocket
+
+void UdpChatSocketManager::closeSockets()
+{
+    cleanupSocket(recvSocket);
+    cleanupSocket(sendSocket);
+}//closeSockets
 
 void UdpChatSocketManager::setLoopbackMode(bool enabled)
 {
     loopbackEnabled = enabled;
-}
+}//setLoopbackMode
 
 void UdpChatSocketManager::setMulticastMode(bool enabled)
 {
     multicastEnabled = enabled;
-}
+}//setMulticastMode
+
+QByteArray UdpChatSocketManager::receiveDatagram(QHostAddress &sender, quint16 &port)
+{
+    QByteArray datagram;
+    datagram.resize(int(recvSocket->pendingDatagramSize()));
+    recvSocket->readDatagram(datagram.data(), datagram.size(), &sender, &port);
+    return datagram;
+}//receiveDatagram
+
+bool UdpChatSocketManager::isSelfEcho(const QByteArray &datagram) const
+{
+    return datagram == lastSentData;
+}//isSelfEcho
+
+std::pair<QString, QString> UdpChatSocketManager::parseUserMessage(const QString &raw) const
+{
+    const QStringList parts = raw.split(" - ", Qt::KeepEmptyParts);
+
+    if (parts.size() >= 2) {
+        const QString user = parts[0].trimmed();
+        const QString message = parts.mid(1).join(" - ").trimmed();
+        return { user, message };
+    }
+
+    return { "Unknown", raw };
+}//parseUserMessage
 
 void UdpChatSocketManager::processPendingDatagrams()
 {
-    if (!recvSocket) return;
+    if (!recvSocket)
+        return;
 
     while (recvSocket->hasPendingDatagrams()) {
-        QByteArray datagram;
-        datagram.resize(int(recvSocket->pendingDatagramSize()));
-
         QHostAddress sender;
         quint16 senderPort;
-        recvSocket->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
+        QByteArray datagram = receiveDatagram(sender, senderPort);
 
-        if (datagram == lastSentData) {
+        if (isSelfEcho(datagram)) {
             lastSentData.clear();
-            continue; // Ignore self-sent echo
+            continue;
         }
 
-        QString receivedText = QString::fromUtf8(datagram);
-        QStringList parts = receivedText.split(" - ", Qt::KeepEmptyParts);
-        if (parts.size() >= 2) {
-            QString user = parts[0].trimmed();
-            QString message = parts.mid(1).join(" - ").trimmed();
-            emit messageReceived(user, message);
-        } else {
-            emit messageReceived("Unknown", receivedText);
-        }
+        const QString messageText = QString::fromUtf8(datagram);
+        const auto [user, message] = parseUserMessage(messageText);
+        emit messageReceived(user, message);
     }
-}
+}//processPendingDatagrams
 
 QString UdpChatSocketManager::lastError() const {
     return sendSocket ? sendSocket->errorString() : "No socket";
-}
+}//lastError

@@ -40,7 +40,7 @@ private:
     const int messagesPerPage = 20;
 
     bool isLoadingHistory = false;
-    int previousScrollValue = -1;
+    int lastScrollBarValue = -1;
 
     /**
     * @brief instanceID
@@ -105,7 +105,7 @@ private:
     * @brief openResourceFile
     * @param fileName
     */
-    void openResourceFile(const QString fileName);
+    void openResourceFile(const QString &fileName);
 
     bool eventFilter(QObject *obj, QEvent *event) override;
 
@@ -113,6 +113,40 @@ private:
     void loadPage(int offset);
 
     void handleChatScroll(QScrollBar *scrollBar, bool scrollingDown);
+    QString buildVersionSuffix(const QString &version) const;
+    QString getInstanceIdsFilePath() const;
+    QString getInstanceIdsLockFilePath() const;
+    QSet<int> loadInstanceIdsExcluding(int excludeId, const QString &filePath) const;
+    void saveInstanceIds(const QSet<int> &ids, const QString &filePath) const;
+    QString detectCompilerInfo() const;
+    QString buildAppVersionString() const;
+    QString buildAboutText(const QString &version, const QString &compileDate, const QString &releaseDate, const QString &compilerInfo) const;
+    bool copyResourceToFile(const QString &resourcePath, const QString &targetPath);
+    bool isValidIPv4Address(const QString &ip) const;
+    QString chatBackgroundStyle() const;
+    void displayMessages(const QList<Message> &messages);
+    int calculateClampedOffset(int requestedOffset, int totalMessages) const;
+    bool canScrollDown(int totalMessages) const;
+    bool canScrollUp() const;
+    void restoreScrollPositionAfterLoad(bool scrollToTop, bool edgeOfDatabase);
+    void initializeManagers();
+    void initializeUi();
+    void initializeDatabase();
+    void connectSignals();
+    void loadInitialState();
+
+    QByteArray buildRawUdpPayload(const QString &user, const QString &msg) const;
+    bool sendUdpMessage(const QByteArray &data, const QHostAddress &address, quint16 port);
+    void storeAndDisplaySentMessage(const QString &user, const QString &msg, const QDateTime &timestamp);
+    QHostAddress parseLocalAddress() const;
+    bool bindUdpSockets(const QHostAddress &local, const QHostAddress &remote, quint16 port);
+    void updateUiOnConnectSuccess();
+    void resetUiAfterDisconnect();
+    void populateStyleSheetMap(const QString &folderPath);
+    void populateStyleSheetComboBox();
+    QString readStyleSheetFile(const QString &path);
+    bool extractThemeFromStyleSheet(const QString &styleSheet) const;
+    QString generateNextTestMessage();
 private slots:
     /**
     * @brief on_actionAbout_triggered

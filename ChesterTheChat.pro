@@ -41,3 +41,6 @@ SOURCES += \
     src/settingsmanager.cpp \
     src/udpchatsocketmanager.cpp \
     src/toastnotification.cpp
+
+DISTFILES += \
+    oldCode

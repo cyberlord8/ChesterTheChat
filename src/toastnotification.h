@@ -13,6 +13,11 @@ public:
 private:
     QTimer timer;
     QLabel *label;
+    static constexpr int kDisplayDurationMs = 5000;
+    static constexpr int kPadding = 20;
+    void setupLabel(const QString &text);
+    void setupLayout();
+    void positionBottomRight();
 };
 
 #endif // TOASTNOTIFICATION_H

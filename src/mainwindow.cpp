@@ -1,38 +1,78 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-void MainWindow::setAppWindowTitle()
+QString MainWindow::buildVersionSuffix(const QString &version) const
 {
-    QString userName = ui->lineEditUserName->text();
-    QString baseTitle = tr(APP_NAME) + QString(" - %1_%2").arg(QString::number(instanceID), userName);
-
-    QString version = tr(VERSION);
-    QString titleSuffix;
-
     if (version.contains("alpha", Qt::CaseInsensitive)) {
         QString buildDate = tr(BUILDDATE);
         int lastColonIndex = buildDate.lastIndexOf(':');
         if (lastColonIndex != -1) {
             buildDate = buildDate.left(lastColonIndex);
         }
-        titleSuffix = QString(" - %1 - %2").arg(version, buildDate);
+        return QString(" - %1 - %2").arg(version, buildDate);
     } else if (version.contains("beta", Qt::CaseInsensitive)) {
-        titleSuffix = QString(" - %1 - %2").arg(version, tr(RELEASEDATE));
+        return QString(" - %1 - %2").arg(version, tr(RELEASEDATE));
     } else {
-        titleSuffix = QString(" - %1").arg(tr(RELEASEDATE));
+        return QString(" - %1").arg(tr(RELEASEDATE));
     }
+}//buildVersionSuffix
 
-    setWindowTitle(baseTitle + titleSuffix);
-} //setAppWindowTitle
+void MainWindow::setAppWindowTitle()
+{
+    const QString userName = ui->lineEditUserName->text();
+    const QString baseTitle = tr(APP_NAME) + QString(" - %1_%2").arg(QString::number(instanceID), userName);
+    const QString version = tr(VERSION);
+
+    const QString versionSuffix = buildVersionSuffix(version);
+
+    setWindowTitle(baseTitle + versionSuffix);
+}//setAppWindowTitle
+
+QString MainWindow::getInstanceIdsFilePath() const
+{
+    return QCoreApplication::applicationDirPath() + "/instance_ids.txt";
+}//getInstanceIdsFilePath
+
+QString MainWindow::getInstanceIdsLockFilePath() const
+{
+    return QCoreApplication::applicationDirPath() + "/instance_ids.lock";
+}//getInstanceIdsLockFilePath
+
+QSet<int> MainWindow::loadInstanceIdsExcluding(int excludeId, const QString &filePath) const
+{
+    QSet<int> ids;
+    QFile file(filePath);
+    if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        while (!in.atEnd()) {
+            int id = in.readLine().toInt();
+            if (excludeId < 0 || id != excludeId)
+                ids.insert(id);
+        }
+        file.close();
+    }
+    return ids;
+}//loadInstanceIdsExcluding
+
+void MainWindow::saveInstanceIds(const QSet<int> &ids, const QString &filePath) const
+{
+    QFile file(filePath);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QTextStream out(&file);
+        for (int id : std::as_const(ids)) {
+            out << id << "\n";
+        }
+        file.close();
+    }
+}//saveInstanceIds
 
 void MainWindow::releaseInstanceId(int instanceId)
 {
     if (instanceId < 1)
         return;
 
-    QString appDir = QCoreApplication::applicationDirPath();
-    QString idsFilePath = appDir + "/instance_ids.txt";
-    QString lockFilePath = appDir + "/instance_ids.lock";
+    const QString idsFilePath = getInstanceIdsFilePath();
+    const QString lockFilePath = getInstanceIdsLockFilePath();
 
     QLockFile lock(lockFilePath);
     if (!lock.tryLock(5000)) {
@@ -40,36 +80,16 @@ void MainWindow::releaseInstanceId(int instanceId)
         return;
     }
 
-    QSet<int> usedIds;
-
-    QFile idFile(idsFilePath);
-    if (idFile.exists() && idFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&idFile);
-        while (!in.atEnd()) {
-            int id = in.readLine().toInt();
-            if (id != instanceId) {
-                usedIds.insert(id);
-            }
-        }
-        idFile.close();
-    }
-
-    if (idFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        QTextStream out(&idFile);
-        for (int id : std::as_const(usedIds)) {
-            out << id << "\n";
-        }
-        idFile.close();
-    }
+    QSet<int> usedIds = loadInstanceIdsExcluding(instanceId, idsFilePath);
+    saveInstanceIds(usedIds, idsFilePath);
 
     lock.unlock();
-} //releaseInstanceId
+}//releaseInstanceId
 
 int MainWindow::acquireInstanceId()
 {
-    QString appDir = QCoreApplication::applicationDirPath();
-    QString idsFilePath = appDir + "/instance_ids.txt";
-    QString lockFilePath = appDir + "/instance_ids.lock";
+    const QString idsFilePath = getInstanceIdsFilePath();
+    const QString lockFilePath = getInstanceIdsLockFilePath();
 
     QLockFile lock(lockFilePath);
     if (!lock.tryLock(5000)) {
@@ -77,145 +97,166 @@ int MainWindow::acquireInstanceId()
         return -1;
     }
 
-    QSet<int> usedIds;
+    QSet<int> usedIds = loadInstanceIdsExcluding(-1, idsFilePath); // -1 means load all
 
-    QFile idFile(idsFilePath);
-    if (idFile.exists() && idFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&idFile);
-        while (!in.atEnd()) {
-            usedIds.insert(in.readLine().toInt());
-        }
-        idFile.close();
-    }
-
+    // Find the first unused positive ID
     int newId = 1;
     while (usedIds.contains(newId)) {
         ++newId;
     }
 
     usedIds.insert(newId);
-    if (idFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        QTextStream out(&idFile);
-        for (int id : std::as_const(usedIds)) {
-            out << id << "\n";
-        }
-        idFile.close();
-    }
+    saveInstanceIds(usedIds, idsFilePath);
 
     lock.unlock();
     return newId;
-} //acquireInstanceId
+}//acquireInstanceId
+
+QString MainWindow::buildAppVersionString() const
+{
+    QString version = VERSION;
+    if (version.contains("alpha", Qt::CaseInsensitive) ||
+        version.contains("bravo", Qt::CaseInsensitive)) {
+        version += " " + tr(__TIME__); // Append compile time
+    }
+    return version;
+}//buildAppVersionString
+
+QString MainWindow::detectCompilerInfo() const
+{
+#ifdef ENV32
+    return QString("Qt %1 MinGW (32-bit)").arg(qVersion());
+#else
+    return QString("Qt %1 MinGW (64-bit)").arg(qVersion());
+#endif
+}//detectCompilerInfo
+
+QString MainWindow::buildAboutText(const QString &version,
+                                   const QString &compileDate,
+                                   const QString &releaseDate,
+                                   const QString &compilerInfo) const
+{
+    QString about;
+    about += tr(APP_LICENSE) + "\n";
+    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    about += QString(" - %1 %2 %3\n").arg(COPYRIGHT, compileDate, COMPANY);
+    about += QString(" - %1\n").arg(RIGHTS);
+    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    about += QString(" - %1%2\n").arg(tr("Version: "), version);
+    about += QString(" - %1%2\n").arg(tr("Release date: "), releaseDate);
+    about += QString(" - %1%2\n").arg(tr("Compiler: "), compilerInfo);
+    about += QString(" - %1%2\n").arg(tr("Running on: "), SYSTEMINFO);
+    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    about += QString("%1\n").arg(WARRANTY);
+    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    about += tr("This product uses Qt Libraries:\n");
+    about += QString(" - %1\n").arg(qt_COPYRIGHT);
+    about += QString(" - %1%2\n").arg(tr("QT Library License: "), qt_LICENSE);
+    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    return about;
+}//buildAboutText
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QString compilerInfo;
-#ifdef ENV32
-    compilerInfo = QString("Qt %1 MinGW (32-bit)").arg(qVersion());
-#else
-    compilerInfo = QString("Qt %1 MinGW (64-bit)").arg(qVersion());
-#endif
-
-    QString version = VERSION;
-    if (version.contains("alpha", Qt::CaseInsensitive) || version.contains("bravo", Qt::CaseInsensitive)) {
-        version += " " + tr(__TIME__); // Append compile time if in alpha/bravo
-    }
-
+    const QString version = buildAppVersionString();
     const QString compileDate = QDate::fromString(tr(__DATE__), "MMM dd yyyy").toString("yyyy");
     const QString releaseDate = tr(__DATE__);
+    const QString compilerInfo = detectCompilerInfo();
 
-    QString aboutText = tr(APP_LICENSE) + "\n";
-    aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    aboutText += QString(" - %1 %2 %3\n").arg(COPYRIGHT, compileDate, COMPANY);
-    aboutText += QString(" - %1\n").arg(RIGHTS);
-    aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    aboutText += QString(" - %1%2\n").arg(tr("Version: "), version);
-    aboutText += QString(" - %1%2\n").arg(tr("Release date: "), releaseDate);
-    aboutText += QString(" - %1%2\n").arg(tr("Compiler: "), compilerInfo);
-    aboutText += QString(" - %1%2\n").arg(tr("Running on: "), SYSTEMINFO);
-    aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    aboutText += QString("%1\n").arg(WARRANTY);
-    aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    aboutText += tr("This product uses Qt Libraries:\n");
-    aboutText += QString(" - %1\n").arg(qt_COPYRIGHT);
-    aboutText += QString(" - %1%2\n").arg(tr("QT Library License: "), qt_LICENSE);
-    aboutText += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    const QString aboutText = buildAboutText(version, compileDate, releaseDate, compilerInfo);
 
     QMessageBox aboutBox(this);
     aboutBox.setWindowTitle(APP_NAME);
     aboutBox.setText(aboutText);
     aboutBox.exec();
-} //on_actionAbout_triggered
+}//on_actionAbout_triggered
 
 void MainWindow::on_actionAbout_Qt_triggered()
 {
     qApp->aboutQt();
 } //on_actionAbout_Qt_triggered
 
-void MainWindow::openResourceFile(const QString fileName)
+bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &targetPath)
+{
+    QFile resourceFile(resourcePath);
+    QFile targetFile(targetPath);
+
+    if (targetFile.exists()) {
+        if (!targetFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther)) {
+            qWarning().nospace() << "[copyResourceToFile] Cannot change permissions on: " << targetPath
+                                 << " | Reason: " << targetFile.errorString();
+        }
+
+        if (!targetFile.remove()) {
+            qCritical().nospace() << "[copyResourceToFile] Failed to remove: " << targetPath
+                                  << " | Reason: " << targetFile.errorString();
+            return false;
+        }
+
+        qDebug().nospace() << "[copyResourceToFile] Existing file removed: " << targetPath;
+    } else {
+        qDebug().nospace() << "[copyResourceToFile] No existing file to replace: " << targetPath;
+    }
+
+    if (!resourceFile.copy(targetPath)) {
+        qCritical().nospace() << "[copyResourceToFile] Copy failed: " << resourcePath
+                              << " → " << targetPath
+                              << " | Reason: " << resourceFile.errorString();
+        return false;
+    }
+
+    qDebug().nospace() << "[copyResourceToFile] Resource copied successfully to: " << targetPath;
+    return true;
+}//copyResourceToFile
+
+void MainWindow::openResourceFile(const QString &fileName)
 {
     const QString resourcePath = ":/resources" + fileName;
     const QString targetPath = qApp->applicationDirPath() + fileName;
 
-    QFile resourceFile(resourcePath);
-    QFile existingFile(targetPath);
-
-    if (existingFile.exists()) {
-        if (!existingFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther)) {
-            qDebug() << "Failed to change permissions on existing file:" << existingFile.errorString();
-        }
-
-        if (existingFile.remove()) {
-            qDebug() << "Removed old file.";
-        } else {
-            qDebug() << "ERROR - Cannot remove file:" << existingFile.errorString();
-        }
-    } else {
-        qDebug() << "No existing file found.";
-    }
-
-    if (!resourceFile.copy(targetPath)) {
-        qDebug() << "Error copying file to:" << targetPath;
-        qDebug() << "Reason:" << resourceFile.errorString();
+    if (!copyResourceToFile(resourcePath, targetPath)) {
+        qWarning() << "Failed to open resource file:" << targetPath;
+        return;
     }
 
     QDesktopServices::openUrl(QUrl::fromLocalFile(targetPath));
-} //openResourceFile
+}//openResourceFile
 
 void MainWindow::on_actionQt_License_triggered()
 {
-    const QString fileName = "/LGPLv3.pdf";
-    openResourceFile(fileName);
+    openResourceFile("/LGPLv3.pdf");
 } //on_actionQt_License_triggered
 
 void MainWindow::on_actionUser_Manual_triggered()
 {
-    const QString fileName = "/UserManual.pdf";
-    openResourceFile(fileName);
+    openResourceFile("/UserManual.pdf");
 } //on_actionUser_Manual_triggered
+
+bool MainWindow::isValidIPv4Address(const QString &ip) const
+{
+    return !ip.contains(":") && !ip.startsWith("169.254");
+}//isValidIPv4Address
 
 void MainWindow::fillNetworkWidgets()
 {
+    ui->comboBoxLocalUDPNetwork->clear();
     ui->comboBoxLocalUDPNetwork->addItem("ANY");
 
-    const QList<QHostAddress> ipAddresses = QNetworkInterface::allAddresses();
+    const QList<QHostAddress> addresses = QNetworkInterface::allAddresses();
 
-    for (const QHostAddress &address : ipAddresses) {
+    for (const QHostAddress &address : addresses) {
         const QString ip = address.toString();
 
-        // Skip IPv6
-        if (ip.contains(":"))
-            continue;
-
-        // Skip link-local addresses (169.254.x.x)
-        if (ip.startsWith("169.254"))
-            continue;
-
-        ui->comboBoxLocalUDPNetwork->addItem(ip);
+        if (isValidIPv4Address(ip)) {
+            ui->comboBoxLocalUDPNetwork->addItem(ip);
+        }
     }
-} //fillNetworkWidgets
+}//fillNetworkWidgets
 
 void MainWindow::updateUIWidgets()
 {
+    // Network Settings
     ui->lineEditUserName->setText(configSettings.userName);
     ui->checkBoxLoopback->setChecked(configSettings.b_loopback);
     ui->checkBoxMulticast->setChecked(configSettings.b_multicast);
@@ -225,70 +266,95 @@ void MainWindow::updateUIWidgets()
     ui->lineEditRemoteUDPNetwork->setText(configSettings.remoteUDPAddress);
     ui->lineEditRemoteUDPPort->setText(QString::number(configSettings.remoteUDPPort));
 
+    // Visual Options
     ui->checkBoxDisplayBackgroundImage->setChecked(configSettings.b_displayBackgroundImage);
 
+    // Style Sheet Settings
     ui->checkBoxLoadStyleSheet->setChecked(configSettings.b_loadStyleSheet);
     ui->comboBoxSelectStyleSheet->setCurrentText(configSettings.stylesheetName);
-} //updateUIWidgets
+}//updateUIWidgets
 
 void MainWindow::setStyleSheet()
 {
-    if (!configSettings.b_loadStyleSheet)
+    if (!configSettings.b_loadStyleSheet) {
+        qDebug() << "[setStyleSheet] Skipping stylesheet load: setting disabled.";
         return;
+    }
 
-    const QString styleKey = QStyleSheetMap.key(configSettings.stylesheetName);
+    const QString displayName = QStyleSheetMap.key(configSettings.stylesheetName);
 
-    if (!styleKey.isEmpty()) {
-        ui->comboBoxSelectStyleSheet->setCurrentText(styleKey);
+    if (!displayName.isEmpty()) {
+        ui->comboBoxSelectStyleSheet->setCurrentText(displayName);
         loadStyleSheet();
     } else {
-        qWarning() << "Style sheet not found in map for filename:" << configSettings.stylesheetName;
+        qWarning() << "[setStyleSheet] Style sheet not found in map for file:" << configSettings.stylesheetName;
     }
-} //setStyleSheet
+}//setStyleSheet
+
+QString MainWindow::chatBackgroundStyle() const
+{
+    return QStringLiteral(
+        "QTextEdit#textEditChat { "
+        "border-image: url(:/images/BackgroundImage10.png); "
+        "}"
+        );
+}//chatBackgroundStyle
 
 void MainWindow::setBackgroundImage()
 {
     if (configSettings.b_displayBackgroundImage) {
-        const QString style = QStringLiteral("QTextEdit#textEditChat { "
-                                             "border-image: url(:/images/BackgroundImage10.png); "
-                                             "}");
-        ui->textEditChat->setStyleSheet(style);
+        ui->textEditChat->setStyleSheet(chatBackgroundStyle());
     } else {
-        ui->textEditChat->setStyleSheet(QString());
+        ui->textEditChat->setStyleSheet(QString()); // reset to default
     }
-} //setBackgroundImage
+}//setBackgroundImage
+
+void MainWindow::displayMessages(const QList<Message> &messages)
+{
+    ui->textEditChat->clear();
+    for (const Message &msg : messages) {
+        m_formatter->appendMessage(
+            ui->textEditChat,
+            msg.user,
+            msg.text,
+            msg.timestamp,
+            configSettings.b_isDarkThemed,
+            msg.isSentByMe
+            );
+    }
+}//displayMessages
+
+int MainWindow::calculateClampedOffset(int requestedOffset, int totalMessages) const
+{
+    int maxOffset = qMax(0, totalMessages - messagesPerPage);
+    return qBound(0, requestedOffset, maxOffset);
+}//calculateClampedOffset
 
 void MainWindow::loadPage(int offset)
 {
-    if (isLoadingHistory)
-        return; // prevent reentrancy
+    if (isLoadingHistory || offset == currentOffset)
+        return;
 
     isLoadingHistory = true;
 
-    int total = messageStore->messageCount();
+    const int total = messageStore->messageCount();
     if (total == 0) {
         isLoadingHistory = false;
         return;
     }
 
-    int maxOffset = qMax(0, total - messagesPerPage);
-    offset = qBound(0, offset, maxOffset);
-
-    if (offset == currentOffset) {
+    const int clampedOffset = calculateClampedOffset(offset, total);
+    if (clampedOffset == currentOffset) {
         isLoadingHistory = false;
         return;
     }
 
-    const QList<Message> messages = messageStore->fetchMessages(offset, messagesPerPage);
+    const QList<Message> messages = messageStore->fetchMessages(clampedOffset, messagesPerPage);
+    displayMessages(messages);
 
-    ui->textEditChat->clear();
-    for (const Message &msg : messages) {
-        m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
-    }
-
-    currentOffset = offset;
+    currentOffset = clampedOffset;
     isLoadingHistory = false;
-} //loadPage
+}//loadPage
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
@@ -298,7 +364,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         handleChatScroll(ui->textEditChat->verticalScrollBar(), delta < 0); // true if scrolling down
     }
     return QMainWindow::eventFilter(obj, event);
-}
+}//eventFilter
 
 void MainWindow::handleChatScroll(QScrollBar *scrollBar, bool scrollingDown)
 {
@@ -336,70 +402,76 @@ void MainWindow::handleChatScroll(QScrollBar *scrollBar, bool scrollingDown)
             });
         }
     }
-} //
+} //handleChatScroll
 
 void MainWindow::onChatScrollBarChanged(int value)
 {
-    static int lastScrollValue = -1;
-    if (lastScrollValue < 0) {
-        lastScrollValue = value;
+    if (lastScrollBarValue < 0) {
+        lastScrollBarValue = value;
         return;
     }
 
-    bool scrollingDown = value > lastScrollValue;
-    lastScrollValue = value;
+    const bool scrollingDown = (value > lastScrollBarValue);
+    lastScrollBarValue = value;
 
     handleChatScroll(ui->textEditChat->verticalScrollBar(), scrollingDown);
-} //
+}//onChatScrollBarChanged
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+void MainWindow::initializeManagers()
 {
-    ui->setupUi(this);
-
-    instanceID = acquireInstanceId();
     settingsManager = new SettingsManager(instanceID, QCoreApplication::applicationDirPath(), this);
+    udpManager = new UdpChatSocketManager(this);
+    m_formatter = new ChatFormatter(this);
+}//initializeManagers
+
+void MainWindow::initializeUi()
+{
+    ui->tabWidget->setCurrentIndex(1);
+    ui->tabWidget->setTabEnabled(0, false); // Disable Chat tab
+    ui->statusbar->addWidget(ui->labelStatus);
+    ui->textEditChat->verticalScrollBar()->installEventFilter(this);
+}//initializeUi
+
+void MainWindow::connectSignals()
+{
+    connect(ui->textEditChat->verticalScrollBar(), &QScrollBar::valueChanged,
+            this, &MainWindow::onChatScrollBarChanged);
+
+    connect(udpManager, &UdpChatSocketManager::messageReceived,
+            this, [this](const QString &user, const QString &msg) {
+                const QDateTime timestamp = QDateTime::currentDateTimeUtc();
+                messageStore->insertMessage(user, msg, timestamp, false);
+                m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, configSettings.b_isDarkThemed, false);
+                ui->textEditChat->moveCursor(QTextCursor::End);
+
+                if (isMinimized() || !isVisible() || !isActiveWindow()) {
+                    QApplication::alert(this, 3000);
+                    new ToastNotification(QString("%1: %2").arg(user, msg), this);
+                }
+            });
+}//connectSignals
+
+void MainWindow::loadInitialState()
+{
     settingsManager->load(configSettings);
     restoreGeometry(settingsManager->loadGeometry());
-
-    udpManager = new UdpChatSocketManager(this);
-
-    connect(ui->textEditChat->verticalScrollBar(), &QScrollBar::valueChanged, this, &MainWindow::onChatScrollBarChanged);
-
-    connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
-        messageStore->insertMessage(user, msg, QDateTime::currentDateTimeUtc(), false);
-        m_formatter->appendMessage(ui->textEditChat, user, msg, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, false);
-        ui->textEditChat->moveCursor(QTextCursor::End);
-
-        if (isMinimized() || !isVisible() || !isActiveWindow()) {
-            QApplication::alert(this, 3000);                               // flash for 3 seconds
-            new ToastNotification(QString("%1: %2").arg(user, msg), this); // auto-deletes on close
-        }
-    });
-
-    m_formatter = new ChatFormatter(this);
-
-    isApplicationStarting = true;
 
     loadQStyleSheetFolder();
     setStyleSheet();
     setBackgroundImage();
     setAppWindowTitle();
-
     fillNetworkWidgets();
-
     updateUIWidgets();
+}//loadInitialState
 
-    ui->tabWidget->setCurrentIndex(1);
-    ui->tabWidget->setTabEnabled(0, false); // Disable Chat tab
-    ui->textEditChat->verticalScrollBar()->installEventFilter(this);
-    ui->statusbar->addWidget(ui->labelStatus);
-
-    QString dbPath = QCoreApplication::applicationDirPath() + "/chat_messages.db";
+void MainWindow::initializeDatabase()
+{
+    const QString dbPath = QCoreApplication::applicationDirPath() + "/chat_messages.db";
     messageStore = new MessageStore(dbPath, this);
+
     if (!messageStore->open()) {
         qCritical() << "Unable to load message database.";
+        return;
     }
 
     const QList<Message> messages = messageStore->fetchLastMessages(20);
@@ -410,27 +482,54 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     currentOffset = messageStore->messageCount() - messages.size();
+}//initializeDatabase
+
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+
+    isApplicationStarting = true;
+
+    instanceID = acquireInstanceId();
+    initializeManagers();
+    initializeUi();
+    connectSignals();
+    loadInitialState();
+    initializeDatabase();
 
     isApplicationStarting = false;
-} //MainWindow
+}//MainWindow
 
 MainWindow::~MainWindow()
 {
-#ifdef DEBUG_MODE
-    qDebug() << Q_FUNC_INFO << "- Shutting down and saving settings.";
-#endif
-
-    settingsManager->save(configSettings);
-    settingsManager->saveGeometry(saveGeometry());
+    if (settingsManager) {
+        settingsManager->save(configSettings);
+        settingsManager->saveGeometry(saveGeometry());
+    }
 
     releaseInstanceId(instanceID);
 
-    delete m_formatter;
-    delete settingsManager;
-    delete messageStore;
     delete ui;
     ui = nullptr;
-} //MainWindow
+}//~MainWindow
+
+QByteArray MainWindow::buildRawUdpPayload(const QString &user, const QString &msg) const
+{
+    return QString("%1 - %2").arg(user, msg).toLocal8Bit();
+}//buildRawUdpPayload
+
+bool MainWindow::sendUdpMessage(const QByteArray &data, const QHostAddress &address, quint16 port)
+{
+    return udpManager->sendMessage(data, address, port) == data.size();
+}//sendUdpMessage
+
+void MainWindow::storeAndDisplaySentMessage(const QString &user, const QString &msg, const QDateTime &timestamp)
+{
+    messageStore->insertMessage(user, msg, timestamp, true);
+    m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, configSettings.b_isDarkThemed, true);
+}//storeAndDisplaySentMessage
 
 void MainWindow::on_pushButtonSend_clicked()
 {
@@ -438,15 +537,12 @@ void MainWindow::on_pushButtonSend_clicked()
         return;
 
     const QString messageText = ui->lineEditChatText->text().trimmed();
-    if (messageText.isEmpty())
+    const QString userName = ui->lineEditUserName->text().trimmed();
+
+    if (messageText.isEmpty() || userName.isEmpty())
         return;
 
-    const QString userName = ui->lineEditUserName->text().trimmed();
-    const QString timestamp = QDateTime::currentDateTimeUtc().toString("hh:mm");
-
-    QByteArray rawData = QString("%1 - %2").arg(userName, messageText).toLocal8Bit();
-
-    QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
+    const QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
     bool portOk = false;
     const quint16 port = ui->lineEditRemoteUDPPort->text().toUShort(&portOk);
 
@@ -455,21 +551,48 @@ void MainWindow::on_pushButtonSend_clicked()
         return;
     }
 
-    const qint64 returnSize = udpManager->sendMessage(rawData, groupAddress, port);
+    const QDateTime timestamp = QDateTime::currentDateTimeUtc();
+    const QByteArray rawData = buildRawUdpPayload(userName, messageText);
 
-    if (returnSize == rawData.size()) {
-        messageStore->insertMessage(userName, messageText, QDateTime::currentDateTimeUtc(), true);
-        m_formatter->appendMessage(ui->textEditChat, userName, messageText, QDateTime::currentDateTimeUtc(), configSettings.b_isDarkThemed, true);
+    if (sendUdpMessage(rawData, groupAddress, port)) {
+        storeAndDisplaySentMessage(userName, messageText, timestamp);
     } else {
-        const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
+        const QString error = tr("%1 - ERROR writing to UDP socket: %2")
+        .arg(Q_FUNC_INFO, udpManager->lastError());
         ui->labelStatus->setText(error);
     }
-} //on_pushButtonSend_clicked
+}//on_pushButtonSend_clicked
+
+QHostAddress MainWindow::parseLocalAddress() const
+{
+    const QString text = ui->comboBoxLocalUDPNetwork->currentText().trimmed();
+    return (text == "ANY") ? QHostAddress(QHostAddress::AnyIPv4) : QHostAddress(text);
+}//parseLocalAddress
+
+bool MainWindow::bindUdpSockets(const QHostAddress &local, const QHostAddress &remote, quint16 port)
+{
+    bool recvBound = udpManager->bindReceiveSocket(local, remote, port);
+    bool sendBound = udpManager->bindSendSocket(local);
+    return recvBound && sendBound;
+}//bindUdpSockets
+
+void MainWindow::updateUiOnConnectSuccess()
+{
+    ui->labelStatus->setText(tr("Connection established."));
+    ui->pushButtonConnect->setEnabled(false);
+    ui->pushButtonDisconnect->setEnabled(true);
+    ui->frameUDPParameters->setEnabled(false);
+    ui->tabWidget->setTabEnabled(0, true);
+    ui->tabWidget->setCurrentIndex(0);
+}//updateUiOnConnectSuccess
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
     if (!udpManager)
         return;
+
+    const QHostAddress localAddress = parseLocalAddress();
+    const QHostAddress groupAddress = QHostAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
 
     bool portOk = false;
     const quint16 port = ui->lineEditLocalUDPPort->text().toUShort(&portOk);
@@ -478,47 +601,36 @@ void MainWindow::on_pushButtonConnect_clicked()
         return;
     }
 
-    const QString localAddressText = ui->comboBoxLocalUDPNetwork->currentText();
-    QHostAddress localAddress = (localAddressText == "ANY") ? QHostAddress(QHostAddress::AnyIPv4) : QHostAddress(localAddressText);
-
-    const QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
-
-    bool recvBound = udpManager->bindReceiveSocket(localAddress, groupAddress, port);
-    bool sendBound = udpManager->bindSendSocket(localAddress);
-
-    if (recvBound && sendBound) {
-        ui->labelStatus->setText(tr("Connection established."));
-        ui->pushButtonConnect->setEnabled(false);
-        ui->pushButtonDisconnect->setEnabled(true);
-        ui->frameUDPParameters->setEnabled(false);
-        ui->tabWidget->setCurrentIndex(0);
-        ui->tabWidget->setTabEnabled(0, true);
+    if (bindUdpSockets(localAddress, groupAddress, port)) {
+        updateUiOnConnectSuccess();
     } else {
         ui->labelStatus->setText(tr("Failed to bind one or both sockets."));
     }
-} //on_pushButtonConnect_clicked
+}//on_pushButtonConnect_clicked
 
 void MainWindow::on_lineEditChatText_returnPressed()
 {
-    if (!ui->pushButtonSend->isEnabled())
-        return;
-    on_pushButtonSend_clicked();
-} //on_lineEditChatText_returnPressed
+    if (ui->pushButtonSend->isEnabled()) {
+        on_pushButtonSend_clicked();
+    }
+}//on_lineEditChatText_returnPressed
 
-void MainWindow::on_pushButtonDisconnect_clicked()
+void MainWindow::resetUiAfterDisconnect()
 {
-    const QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
-
-    if (udpManager)
-        udpManager->closeSockets();
-
     ui->pushButtonConnect->setEnabled(true);
     ui->pushButtonDisconnect->setEnabled(false);
     ui->frameUDPParameters->setEnabled(true);
-    ui->tabWidget->setTabEnabled(0, false); // Disable Chat tab
+    ui->tabWidget->setTabEnabled(0, false);
+}//resetUiAfterDisconnect
 
+void MainWindow::on_pushButtonDisconnect_clicked()
+{
+    if (udpManager)
+        udpManager->closeSockets();
+
+    resetUiAfterDisconnect();
     ui->labelStatus->setText(tr("Disconnected from network."));
-} //on_pushButtonDisconnect_clicked
+}//on_pushButtonDisconnect_clicked
 
 void MainWindow::on_checkBoxMulticast_clicked(bool checked)
 {
@@ -583,16 +695,33 @@ void MainWindow::on_spinBoxTTL_valueChanged(int arg1)
 
 } //on_spinBoxTTL_valueChanged
 
-void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &arg1)
+void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &styleName)
 {
-    if (isApplicationStarting) {
+    if (isApplicationStarting)
         return;
-    }
 
-    settingsManager->update(configSettings.stylesheetName, QStyleSheetMap.value(arg1));
+    const QString styleFile = QStyleSheetMap.value(styleName);
+    settingsManager->update(configSettings.stylesheetName, styleFile);
+
     loadStyleSheet();
     settingsManager->save(configSettings);
-} //on_comboBoxSelectStyleSheet_currentTextChanged
+}//on_comboBoxSelectStyleSheet_currentTextChanged
+
+void MainWindow::populateStyleSheetMap(const QString &folderPath)
+{
+    QDirIterator it(folderPath, QStringList() << "*.qss", QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        QFileInfo fileInfo(it.next());
+        QStyleSheetMap.insert(fileInfo.baseName(), fileInfo.absoluteFilePath());
+    }
+}//populateStyleSheetMap
+
+void MainWindow::populateStyleSheetComboBox()
+{
+    ui->comboBoxSelectStyleSheet->clear();
+    ui->comboBoxSelectStyleSheet->addItem(""); // for 'none' or default
+    ui->comboBoxSelectStyleSheet->addItems(QStyleSheetMap.keys());
+}//populateStyleSheetComboBox
 
 void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
 {
@@ -606,82 +735,84 @@ void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
 
 void MainWindow::loadQStyleSheetFolder()
 {
-    QString QStyleSheetFolder = QApplication::applicationDirPath() + "/../QStyleSheets";
-    QDirIterator fileIterator(QStyleSheetFolder, QStringList() << "*.qss", QDir::Files, QDirIterator::Subdirectories);
+    const QString styleFolder = QApplication::applicationDirPath() + "/../QStyleSheets";
+    QStyleSheetMap.clear();  // clear existing entries
 
-    while (fileIterator.hasNext()) {
-        QFile styleSheetFile(fileIterator.next());
-        QFileInfo fileInfo(styleSheetFile);
-        QStyleSheetMap.insert(fileInfo.baseName(), styleSheetFile.fileName());
+    populateStyleSheetMap(styleFolder);
+    populateStyleSheetComboBox();
+}//loadQStyleSheetFolder
+
+QString MainWindow::readStyleSheetFile(const QString &path)
+{
+    QFile file(path);
+    if (!file.exists() || !file.open(QFile::ReadOnly)) {
+        qWarning() << "[readStyleSheetFile] Cannot read file:" << path;
+        return {};
     }
 
-    ui->comboBoxSelectStyleSheet->clear();
-    ui->comboBoxSelectStyleSheet->addItem("");
-    ui->comboBoxSelectStyleSheet->addItems(QStyleSheetMap.keys());
-} //loadQStyleSheetFolder
+    const QString content = QLatin1String(file.readAll());
+    file.close();
+    configSettings.stylesheetName = path;
+    return content;
+}//readStyleSheetFile
+
+bool MainWindow::extractThemeFromStyleSheet(const QString &styleSheet) const
+{
+    QRegularExpression themeRegex(R"(/\*\s*theme:\s*(dark|light)\s*\*/)", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match = themeRegex.match(styleSheet);
+
+    if (match.hasMatch()) {
+        const QString theme = match.captured(1).toLower();
+        return theme == "dark";
+    }
+
+    return false; // Default to light
+}//extractThemeFromStyleSheet
 
 void MainWindow::loadStyleSheet()
 {
-    QFile styleSheetFile;
-    styleSheetFile.setFileName(configSettings.stylesheetName);
+    const QString path = configSettings.stylesheetName;
+    QString styleSheetContent = readStyleSheetFile(path);
 
-    if (!styleSheetFile.exists()) {
+    if (styleSheetContent.isEmpty()) {
         qApp->setStyleSheet("");
         ui->checkBoxLoadStyleSheet->setChecked(false);
         return;
     }
 
-    styleSheetFile.open(QFile::ReadOnly);
-    QString styleSheetString = QLatin1String(styleSheetFile.readAll());
-    styleSheetFile.close();
-    configSettings.stylesheetName = styleSheetFile.fileName();
-
-    // Detect theme from comment in stylesheet
-    QRegularExpression themeRegex(R"(/\*\s*theme:\s*(dark|light)\s*\*/)", QRegularExpression::CaseInsensitiveOption);
-    QRegularExpressionMatch match = themeRegex.match(styleSheetString);
-    if (match.hasMatch()) {
-        QString theme = match.captured(1).toLower();
-        configSettings.b_isDarkThemed = (theme == "dark");
-    } else {
-        configSettings.b_isDarkThemed = false; // Default to light if not specified
-    }
-
-    QTimer::singleShot(0, [=] { qApp->setStyleSheet(styleSheetString); });
-} //
+    configSettings.b_isDarkThemed = extractThemeFromStyleSheet(styleSheetContent);
+    QTimer::singleShot(0, [styleSheetContent]() {
+        qApp->setStyleSheet(styleSheetContent);
+    });
+}//loadStyleSheet
 
 void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
-{
-    if (isApplicationStarting) {
-        return;
-    }
-
-    SettingsManager::update(configSettings.b_displayBackgroundImage, checked);
-    settingsManager->save(configSettings);
-
-    if (checked) {
-        const QString style = QStringLiteral("QTextEdit#textEditChat { "
-                                             "border-image: url(:/images/BackgroundImage10.png); "
-                                             "}");
-        ui->textEditChat->setStyleSheet(style);
-    } else {
-        const QString style = QStringLiteral("QTextEdit#textEditChat { "
-                                             "border-image: none; "
-                                             "}");
-        ui->textEditChat->setStyleSheet(style);
-    }
-} //on_checkBoxDisplayBackgroundImage_clicked
-
-void MainWindow::on_lineEditUserName_textChanged(const QString &arg1)
 {
     if (isApplicationStarting)
         return;
 
-    configSettings.userName = arg1;
+    SettingsManager::update(configSettings.b_displayBackgroundImage, checked);
+    settingsManager->save(configSettings);
+
+    setBackgroundImage();
+}//on_checkBoxDisplayBackgroundImage_clicked
+
+void MainWindow::on_lineEditUserName_textChanged(const QString &newUserName)
+{
+    if (isApplicationStarting)
+        return;
+
+    configSettings.userName = newUserName;
     setAppWindowTitle();
 } //on_lineEditUserName_textChanged
 
-void MainWindow::on_pushButtonTestMsg_clicked()
+QString MainWindow::generateNextTestMessage()
 {
     static uint msgNumber = 1;
-    ui->lineEditChatText->setText(QString("Test %1").arg(msgNumber++));
-} //on_pushButtonTestMsg_clicked
+    return QString("Test %1").arg(msgNumber++);
+}//generateNextTestMessage
+
+void MainWindow::on_pushButtonTestMsg_clicked()
+{
+    ui->lineEditChatText->setText(generateNextTestMessage());
+}//on_pushButtonTestMsg_clicked
