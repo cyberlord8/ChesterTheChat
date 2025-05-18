@@ -556,6 +556,7 @@ void MainWindow::on_pushButtonSend_clicked()
 
     if (sendUdpMessage(rawData, groupAddress, port)) {
         storeAndDisplaySentMessage(userName, messageText, timestamp);
+        ui->lineEditChatText->clear();
     } else {
         const QString error = tr("%1 - ERROR writing to UDP socket: %2")
         .arg(Q_FUNC_INFO, udpManager->lastError());
