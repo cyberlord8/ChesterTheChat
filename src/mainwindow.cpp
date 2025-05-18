@@ -816,3 +816,18 @@ void MainWindow::on_pushButtonTestMsg_clicked()
 {
     ui->lineEditChatText->setText(generateNextTestMessage());
 }//on_pushButtonTestMsg_clicked
+
+void MainWindow::on_pushButtonDeleteDatabase_clicked()
+{
+    if (QMessageBox::question(this, "Confirm Clear",
+                              "Are you sure you want to delete all chat messages?",
+                              QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+        if (messageStore->clearMessages()) {
+            ui->textEditChat->clear();
+            currentOffset = 0;
+            ui->labelStatus->setText("Chat history cleared.");
+        } else {
+            QMessageBox::warning(this, "Error", "Failed to clear chat history.");
+        }
+    }
+}//on_pushButtonDeleteDatabase_clicked

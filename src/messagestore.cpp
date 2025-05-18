@@ -152,3 +152,14 @@ int MessageStore::messageCount() const
     QSqlQuery query("SELECT COUNT(*) FROM messages");
     return query.next() ? query.value(0).toInt() : 0;
 }//messageCount
+
+bool MessageStore::clearMessages()
+{
+    QSqlQuery query("DELETE FROM messages");
+    if (!query.exec()) {
+        qWarning() << "[MessageStore] Failed to clear messages:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}//clearMessages

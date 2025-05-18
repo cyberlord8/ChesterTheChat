@@ -18,6 +18,8 @@ public:
     QList<Message> fetchMessages(int offset, int limit);
     int messageCount() const;
 
+    bool clearMessages();
+
 private:
     bool initializeSchema();
     QSqlDatabase db;

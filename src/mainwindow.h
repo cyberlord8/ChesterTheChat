@@ -238,6 +238,7 @@ private slots:
 
     void on_pushButtonTestMsg_clicked();
     void onChatScrollBarChanged(int value);
+    void on_pushButtonDeleteDatabase_clicked();
 };
 
 #endif // MAINWINDOW_H
