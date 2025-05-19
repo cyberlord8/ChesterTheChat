@@ -236,9 +236,31 @@ private slots:
     */
     void on_lineEditUserName_textChanged(const QString &arg1);
 
+    /**
+ * @brief Slot triggered when the "Test Message" button is clicked.
+ *
+ * Inserts a test message into the chat input for simulation or debugging purposes.
+ */
     void on_pushButtonTestMsg_clicked();
+
+    /**
+ * @brief Slot triggered when the chat scrollbar value changes.
+ *
+ * Detects the scroll direction and handles paging logic by calling
+ * handleChatScroll(). This is used for loading earlier or later messages as the user scrolls.
+ *
+ * @param value The new scrollbar value.
+ */
     void onChatScrollBarChanged(int value);
+
+    /**
+ * @brief Slot triggered when the "Delete Database" button is clicked.
+ *
+ * Asks the user for confirmation and clears all chat messages from the database.
+ * If successful, it clears the UI and resets internal paging state.
+ */
     void on_pushButtonDeleteDatabase_clicked();
+
 };
 
 #endif // MAINWINDOW_H

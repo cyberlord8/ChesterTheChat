@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabChat">
        <attribute name="title">
@@ -89,10 +89,10 @@
             <item>
              <widget class="QPushButton" name="pushButtonClear">
               <property name="toolTip">
-               <string>Clears the messages</string>
+               <string>Clears the window (does not delete messages from database)</string>
               </property>
               <property name="text">
-               <string>Clear</string>
+               <string>Clr Screen</string>
               </property>
              </widget>
             </item>
@@ -111,6 +111,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonTestMsg">
+            <property name="toolTip">
+             <string>Prints an incrementing test message</string>
+            </property>
             <property name="text">
              <string>Test</string>
             </property>
@@ -493,6 +496,9 @@
                <property name="enabled">
                 <bool>false</bool>
                </property>
+               <property name="toolTip">
+                <string>DIsconnects the read and write sockets</string>
+               </property>
                <property name="text">
                 <string>Disconnect</string>
                </property>
@@ -500,6 +506,9 @@
              </item>
              <item>
               <widget class="QPushButton" name="pushButtonConnect">
+               <property name="toolTip">
+                <string>Connects the read and write sockets</string>
+               </property>
                <property name="text">
                 <string>Connect</string>
                </property>
@@ -622,6 +631,9 @@
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
               <widget class="QPushButton" name="pushButtonDeleteDatabase">
+               <property name="toolTip">
+                <string>Permanently deletes ALL messages from database</string>
+               </property>
                <property name="text">
                 <string>!DELETE!</string>
                </property>
