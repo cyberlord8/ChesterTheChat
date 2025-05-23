@@ -7,35 +7,11 @@ ChatFormatter::ChatFormatter(QObject *parent)
     : QObject(parent)
 {}
 
-// void ChatFormatter::insertBlock(QTextCursor &cursor, bool isSent)
-// {
-//     QTextBlockFormat blockFmt;
-//     blockFmt.setAlignment(isSent ? Qt::AlignRight : Qt::AlignLeft);
-//     cursor.insertBlock(blockFmt);
-// }//insertBlock
-
 void ChatFormatter::insertBlock(QTextCursor &cursor, bool isSent)
 {
     QTextBlockFormat blockFmt;
     blockFmt.setAlignment(isSent ? Qt::AlignRight : Qt::AlignLeft);
 
-    // if (isSent) {
-    //     blockFmt.setLeftMargin(200); // Push from left edge (tune as needed)
-    //     blockFmt.setRightMargin(10); // Optional padding on right
-    // } else {
-    //     blockFmt.setRightMargin(200); // For received messages if desired
-    // }
-
-    // QWidget *editorWidget = cursor.block().document()->documentLayout()->paintDevice();
-    // int editorWidth = editorWidget ? editorWidget->width() : 600; // fallback
-
-    // int margin = static_cast<int>(editorWidth * 0.15); // 15% margin
-    // if (isSent) {
-    //     blockFmt.setLeftMargin(margin);
-    //     blockFmt.setRightMargin(10);
-    // } else {
-    //     blockFmt.setRightMargin(margin);
-    // }
     QTextEdit *edit = qobject_cast<QTextEdit *>(cursor.document()->parent());
     int editorWidth = edit ? edit->viewport()->width() : 600;
 
