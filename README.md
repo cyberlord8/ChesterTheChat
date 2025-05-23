@@ -3,14 +3,17 @@
 **Chester The Chat** is a lightweight IP/UDP-based local network chat application built with the Qt Framework (C++). It's designed to support multiple instances on the same machine, each with isolated configuration, making it ideal for local testing or LAN-based messaging scenarios.
 
 **Alice Stylesheet**
+
 ![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Alice.png)
 
 
 **Caterpiller Stylesheet**
+
 ![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Caterpillar.png)
 
 
 **Jabberwocky Stylesheet**
+
 ![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Jabberwocky.png)
 
 
