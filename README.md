@@ -17,7 +17,7 @@
 - 🛠️ Built with Qt (C++), cross-platform compatible.
 
 ## 📘 User Manual
-[UserManual.pdf]([https://github.com/user-attachments/files/19722192/UserManual.pdf](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/UserManual.pdf))
+[UserManual.pdf](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/UserManual.pdf)
 
 ---
 
