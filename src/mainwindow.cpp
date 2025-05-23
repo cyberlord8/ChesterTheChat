@@ -302,6 +302,9 @@ void MainWindow::setBackgroundImage()
 
 void MainWindow::displayMessages(const QList<Message> &messages)
 {
+    visibleOffset = currentOffset;
+    visibleLimit = messages.count();
+
     ui->textEditChat->clear();
     for (const Message &msg : messages) {
         m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
@@ -695,6 +698,9 @@ void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &s
     settingsManager->update(configSettings.stylesheetName, styleFile);
 
     loadStyleSheet();
+
+    redrawCurrentMessages();  // refresh visible messages with new theme context
+
     settingsManager->save(configSettings);
 } //on_comboBoxSelectStyleSheet_currentTextChanged
 
@@ -760,6 +766,17 @@ bool MainWindow::extractThemeFromStyleSheet(const QString &styleSheet) const
     return false; // Default to light
 } //extractThemeFromStyleSheet
 
+void MainWindow::redrawCurrentMessages()
+{
+    const QList<Message> messages = messageStore->fetchMessages(visibleOffset, visibleLimit);
+
+    int savedScrollValue = ui->textEditChat->verticalScrollBar()->value();
+
+    displayMessages(messages);
+
+    ui->textEditChat->verticalScrollBar()->setValue(savedScrollValue);
+}//redrawCurrentMessages
+
 void MainWindow::loadStyleSheet()
 {
     const QString path = configSettings.stylesheetName;
@@ -773,7 +790,9 @@ void MainWindow::loadStyleSheet()
     }
 
     configSettings.b_isDarkThemed = extractThemeFromStyleSheet(styleSheetContent);
-    QTimer::singleShot(0, [styleSheetContent]() { qApp->setStyleSheet(styleSheetContent); });
+    QTimer::singleShot(0, [ styleSheetContent]() {
+        qApp->setStyleSheet(styleSheetContent);
+    });
 } //loadStyleSheet
 
 void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)

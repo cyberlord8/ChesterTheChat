@@ -29,7 +29,29 @@ public:
 private:
     Ui::MainWindow *ui;
 
+    /**
+ * @brief Debounce timer used to delay saving the user name after edits.
+ *
+ * Prevents frequent disk writes or settings updates while the user is still typing.
+ * Starts/restarts on each text change and triggers a save only after a short delay.
+ */
     QTimer userNameSaveDebounceTimer;
+
+    /**
+ * @brief Index offset of the first message currently visible in the chat window.
+ *
+ * Used for pagination and redrawing the current message block, especially after
+ * theme changes or scroll-triggered refreshes.
+ */
+    int visibleOffset;
+
+    /**
+ * @brief Number of messages currently visible in the chat window.
+ *
+ * Helps redraw only the displayed message block without reloading the entire history.
+ * Typically set after fetching a paged result from the message store.
+ */
+    qsizetype visibleLimit;
 
 
     /** @name Chat Message State
@@ -445,6 +467,16 @@ private:
      */
     bool copyResourceToFile(const QString &resourcePath, const QString &targetPath);
     ///@}
+
+    /**
+ * @brief Redraws the currently visible messages in the chat window.
+ *
+ * Refetches and redisplays the subset of messages currently in view,
+ * using the stored visibleOffset and visibleLimit values. Typically
+ * called after a theme change to ensure message styling reflects the
+ * current stylesheet (e.g., for light/dark mode contrast).
+ */
+    void redrawCurrentMessages();
 
 private slots:
 
