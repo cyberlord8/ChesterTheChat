@@ -57,7 +57,7 @@ Each instance creates its own `.ini` file (`instance_1_settings.ini`, `instance_
 ---
 
 ## 📘 License
-Licensed under the [GNU LGPL v3](https://www.gnu.org/licenses/lgpl-3.0.html).
+Licensed under the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.html).
 
 ---
 
