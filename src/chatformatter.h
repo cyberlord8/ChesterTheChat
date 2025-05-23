@@ -14,7 +14,9 @@
 #include <QTextCharFormat>
 #include <QTextCursor>
 #include <QTextEdit>
-#include <QtGlobal> // for qGray
+#include <QtGlobal>
+#include <QTimer>
+#include <QTextBlock>
 
 #include "settingsmanager.h"
 
@@ -56,7 +58,15 @@ public:
                        bool isDarkThemed,
                        bool isSent);
 
+    void flushFinalTimestamp(QTextEdit *textEdit, bool isDarkThemed);
+
 private:
+    QTextCursor lastTimestampCursor;
+    QDateTime lastTimestamp;
+    bool hasPendingTimestamp = false;
+    QTimer flushTimer;
+    QTextEdit *textEditForFlush;
+    bool isDarkThemeForFlush;
     /**
      * @brief Generates a consistent color for a given user.
      * @param user The user identifier.

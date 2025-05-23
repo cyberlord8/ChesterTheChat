@@ -7,12 +7,47 @@ ChatFormatter::ChatFormatter(QObject *parent)
     : QObject(parent)
 {}
 
+// void ChatFormatter::insertBlock(QTextCursor &cursor, bool isSent)
+// {
+//     QTextBlockFormat blockFmt;
+//     blockFmt.setAlignment(isSent ? Qt::AlignRight : Qt::AlignLeft);
+//     cursor.insertBlock(blockFmt);
+// }//insertBlock
+
 void ChatFormatter::insertBlock(QTextCursor &cursor, bool isSent)
 {
     QTextBlockFormat blockFmt;
     blockFmt.setAlignment(isSent ? Qt::AlignRight : Qt::AlignLeft);
+
+    // if (isSent) {
+    //     blockFmt.setLeftMargin(200); // Push from left edge (tune as needed)
+    //     blockFmt.setRightMargin(10); // Optional padding on right
+    // } else {
+    //     blockFmt.setRightMargin(200); // For received messages if desired
+    // }
+
+    // QWidget *editorWidget = cursor.block().document()->documentLayout()->paintDevice();
+    // int editorWidth = editorWidget ? editorWidget->width() : 600; // fallback
+
+    // int margin = static_cast<int>(editorWidth * 0.15); // 15% margin
+    // if (isSent) {
+    //     blockFmt.setLeftMargin(margin);
+    //     blockFmt.setRightMargin(10);
+    // } else {
+    //     blockFmt.setRightMargin(margin);
+    // }
+    QTextEdit *edit = qobject_cast<QTextEdit *>(cursor.document()->parent());
+    int editorWidth = edit ? edit->viewport()->width() : 600;
+
+    int margin = static_cast<int>(editorWidth * 0.15);
+    if (isSent) {
+        blockFmt.setLeftMargin(margin);
+        blockFmt.setRightMargin(10);
+    } else {
+        blockFmt.setRightMargin(margin);
+    }
     cursor.insertBlock(blockFmt);
-}//insertBlock
+} //insertBlock
 
 QColor ChatFormatter::resolveUserColor(const QString &user, bool isSent)
 {
@@ -24,7 +59,7 @@ QColor ChatFormatter::resolveUserColor(const QString &user, bool isSent)
     }
 
     return userColorMap.value(user);
-}//resolveUserColor
+} //resolveUserColor
 
 void ChatFormatter::insertUserLine(QTextCursor &cursor, const QString &user, const QColor &color)
 {
@@ -32,8 +67,9 @@ void ChatFormatter::insertUserLine(QTextCursor &cursor, const QString &user, con
     fmt.setForeground(color);
     fmt.setFontWeight(QFont::Bold);
     fmt.setFontPointSize(11);
-    cursor.insertText(user + "\n", fmt);
-}//insertUserLine
+    cursor.insertText("\n" + user + "\n", fmt);
+    // cursor.insertText(user + "\n", fmt);
+} //insertUserLine
 
 void ChatFormatter::insertMessageLine(QTextCursor &cursor, const QString &message, bool isDark)
 {
@@ -41,7 +77,7 @@ void ChatFormatter::insertMessageLine(QTextCursor &cursor, const QString &messag
     fmt.setForeground(isDark ? Qt::white : Qt::black);
     fmt.setFontPointSize(14);
     cursor.insertText(message + "\n", fmt);
-}//insertMessageLine
+} //insertMessageLine
 
 void ChatFormatter::insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, bool isDark)
 {
@@ -52,25 +88,30 @@ void ChatFormatter::insertTimestampLine(QTextCursor &cursor, const QDateTime &ts
     f.setPointSize(10);
     fmt.setFont(f);
 
-    cursor.insertText(ts.toString("hh:mmZ") + "\n", fmt);
-}//insertTimestampLine
+    // cursor.insertText(ts.toString("hh:mmZ") + "\n", fmt);
+    cursor.insertText(ts.toString("hh:mmZ"), fmt);
+} //insertTimestampLine
 
-void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user,
-                                  const QString &message, const QDateTime &timestamp,
-                                  bool isDarkThemed, bool isSent)
+void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, const QString &message, const QDateTime &timestamp, bool isDarkThemed, bool isSent)
 {
     QTextCursor cursor = textEdit->textCursor();
     cursor.movePosition(QTextCursor::End);
 
-    insertBlock(cursor, isSent);
     const QColor userColor = resolveUserColor(user, isSent);
 
-    insertUserLine(cursor, user, userColor);
-    insertMessageLine(cursor, message, isDarkThemed);
-    insertTimestampLine(cursor, timestamp, textEdit->font(), isDarkThemed);
+    if (!user.isEmpty()){
+        insertBlock(cursor, isSent);
+        insertUserLine(cursor, user, userColor);
+        insertMessageLine(cursor, message, isDarkThemed);
+        insertTimestampLine(cursor, timestamp, textEdit->font(), isDarkThemed);
+    }
+    else {
+        insertMessageLine(cursor, "\n"+message, isDarkThemed);
+        insertTimestampLine(cursor, timestamp, textEdit->font(), isDarkThemed);
+    }
 
     textEdit->setTextCursor(cursor);
-}//appendMessage
+} //appendMessage
 
 QColor ChatFormatter::generateColorForUser(const QString &user)
 {

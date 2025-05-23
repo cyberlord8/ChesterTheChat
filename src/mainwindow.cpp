@@ -306,10 +306,33 @@ void MainWindow::displayMessages(const QList<Message> &messages)
     visibleLimit = messages.count();
 
     ui->textEditChat->clear();
+
+    QString previousUser;
     for (const Message &msg : messages) {
-        m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
+        bool showUserName = (msg.user != previousUser);
+        previousUser = msg.user;
+
+        m_formatter->appendMessage(ui->textEditChat,
+                                   showUserName ? msg.user : "",
+                                   msg.text,
+                                   msg.timestamp,
+                                   configSettings.b_isDarkThemed,
+                                   msg.isSentByMe);
     }
-} //displayMessages
+    // m_formatter->flushFinalTimestamp(ui->textEditChat, configSettings.b_isDarkThemed);
+
+}//
+
+// void MainWindow::displayMessages(const QList<Message> &messages)
+// {
+//     visibleOffset = currentOffset;
+//     visibleLimit = messages.count();
+
+//     ui->textEditChat->clear();
+//     for (const Message &msg : messages) {
+//         m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
+//     }
+// } //displayMessages
 
 int MainWindow::calculateClampedOffset(int requestedOffset, int totalMessages) const
 {

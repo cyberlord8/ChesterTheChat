@@ -635,7 +635,7 @@
                 <string>Permanently deletes ALL messages from database</string>
                </property>
                <property name="text">
-                <string>!DELETE!</string>
+                <string>¡DELETE!</string>
                </property>
               </widget>
              </item>
