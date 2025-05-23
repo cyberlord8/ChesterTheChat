@@ -1,10 +1,12 @@
 #ifndef UDPCHATSOCKETMANAGER_H
 #define UDPCHATSOCKETMANAGER_H
 
+#include "globals.h"
+
 #include <QObject>
 #include <QUdpSocket>
 #include <QHostAddress>
-
+#include <QDateTime>
 /**
  * @class UdpChatSocketManager
  * @brief Manages sending and receiving of UDP chat messages.
@@ -101,6 +103,15 @@ private:
     /** @brief Stores the last sent datagram to detect self-echoes. */
     QByteArray lastSentData;
 
+    /**
+ * @brief Timestamp of the last sent datagram.
+ *
+ * Used in conjunction with lastSentData to detect and suppress self-echoed
+ * UDP messages. A message identical to the last one sent is considered an
+ * echo only if it is received within a short time window (e.g., 250 ms).
+ */
+    QDateTime lastSentTime;
+
     /** @brief Whether multicast sending is enabled. */
     bool multicastEnabled = false;
 
@@ -152,7 +163,7 @@ private:
      * @param raw The raw UTF-8 decoded message string.
      * @return A pair containing user and message.
      */
-    std::pair<QString, QString> parseUserMessage(const QString &raw) const;
+    std::pair<QString, QString> parseUserMessage(const QByteArray &raw) const;
 };
 
 

@@ -456,3 +456,18 @@
 //     return messages;
 // }//fetchMessages
 
+
+// void MainWindow::on_lineEditUserName_textChanged(const QString &newUserName)
+// {
+//     if (isApplicationStarting)
+//         return;
+//     QString localNewUserName = newUserName;
+
+//     if (localNewUserName.contains(" - ")) {
+//         localNewUserName.replace(" - ", "-");
+//     }
+
+//     configSettings.userName = localNewUserName;
+//     setAppWindowTitle();
+// } //on_lineEditUserName_textChanged
+

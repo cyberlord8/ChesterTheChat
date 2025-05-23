@@ -96,6 +96,8 @@ qint64 UdpChatSocketManager::sendMessage(const QByteArray &data, const QHostAddr
     }
 
     lastSentData = data;
+    lastSentTime = QDateTime::currentDateTimeUtc();
+
     const qint64 bytesWritten = sendSocket->writeDatagram(data, targetAddress, targetPort);
 
     if (bytesWritten == -1) {
@@ -141,12 +143,19 @@ QByteArray UdpChatSocketManager::receiveDatagram(QHostAddress &sender, quint16 &
 
 bool UdpChatSocketManager::isSelfEcho(const QByteArray &datagram) const
 {
-    return datagram == lastSentData;
+    const int echoSuppressionMs = 250;
+
+    if (datagram != lastSentData)
+        return false;
+
+    const qint64 elapsed = lastSentTime.msecsTo(QDateTime::currentDateTimeUtc());
+    return elapsed < echoSuppressionMs;
 }//isSelfEcho
 
-std::pair<QString, QString> UdpChatSocketManager::parseUserMessage(const QString &raw) const
+std::pair<QString, QString> UdpChatSocketManager::parseUserMessage(const QByteArray &raw) const
 {
-    const QStringList parts = raw.split(" - ", Qt::KeepEmptyParts);
+    const QString fallbackText = QString::fromUtf8(raw);
+    const QStringList parts = fallbackText.split(" - ", Qt::KeepEmptyParts);
 
     if (parts.size() >= 2) {
         const QString user = parts[0].trimmed();
@@ -154,7 +163,7 @@ std::pair<QString, QString> UdpChatSocketManager::parseUserMessage(const QString
         return { user, message };
     }
 
-    return { "Unknown", raw };
+    return { "Unknown", fallbackText };
 }//parseUserMessage
 
 void UdpChatSocketManager::processPendingDatagrams()
@@ -169,11 +178,12 @@ void UdpChatSocketManager::processPendingDatagrams()
 
         if (isSelfEcho(datagram)) {
             lastSentData.clear();
+            lastSentTime = {};
             continue;
         }
 
-        const QString messageText = QString::fromUtf8(datagram);
-        const auto [user, message] = parseUserMessage(messageText);
+        // const QString messageText = QString::fromUtf8(datagram);
+        const auto [user, message] = parseUserMessage(datagram);
         emit messageReceived(user, message);
     }
 }//processPendingDatagrams

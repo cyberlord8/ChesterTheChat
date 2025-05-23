@@ -6,7 +6,7 @@
 #include <QVariant>
 #include <QDebug>
 
-MessageStore::MessageStore(const QString &dbPath, QObject *parent)
+MessageStore::MessageStore(const QString &dbPath, const int m_instanceID,  QObject *parent)
     : QObject(parent)
 {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
@@ -14,13 +14,26 @@ MessageStore::MessageStore(const QString &dbPath, QObject *parent)
         return;
     }
 
-    db = QSqlDatabase::addDatabase("QSQLITE");
+    // db = QSqlDatabase::addDatabase("QSQLITE");
+    m_connectionName  = QString("chatdb_connection_%1").arg(m_instanceID);
+    db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
+
     db.setDatabaseName(dbPath);
 
 #ifdef DEBUG_MODE
     qDebug() << "[MessageStore] Initialized with DB path:" << dbPath;
 #endif
-}//MessageStore
+} //MessageStore
+
+MessageStore::~MessageStore()
+{
+    if (QSqlDatabase::contains(m_connectionName)) {
+        QSqlDatabase conn = QSqlDatabase::database(m_connectionName);
+        if (conn.isOpen())
+            conn.close();
+        QSqlDatabase::removeDatabase(m_connectionName);
+    }
+} //MessageStore
 
 void MessageStore::logDatabaseOpenError() const
 {
@@ -49,7 +62,7 @@ bool MessageStore::initializeSchema()
         )
     )";
 
-    QSqlQuery query;
+    QSqlQuery query(conn());
     if (!query.exec(createSql)) {
         qCritical() << "[MessageStore] Failed to create 'messages' table:" << query.lastError().text();
         return false;
@@ -62,9 +75,77 @@ bool MessageStore::initializeSchema()
     return true;
 }//initializeSchema
 
+bool MessageStore::initializeSchemaWithVersioning()
+{
+    QSqlQuery query(conn());
+
+    // 1. Create meta table if it doesn't exist
+    if (!query.exec(R"(
+        CREATE TABLE IF NOT EXISTS meta (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+    )")) {
+        qCritical() << "[MessageStore] Failed to create 'meta' table:" << query.lastError().text();
+        return false;
+    }
+
+    // 2. Check schema version
+    QString schemaVersion = "0";
+    if (query.exec("SELECT value FROM meta WHERE key = 'schema_version'") && query.next()) {
+        schemaVersion = query.value(0).toString();
+    }
+
+    // 3. Apply schema based on version
+    if (schemaVersion == "0") {
+        // Initial schema setup
+        const QString createMessagesSql = R"(
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user TEXT NOT NULL,
+                text TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                is_sent INTEGER DEFAULT 0
+            )
+        )";
+
+        if (!query.exec(createMessagesSql)) {
+            qCritical() << "[MessageStore] Failed to create 'messages' table:" << query.lastError().text();
+            return false;
+        }
+
+        // Update schema version to 1
+        QSqlQuery updateVersion(conn());
+        updateVersion.prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '1')");
+        if (!updateVersion.exec()) {
+            qWarning() << "[MessageStore] Failed to set schema version:" << updateVersion.lastError().text();
+            return false;
+        }
+
+#ifdef DEBUG_MODE
+        qDebug() << "[MessageStore] Schema initialized and version set to 1.";
+#endif
+    }
+
+    // 4. Handle future migrations (example for version 2)
+    /*
+    if (schemaVersion == "1") {
+        // ALTER TABLE or other migration logic here
+        QSqlQuery alter;
+        alter.exec("ALTER TABLE messages ADD COLUMN message_type TEXT DEFAULT 'text'");
+
+        QSqlQuery updateVersion;
+        updateVersion.prepare("UPDATE meta SET value = '2' WHERE key = 'schema_version'");
+        updateVersion.exec();
+    }
+    */
+
+    return true;
+}// initializeSchemaWithVersioning
+
 void MessageStore::insertMessage(const QString &user, const QString &text, const QDateTime &timestamp, bool isSent)
 {
-    QSqlQuery query;
+    QSqlQuery query(conn());
     query.prepare(R"(
         INSERT INTO messages (user, text, timestamp, is_sent)
         VALUES (:user, :text, :timestamp, :is_sent)
@@ -95,7 +176,7 @@ Message MessageStore::extractMessageFromQuery(const QSqlQuery &query) const
 QList<Message> MessageStore::fetchLastMessages(int count)
 {
     QList<Message> messages;
-    QSqlQuery query;
+    QSqlQuery query(conn());
 
     query.prepare(R"(
         SELECT user, text, timestamp, is_sent
@@ -122,7 +203,7 @@ QList<Message> MessageStore::fetchLastMessages(int count)
 QList<Message> MessageStore::fetchMessages(int offset, int limit)
 {
     QList<Message> messages;
-    QSqlQuery query;
+    QSqlQuery query(conn());
 
     query.prepare(R"(
         SELECT user, text, timestamp, is_sent
@@ -149,13 +230,13 @@ QList<Message> MessageStore::fetchMessages(int offset, int limit)
 
 int MessageStore::messageCount() const
 {
-    QSqlQuery query("SELECT COUNT(*) FROM messages");
+    QSqlQuery query("SELECT COUNT(*) FROM messages", conn());
     return query.next() ? query.value(0).toInt() : 0;
 }//messageCount
 
 bool MessageStore::clearMessages()
 {
-    QSqlQuery query("DELETE FROM messages");
+    QSqlQuery query("DELETE FROM messages", conn());
     if (!query.exec()) {
         qWarning() << "[MessageStore] Failed to clear messages:" << query.lastError().text();
         return false;

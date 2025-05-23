@@ -23,8 +23,8 @@ public:
      * @param dbPath Path to the SQLite database file.
      * @param parent The parent QObject.
      */
-    explicit MessageStore(const QString &dbPath, QObject *parent = nullptr);
-
+    explicit MessageStore(const QString &dbPath, const int m_instanceID, QObject *parent = nullptr);
+    ~MessageStore();
     /**
      * @brief Opens the SQLite database and initializes the message schema if necessary.
      * @return True if the database was successfully opened and initialized, false otherwise.
@@ -75,6 +75,17 @@ private:
     bool initializeSchema();
 
     /**
+ * @brief Retrieves the QSqlDatabase connection associated with this instance.
+ *
+ * Ensures that all SQL queries operate on the correct named connection created
+ * during initialization. This avoids conflicts with the default connection and
+ * is critical for multi-instance or embedded SQLite setups.
+ *
+ * @return The QSqlDatabase object bound to this message store's connection name.
+ */
+    QSqlDatabase conn() const { return QSqlDatabase::database(m_connectionName); }
+
+    /**
      * @brief Logs database connection errors for debugging.
      */
     void logDatabaseOpenError() const;
@@ -90,7 +101,27 @@ private:
      * @brief The internal database instance.
      */
     QSqlDatabase db;
-};
 
+    /**
+ * @brief Unique name used for the SQLite database connection.
+ *
+ * Ensures that each instance of MessageStore uses a distinct connection
+ * to avoid conflicts or reuse within the QSqlDatabase connection pool.
+ * Used to identify and later remove the connection cleanly on destruction.
+ */
+    QString m_connectionName;
+
+    /**
+ * @brief Initializes the database schema with version tracking support.
+ *
+ * Creates required tables including a `meta` table to track the schema version.
+ * If no version is present, it initializes the `messages` table and sets version to 1.
+ * Future schema migrations can be handled based on the current version value stored in `meta`.
+ *
+ * @return True if schema initialization or upgrade was successful, false otherwise.
+ * @note NOT CURRENTLY USED - For possible future expansion
+ */
+    bool initializeSchemaWithVersioning();
+};
 
 #endif // MESSAGESTORE_H

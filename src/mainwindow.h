@@ -29,6 +29,9 @@ public:
 private:
     Ui::MainWindow *ui;
 
+    QTimer userNameSaveDebounceTimer;
+
+
     /** @name Chat Message State
      *  Tracks chat rendering, history paging, and scroll position.
      */

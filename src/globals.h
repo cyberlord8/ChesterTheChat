@@ -29,7 +29,6 @@
 #include <QTextStream>
 #include <QLockFile>
 
-
 #define APP_NAME "Chester the Chat"
 #define RELEASEDATE __DATE__
 #define BUILDDATE RELEASEDATE " - " __TIME__
