@@ -4,10 +4,13 @@
 
 ![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Alice.png)
 Alice Stylesheet
+
 ![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Caterpillar.png)
 Caterpiller Stylesheet
+
 ![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Jabberwocky.png)
 Jabberwocky Stylesheet
+
 ---
 
 ## 🚀 Features
