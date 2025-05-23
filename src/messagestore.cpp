@@ -45,10 +45,14 @@ MessageStore::~MessageStore()
     if (!QSqlDatabase::contains(m_connectionName))
         return;
 
-    QSqlDatabase conn = QSqlDatabase::database(m_connectionName, /* open */ false);
+    db = QSqlDatabase();
 
-    if (conn.isOpen())
-        conn.close();
+    {
+        QSqlDatabase conn = QSqlDatabase::database(m_connectionName, /* open */ false);
+
+        if (conn.isOpen())
+            conn.close();
+    }
 
     QSqlDatabase::removeDatabase(m_connectionName);
 } //MessageStore

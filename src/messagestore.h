@@ -148,6 +148,7 @@ private:
  * @note NOT CURRENTLY USED - For possible future expansion
  */
     bool initializeSchemaWithVersioning();
+
     /**
  * @brief Opens the configured SQLite database connection.
  *
