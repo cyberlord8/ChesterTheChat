@@ -451,7 +451,6 @@ void MainWindow::loadInitialState()
 
 void MainWindow::initializeDatabase()
 {
-    // const QString dbPath = QCoreApplication::applicationDirPath() + "/chat_messages.db";
     const QString dbPath = QCoreApplication::applicationDirPath() + QString("/chat_messages_instance_%1.db").arg(instanceID);
 
     messageStore = new MessageStore(dbPath, instanceID, this);
@@ -463,12 +462,13 @@ void MainWindow::initializeDatabase()
 
     const QList<Message> messages = messageStore->fetchLastMessages(20);
 
-    ui->textEditChat->clear();
-    for (const Message &msg : messages) {
-        m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
-    }
+    // ui->textEditChat->clear();
+    // for (const Message &msg : messages) {
+    //     m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
+    // }
 
     currentOffset = messageStore->messageCount() - messages.size();
+    displayMessages(messages);
 } //initializeDatabase
 
 MainWindow::MainWindow(QWidget *parent)
@@ -790,8 +790,10 @@ void MainWindow::loadStyleSheet()
     }
 
     configSettings.b_isDarkThemed = extractThemeFromStyleSheet(styleSheetContent);
-    QTimer::singleShot(0, [ styleSheetContent]() {
+
+    QTimer::singleShot(0, this, [this, styleSheetContent]() {
         qApp->setStyleSheet(styleSheetContent);
+        redrawCurrentMessages();
     });
 } //loadStyleSheet
 
