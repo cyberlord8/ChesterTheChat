@@ -61,12 +61,36 @@ public:
     void flushFinalTimestamp(QTextEdit *textEdit, bool isDarkThemed);
 
 private:
+    /**
+ * @brief Stores the cursor position for the last message that may need a delayed timestamp.
+ */
     QTextCursor lastTimestampCursor;
+
+    /**
+ * @brief Timestamp of the last message, used for delayed timestamp insertion.
+ */
     QDateTime lastTimestamp;
+
+    /**
+ * @brief Flag indicating whether a timestamp is pending for insertion.
+ */
     bool hasPendingTimestamp = false;
+
+    /**
+ * @brief Timer used to delay insertion of a timestamp until a brief inactivity period passes.
+ */
     QTimer flushTimer;
+
+    /**
+ * @brief Pointer to the QTextEdit instance associated with the pending timestamp.
+ */
     QTextEdit *textEditForFlush;
+
+    /**
+ * @brief Indicates whether the theme is currently dark, affecting timestamp formatting.
+ */
     bool isDarkThemeForFlush;
+
     /**
      * @brief Generates a consistent color for a given user.
      * @param user The user identifier.
