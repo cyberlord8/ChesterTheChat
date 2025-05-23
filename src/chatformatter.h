@@ -160,7 +160,31 @@ private:
      * @brief Stores user-to-color mappings for consistent chat display.
      */
     QMap<QString, QColor> userColorMap;
-};
 
+    /**
+ * @brief Calculates a dynamic margin based on the width of the parent QTextEdit.
+ *
+ * This utility determines a margin value as a percentage of the visible width of the QTextEdit
+ * that owns the given QTextCursor. If the QTextEdit cannot be determined, a fallback value is used.
+ *
+ * @param cursor A QTextCursor from which the parent QTextEdit is inferred.
+ * @param percent The margin as a fraction of the QTextEdit's width (e.g., 0.15 for 15%).
+ * @param fallback The pixel value to use if the QTextEdit or its viewport cannot be resolved.
+ * @return The calculated margin in pixels.
+ */
+    int calculateDynamicMargin(QTextCursor &cursor, double percent, int fallback) const;
+
+    /**
+ * @brief Retrieves the color assigned to a specific user, generating and caching a new color if needed.
+ *
+ * This function ensures consistent user-specific coloring in the chat display. If the user has not
+ * yet been assigned a color, one is generated deterministically using a hash-based method and stored
+ * in the internal cache for future reuse.
+ *
+ * @param user The identifier (typically a username) whose color should be retrieved.
+ * @return A QColor uniquely associated with the specified user.
+ */
+    QColor generateUserColor(const QString &user);
+};
 
 #endif // CHATFORMATTER_H

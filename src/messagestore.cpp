@@ -18,54 +18,59 @@
 
 #include "messagestore.h"
 
-#include <QSqlQuery>
-#include <QSqlError>
-#include <QVariant>
 #include <QDebug>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QVariant>
 
-MessageStore::MessageStore(const QString &dbPath, const int m_instanceID,  QObject *parent)
+MessageStore::MessageStore(const QString &dbPath, int m_instanceID, QObject *parent)
     : QObject(parent)
+    , m_connectionName(QString("chatdb_connection_%1").arg(m_instanceID))
 {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
         qCritical() << "[MessageStore] SQLite driver not available!";
         return;
     }
 
-    // db = QSqlDatabase::addDatabase("QSQLITE");
-    m_connectionName  = QString("chatdb_connection_%1").arg(m_instanceID);
     db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
-
     db.setDatabaseName(dbPath);
 
 #ifdef DEBUG_MODE
-    qDebug() << "[MessageStore] Initialized with DB path:" << dbPath;
+    qDebug() << "[MessageStore] Initialized with DB path:" << dbPath << " and connection name:" << m_connectionName;
 #endif
 } //MessageStore
 
 MessageStore::~MessageStore()
 {
-    if (QSqlDatabase::contains(m_connectionName)) {
-        QSqlDatabase conn = QSqlDatabase::database(m_connectionName);
-        if (conn.isOpen())
-            conn.close();
-        QSqlDatabase::removeDatabase(m_connectionName);
-    }
+    if (!QSqlDatabase::contains(m_connectionName))
+        return;
+
+    QSqlDatabase conn = QSqlDatabase::database(m_connectionName, /* open */ false);
+
+    if (conn.isOpen())
+        conn.close();
+
+    QSqlDatabase::removeDatabase(m_connectionName);
 } //MessageStore
 
 void MessageStore::logDatabaseOpenError() const
 {
     qCritical() << "[MessageStore] Failed to open database:" << db.lastError().text();
-}
+}//logDatabaseOpenError
 
 bool MessageStore::open()
+{
+    return initializeConnection() && initializeSchema();
+}//
+
+bool MessageStore::initializeConnection()
 {
     if (!db.open()) {
         logDatabaseOpenError();
         return false;
     }
-
-    return initializeSchema();
-}//open
+    return true;
+}//
 
 bool MessageStore::initializeSchema()
 {
@@ -85,12 +90,8 @@ bool MessageStore::initializeSchema()
         return false;
     }
 
-#ifdef DEBUG_MODE
-    qDebug() << "[MessageStore] Database schema initialized successfully.";
-#endif
-
     return true;
-}//initializeSchema
+} //initializeSchema
 
 bool MessageStore::initializeSchemaWithVersioning()
 {
@@ -138,10 +139,6 @@ bool MessageStore::initializeSchemaWithVersioning()
             qWarning() << "[MessageStore] Failed to set schema version:" << updateVersion.lastError().text();
             return false;
         }
-
-#ifdef DEBUG_MODE
-        qDebug() << "[MessageStore] Schema initialized and version set to 1.";
-#endif
     }
 
     // 4. Handle future migrations (example for version 2)
@@ -158,7 +155,7 @@ bool MessageStore::initializeSchemaWithVersioning()
     */
 
     return true;
-}// initializeSchemaWithVersioning
+} // initializeSchemaWithVersioning
 
 void MessageStore::insertMessage(const QString &user, const QString &text, const QDateTime &timestamp, bool isSent)
 {
@@ -174,11 +171,9 @@ void MessageStore::insertMessage(const QString &user, const QString &text, const
     query.bindValue(":is_sent", isSent ? 1 : 0);
 
     if (!query.exec()) {
-        qWarning().nospace()
-        << "[MessageStore] Failed to insert message from '" << user
-        << "': " << query.lastError().text();
+        qWarning().nospace() << "[MessageStore] Failed to insert message from '" << user << "': " << query.lastError().text();
     }
-}//insertMessage
+} //insertMessage
 
 Message MessageStore::extractMessageFromQuery(const QSqlQuery &query) const
 {
@@ -188,7 +183,7 @@ Message MessageStore::extractMessageFromQuery(const QSqlQuery &query) const
     m.timestamp = QDateTime::fromString(query.value(2).toString(), Qt::ISODate);
     m.isSentByMe = (query.value(3).toInt() == 1);
     return m;
-}//extractMessageFromQuery
+} //extractMessageFromQuery
 
 QList<Message> MessageStore::fetchLastMessages(int count)
 {
@@ -204,8 +199,7 @@ QList<Message> MessageStore::fetchLastMessages(int count)
     query.bindValue(":limit", count);
 
     if (!query.exec()) {
-        qWarning().nospace() << "[MessageStore] fetchLastMessages failed: "
-                             << query.lastError().text();
+        qWarning().nospace() << "[MessageStore] fetchLastMessages failed: " << query.lastError().text();
         return messages;
     }
 
@@ -213,9 +207,9 @@ QList<Message> MessageStore::fetchLastMessages(int count)
         messages.append(extractMessageFromQuery(query));
     }
 
-    std::reverse(messages.begin(), messages.end());  // Return in chronological order
+    std::reverse(messages.begin(), messages.end()); // Return in chronological order
     return messages;
-}//fetchLastMessages
+} //fetchLastMessages
 
 QList<Message> MessageStore::fetchMessages(int offset, int limit)
 {
@@ -233,8 +227,7 @@ QList<Message> MessageStore::fetchMessages(int offset, int limit)
     query.bindValue(":offset", offset);
 
     if (!query.exec()) {
-        qWarning().nospace() << "[MessageStore] fetchMessages failed: "
-                             << query.lastError().text();
+        qWarning().nospace() << "[MessageStore] fetchMessages failed: " << query.lastError().text();
         return messages;
     }
 
@@ -243,13 +236,13 @@ QList<Message> MessageStore::fetchMessages(int offset, int limit)
     }
 
     return messages;
-}//fetchMessages
+} //fetchMessages
 
 int MessageStore::messageCount() const
 {
     QSqlQuery query("SELECT COUNT(*) FROM messages", conn());
     return query.next() ? query.value(0).toInt() : 0;
-}//messageCount
+} //messageCount
 
 bool MessageStore::clearMessages()
 {
@@ -260,4 +253,4 @@ bool MessageStore::clearMessages()
     }
 
     return true;
-}//clearMessages
+} //clearMessages

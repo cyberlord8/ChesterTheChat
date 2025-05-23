@@ -36,12 +36,20 @@ class MessageStore : public QObject {
     Q_OBJECT
 
 public:
+
     /**
-     * @brief Constructs a MessageStore object with a specified database path.
-     * @param dbPath Path to the SQLite database file.
-     * @param parent The parent QObject.
-     */
-    explicit MessageStore(const QString &dbPath, const int m_instanceID, QObject *parent = nullptr);
+ * @brief Constructs a MessageStore tied to a unique SQLite connection.
+ *
+ * Initializes a dedicated QSqlDatabase connection using the provided instance ID
+ * to ensure isolation for each application instance. This allows multiple instances
+ * of Chester The Chat to run simultaneously with independent storage backends.
+ *
+ * @param dbPath Path to the SQLite database file.
+ * @param m_instanceID Unique identifier for the app instance (used for connection isolation).
+ * @param parent Optional parent QObject.
+ */
+    explicit MessageStore(const QString &dbPath, int m_instanceID, QObject *parent = nullptr);
+
     ~MessageStore();
     /**
      * @brief Opens the SQLite database and initializes the message schema if necessary.
@@ -140,6 +148,18 @@ private:
  * @note NOT CURRENTLY USED - For possible future expansion
  */
     bool initializeSchemaWithVersioning();
+    /**
+ * @brief Opens the configured SQLite database connection.
+ *
+ * Attempts to open the database connection associated with this instance.
+ * If the connection fails, an error is logged and the method returns false.
+ *
+ * This method does not modify the database schema; it is intended to be called
+ * prior to any operations that require an open database.
+ *
+ * @return True if the database connection was successfully opened, false otherwise.
+ */
+    bool initializeConnection();
 };
 
 #endif // MESSAGESTORE_H

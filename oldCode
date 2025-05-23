@@ -471,3 +471,21 @@
 //     setAppWindowTitle();
 // } //on_lineEditUserName_textChanged
 
+// void ChatFormatter::insertBlock(QTextCursor &cursor, bool isSent)
+// {
+//     QTextBlockFormat blockFmt;
+//     blockFmt.setAlignment(isSent ? Qt::AlignRight : Qt::AlignLeft);
+
+//     QTextEdit *edit = qobject_cast<QTextEdit *>(cursor.document()->parent());
+//     int editorWidth = edit ? edit->viewport()->width() : 600;
+
+//     int margin = static_cast<int>(editorWidth * 0.15);
+//     if (isSent) {
+//         blockFmt.setLeftMargin(margin);
+//         blockFmt.setRightMargin(10);
+//     } else {
+//         blockFmt.setRightMargin(margin);
+//     }
+//     cursor.insertBlock(blockFmt);
+// } //insertBlock
+
