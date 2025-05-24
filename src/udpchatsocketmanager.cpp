@@ -21,6 +21,11 @@
 #include <QStringList>
 #include <QDateTime>
 
+bool UdpChatSocketManager::isConnected() const {
+    return (sendSocket && sendSocket->state() == QAbstractSocket::BoundState) &&
+           (recvSocket && recvSocket->state() == QAbstractSocket::BoundState);
+}//
+
 UdpChatSocketManager::UdpChatSocketManager(QObject *parent)
     : QObject(parent)
 {}

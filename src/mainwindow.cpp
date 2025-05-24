@@ -35,18 +35,17 @@ QString MainWindow::buildVersionSuffix(const QString &version) const
     }
 
     return QString(" - %1").arg(tr(RELEASEDATE));
-}//buildVersionSuffix
+} //buildVersionSuffix
 
 void MainWindow::setAppWindowTitle()
 {
     const QString userName = configSettings.userName;
-    const QString baseTitle = tr(APP_NAME) + QString(" - %1_%2")
-                                                 .arg(QString::number(instanceID), userName);
+    const QString baseTitle = tr(APP_NAME) + QString(" - %1_%2").arg(QString::number(instanceID), userName);
 
     const QString versionSuffix = buildVersionSuffix(tr(VERSION));
 
     setWindowTitle(baseTitle + versionSuffix);
-}//setAppWindowTitle
+} //setAppWindowTitle
 
 QString MainWindow::getInstanceIdsFilePath() const
 {
@@ -102,8 +101,7 @@ void MainWindow::releaseInstanceId(int instanceId)
 
     QLockFile lock(lockFilePath);
     if (!lock.tryLock(5000)) {
-        qWarning("[MainWindow] Failed to lock %s for releasing instance ID %d",
-                 qUtf8Printable(lockFilePath), instanceId);
+        qWarning("[MainWindow] Failed to lock %s for releasing instance ID %d", qUtf8Printable(lockFilePath), instanceId);
         return;
     }
 
@@ -120,8 +118,7 @@ int MainWindow::acquireInstanceId()
 
     QLockFile lock(lockFilePath);
     if (!lock.tryLock(5000)) {
-        qWarning("[MainWindow] Failed to lock %s for acquiring instance ID",
-                 qUtf8Printable(lockFilePath));
+        qWarning("[MainWindow] Failed to lock %s for acquiring instance ID", qUtf8Printable(lockFilePath));
         return -1;
     }
 
@@ -143,8 +140,7 @@ QString MainWindow::buildAppVersionString() const
 {
     QString version = VERSION;
 
-    if (version.contains("alpha", Qt::CaseInsensitive) ||
-        version.contains("bravo", Qt::CaseInsensitive)) {
+    if (version.contains("alpha", Qt::CaseInsensitive) || version.contains("bravo", Qt::CaseInsensitive)) {
         version += " " + tr(__TIME__); // Append compile time for dev builds
     }
 
@@ -160,10 +156,7 @@ QString MainWindow::detectCompilerInfo() const
 #endif
 } //detectCompilerInfo
 
-QString MainWindow::buildAboutText(const QString &version,
-                                   const QString &compileDate,
-                                   const QString &releaseDate,
-                                   const QString &compilerInfo) const
+QString MainWindow::buildAboutText(const QString &version, const QString &compileDate, const QString &releaseDate, const QString &compilerInfo) const
 {
     QString about;
     const QString separator = tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
@@ -191,10 +184,8 @@ QString MainWindow::buildAboutText(const QString &version,
 void MainWindow::on_actionAbout_triggered()
 {
     const QString version = buildAppVersionString();
-    const QString compileDate = QStringLiteral(__DATE__);  // e.g. "May 23 2025"
-    const QString releaseDate = QLocale().toString(
-        QDate::fromString(compileDate, "MMM dd yyyy"),
-        QLocale::ShortFormat);
+    const QString compileDate = QStringLiteral(__DATE__); // e.g. "May 23 2025"
+    const QString releaseDate = QLocale().toString(QDate::fromString(compileDate, "MMM dd yyyy"), QLocale::ShortFormat);
 
     const QString compilerInfo = detectCompilerInfo();
     const QString aboutText = buildAboutText(version, compileDate, releaseDate, compilerInfo);
@@ -218,13 +209,11 @@ bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &
     if (targetFile.exists()) {
         // Try to set permissive file mode before removal (especially for read-only files)
         if (!targetFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::WriteUser)) {
-            qWarning().nospace() << "[copyResourceToFile] Cannot change permissions on: "
-                                 << targetPath << " | Reason: " << targetFile.errorString();
+            qWarning().nospace() << "[copyResourceToFile] Cannot change permissions on: " << targetPath << " | Reason: " << targetFile.errorString();
         }
 
         if (!targetFile.remove()) {
-            qCritical().nospace() << "[copyResourceToFile] Failed to remove: "
-                                  << targetPath << " | Reason: " << targetFile.errorString();
+            qCritical().nospace() << "[copyResourceToFile] Failed to remove: " << targetPath << " | Reason: " << targetFile.errorString();
             return false;
         }
 
@@ -234,9 +223,7 @@ bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &
     }
 
     if (!resourceFile.copy(targetPath)) {
-        qCritical().nospace() << "[copyResourceToFile] Copy failed: "
-                              << resourcePath << " → " << targetPath
-                              << " | Reason: " << resourceFile.errorString();
+        qCritical().nospace() << "[copyResourceToFile] Copy failed: " << resourcePath << " → " << targetPath << " | Reason: " << resourceFile.errorString();
         return false;
     }
 
@@ -307,6 +294,7 @@ void MainWindow::updateUIWidgets()
 
     // Style Sheet Settings
     ui->checkBoxLoadStyleSheet->setChecked(configSettings.b_loadStyleSheet);
+    QSignalBlocker block(ui->comboBoxSelectStyleSheet);
     ui->comboBoxSelectStyleSheet->setCurrentText(configSettings.stylesheetName);
 } //updateUIWidgets
 
@@ -356,7 +344,12 @@ void MainWindow::displayMessages(const QList<Message> &messages)
         bool showUserName = (msg.user != previousUser);
         previousUser = msg.user;
 
-        m_formatter->appendMessage(ui->textEditChat, showUserName ? msg.user : "", msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
+        m_formatter->appendMessage(ui->textEditChat,
+                                   showUserName ? msg.user : "",
+                                   msg.text,
+                                   msg.timestamp,
+                                   // configSettings.b_isDarkThemed,
+                                   msg.isSentByMe);
     }
 } //displayMessages
 
@@ -453,11 +446,20 @@ void MainWindow::onChatScrollBarChanged(int value)
     handleChatScroll(ui->textEditChat->verticalScrollBar(), scrollingDown);
 } //onChatScrollBarChanged
 
+void MainWindow::startDemoMode()
+{
+    demoSimulator->startDemo();
+    styleRotator->start();
+}
+
 void MainWindow::initializeManagers()
 {
     settingsManager = new SettingsManager(instanceID, QCoreApplication::applicationDirPath(), this);
     udpManager = new UdpChatSocketManager(this);
     m_formatter = new ChatFormatter(this);
+
+    demoSimulator = new DemoChatSimulator(ui->textEditChat, m_formatter, this);
+
 } //initializeManagers
 
 void MainWindow::initializeUi()
@@ -475,7 +477,12 @@ void MainWindow::connectSignals()
     connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
         const QDateTime timestamp = QDateTime::currentDateTimeUtc();
         messageStore->insertMessage(user, msg, timestamp, false);
-        m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, configSettings.b_isDarkThemed, false);
+        m_formatter->appendMessage(ui->textEditChat,
+                                   user,
+                                   msg,
+                                   timestamp,
+                                   // configSettings.b_isDarkThemed,
+                                   false);
         ui->textEditChat->moveCursor(QTextCursor::End);
 
         if (isMinimized() || !isVisible() || !isActiveWindow()) {
@@ -491,6 +498,11 @@ void MainWindow::loadInitialState()
     restoreGeometry(settingsManager->loadGeometry());
 
     loadQStyleSheetFolder();
+
+    if (!styleRotator) {
+        styleRotator = new StyleRotator(ui->comboBoxSelectStyleSheet, QStyleSheetMap, this);
+    }
+
     setStyleSheet();
     setBackgroundImage();
     setAppWindowTitle();
@@ -566,7 +578,12 @@ bool MainWindow::sendUdpMessage(const QByteArray &data, const QHostAddress &addr
 void MainWindow::storeAndDisplaySentMessage(const QString &user, const QString &msg, const QDateTime &timestamp)
 {
     messageStore->insertMessage(user, msg, timestamp, true);
-    m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, configSettings.b_isDarkThemed, true);
+    m_formatter->appendMessage(ui->textEditChat,
+                               user,
+                               msg,
+                               timestamp,
+                               // configSettings.b_isDarkThemed,
+                               true);
 } //storeAndDisplaySentMessage
 
 void MainWindow::on_pushButtonSend_clicked()
@@ -596,8 +613,7 @@ void MainWindow::on_pushButtonSend_clicked()
         storeAndDisplaySentMessage(userName, messageText, timestamp);
         ui->lineEditChatText->clear();
     } else {
-        const QString error = tr("%1 - ERROR writing to UDP socket: %2")
-                                  .arg(Q_FUNC_INFO, udpManager->lastError());
+        const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
         ui->labelStatus->setText(error);
     }
 } //on_pushButtonSend_clicked
@@ -623,6 +639,9 @@ void MainWindow::updateUiOnConnectSuccess()
     ui->frameUDPParameters->setEnabled(false);
     ui->tabWidget->setTabEnabled(0, true);
     ui->tabWidget->setCurrentIndex(0);
+
+    ui->pushButtonStartStopDemo->setEnabled(!udpManager->isConnected());
+
 } //updateUiOnConnectSuccess
 
 void MainWindow::on_pushButtonConnect_clicked()
@@ -660,6 +679,8 @@ void MainWindow::resetUiAfterDisconnect()
     ui->pushButtonDisconnect->setEnabled(false);
     ui->frameUDPParameters->setEnabled(true);
     ui->tabWidget->setTabEnabled(0, false);
+
+    ui->pushButtonStartStopDemo->setEnabled(!udpManager->isConnected());
 } //resetUiAfterDisconnect
 
 void MainWindow::on_pushButtonDisconnect_clicked()
@@ -741,12 +762,12 @@ void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &s
 
     const QString styleFile = QStyleSheetMap.value(styleName);
     settingsManager->update(configSettings.stylesheetName, styleFile);
-
     loadStyleSheet();
 
-    redrawCurrentMessages(); // refresh visible messages with new theme context
-
-    settingsManager->save(configSettings);
+    if (!isDemoRunning) {
+        redrawCurrentMessages(); // refresh visible messages with new theme context
+        settingsManager->save(configSettings);
+    }
 } //on_comboBoxSelectStyleSheet_currentTextChanged
 
 void MainWindow::populateStyleSheetMap(const QString &folderPath)
@@ -761,6 +782,7 @@ void MainWindow::populateStyleSheetMap(const QString &folderPath)
 void MainWindow::populateStyleSheetComboBox()
 {
     ui->comboBoxSelectStyleSheet->clear();
+    QSignalBlocker block(ui->comboBoxSelectStyleSheet);
     ui->comboBoxSelectStyleSheet->addItem(""); // for 'none' or default
     ui->comboBoxSelectStyleSheet->addItems(QStyleSheetMap.keys());
 } //populateStyleSheetComboBox
@@ -833,11 +855,20 @@ void MainWindow::loadStyleSheet()
         return;
     }
 
-    configSettings.b_isDarkThemed = extractThemeFromStyleSheet(styleSheetContent);
+    // configSettings.b_isDarkThemed = extractThemeFromStyleSheet(styleSheetContent);
+    // if (demoSimulator && isDemoRunning)
+    //     demoSimulator->setThemeDark(configSettings.b_isDarkThemed);
 
     QTimer::singleShot(0, this, [this, styleSheetContent]() {
         qApp->setStyleSheet(styleSheetContent);
-        redrawCurrentMessages();
+        if (!isDemoRunning){
+            redrawCurrentMessages();
+        }
+        else {
+            ui->textEditChat->verticalScrollBar()->setValue(ui->textEditChat->verticalScrollBar()->maximum());
+            QString styleName = QStyleSheetMap.key(configSettings.stylesheetName);
+            ui->labelStatus->setText(tr("Demo running - Applied stylesheet: %1").arg(styleName));
+        }
     });
 } //loadStyleSheet
 
@@ -888,12 +919,10 @@ void MainWindow::on_pushButtonTestMsg_clicked()
 
 void MainWindow::on_pushButtonDeleteDatabase_clicked()
 {
-    const QMessageBox::StandardButton reply = QMessageBox::question(
-        this,
-        tr("Confirm Clear"),
-        tr("Are you sure you want to delete all chat messages?"),
-        QMessageBox::Yes | QMessageBox::No
-        );
+    const QMessageBox::StandardButton reply = QMessageBox::question(this,
+                                                                    tr("Confirm Clear"),
+                                                                    tr("Are you sure you want to delete all chat messages?"),
+                                                                    QMessageBox::Yes | QMessageBox::No);
 
     if (reply != QMessageBox::Yes)
         return;
@@ -906,3 +935,54 @@ void MainWindow::on_pushButtonDeleteDatabase_clicked()
         QMessageBox::warning(this, tr("Error"), tr("Failed to clear chat history."));
     }
 } //on_pushButtonDeleteDatabase_clicked
+
+void MainWindow::on_pushButtonStartStopDemo_clicked()
+{
+    if (!demoSimulator || !styleRotator || !udpManager)
+        return;
+
+    if (!isDemoRunning) {
+        if (udpManager->isConnected()) {
+            QMessageBox::warning(this, tr("Cannot Start Demo"), tr("Please disconnect from the UDP session before starting demo mode."));
+            return;
+        }
+        if (realStyleSheetName.isEmpty()) {
+            realStyleSheetName = QStyleSheetMap.key(configSettings.stylesheetName);
+        }
+
+        ui->textEditChat->clear();
+
+        if (!demoSimulator->startDemo()) {
+            QMessageBox::warning(this, tr("Demo Start Failed"), tr("No demo files found or all files are empty.\nPlease check the 'demofiles' folder."));
+            return;
+        }
+        isDemoRunning = true;
+
+        styleRotator->start();
+        ui->pushButtonStartStopDemo->setText("Stop Demo Mode");
+        ui->labelStatus->setText("Demo Mode Running");
+
+        ui->pushButtonConnect->setEnabled(false);
+        ui->frameUDPParameters->setEnabled(false);
+
+        ui->labelStatus->setText(tr("Running demo..."));
+        ui->tabWidget->setTabEnabled(0, true);
+        ui->tabWidget->setCurrentIndex(0);
+    } else {
+        demoSimulator->stopDemo();
+        styleRotator->stop();
+        ui->pushButtonStartStopDemo->setText("Start Demo Mode");
+        ui->labelStatus->setText("Demo Mode Stopped");
+        isDemoRunning = false;
+
+        configSettings.stylesheetName = QStyleSheetMap.key(realStyleSheetName);
+        ui->comboBoxSelectStyleSheet->setCurrentText(realStyleSheetName);
+        setStyleSheet();
+        redrawCurrentMessages();
+        realStyleSheetName.clear();
+
+        // Restore network controls
+        ui->pushButtonConnect->setEnabled(true);
+        ui->frameUDPParameters->setEnabled(true);
+    }
+} //

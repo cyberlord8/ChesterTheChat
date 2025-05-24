@@ -73,7 +73,7 @@ public:
                        const QString &user,
                        const QString &message,
                        const QDateTime &timestamp,
-                       bool isDarkThemed,
+                       // bool isDarkThemed,
                        bool isSent);
 
     void flushFinalTimestamp(QTextEdit *textEdit, bool isDarkThemed);
@@ -145,7 +145,7 @@ private:
      * @param message The message content.
      * @param isDark Whether the theme is dark.
      */
-    void insertMessageLine(QTextCursor &cursor, const QString &message, bool isDark);
+    void insertMessageLine(QTextCursor &cursor, const QString &message);
 
     /**
      * @brief Inserts the timestamp line beneath the message.
@@ -154,7 +154,7 @@ private:
      * @param baseFont The base font to inherit style from.
      * @param isDark Whether the theme is dark.
      */
-    void insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, bool isDark);
+    void insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, const bool &isDark);
 
     /**
      * @brief Stores user-to-color mappings for consistent chat display.

@@ -24,21 +24,25 @@ FORMS += \
     src/mainwindow.ui
 
 HEADERS += \
+    src/demochatsimulator.h \
     src/messagestore.h \
     src/chatformatter.h \
     src/globals.h \
     src/mainwindow.h \
     src/settingsmanager.h \
+    src/stylerotator.h \
     src/udpchatsocketmanager.h \
     src/version.h \
     src/toastnotification.h
 
 SOURCES += \
+    src/demochatsimulator.cpp \
     src/messagestore.cpp \
     src/chatformatter.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/settingsmanager.cpp \
+    src/stylerotator.cpp \
     src/udpchatsocketmanager.cpp \
     src/toastnotification.cpp
 

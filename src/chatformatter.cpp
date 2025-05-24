@@ -72,16 +72,16 @@ void ChatFormatter::insertUserLine(QTextCursor &cursor, const QString &user, con
     cursor.insertText("\n" + user + "\n", fmt);
 } //insertUserLine
 
-void ChatFormatter::insertMessageLine(QTextCursor &cursor, const QString &message, bool isDark)
+void ChatFormatter::insertMessageLine(QTextCursor &cursor, const QString &message)
 {
     QTextCharFormat fmt;
-    fmt.setForeground(isDark ? Qt::white : Qt::black);
+    // fmt.setForeground(isDark ? Qt::white : Qt::black);
     fmt.setFontPointSize(14);
 
     cursor.insertText(message + "\n", fmt);
 } //insertMessageLine
 
-void ChatFormatter::insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, bool isDark)
+void ChatFormatter::insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, const bool &isDark)
 {
     QTextCharFormat fmt;
     fmt.setForeground(isDark ? Qt::gray : Qt::darkGray);
@@ -93,7 +93,7 @@ void ChatFormatter::insertTimestampLine(QTextCursor &cursor, const QDateTime &ts
     cursor.insertText(ts.toString("hh:mmZ"), fmt);
 } //insertTimestampLine
 
-void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, const QString &message, const QDateTime &timestamp, bool isDarkThemed, bool isSent)
+void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, const QString &message, const QDateTime &timestamp, bool isSent)
 {
     QTextCursor cursor = textEdit->textCursor();
     cursor.movePosition(QTextCursor::End);
@@ -103,12 +103,16 @@ void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, cons
     if (!user.isEmpty()) {
         insertBlock(cursor, isSent);
         insertUserLine(cursor, user, userColor);
-        insertMessageLine(cursor, message, isDarkThemed);
+        insertMessageLine(cursor, message);
     } else {
-        insertMessageLine(cursor, "\n" + message, isDarkThemed);
+        insertMessageLine(cursor, "\n" + message);
     }
 
-    insertTimestampLine(cursor, timestamp, textEdit->font(), isDarkThemed);
+    QString styleSheet = textEdit->styleSheet();
+
+    bool isDark = styleSheet.simplified().contains("QTextEdit#textEditChat { color: black;}");
+
+    insertTimestampLine(cursor, timestamp, textEdit->font(), isDark);
 
     textEdit->setTextCursor(cursor);
 } //appendMessage

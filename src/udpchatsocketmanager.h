@@ -21,10 +21,10 @@
 
 #include "globals.h"
 
+#include <QDateTime>
+#include <QHostAddress>
 #include <QObject>
 #include <QUdpSocket>
-#include <QHostAddress>
-#include <QDateTime>
 /**
  * @class UdpChatSocketManager
  * @brief Manages sending and receiving of UDP chat messages.
@@ -33,10 +33,17 @@
  * including socket binding, multicast group management, message sending, and
  * reception. It also filters out self-sent messages to prevent echo.
  */
-class UdpChatSocketManager : public QObject {
+class UdpChatSocketManager : public QObject
+{
     Q_OBJECT
 
 public:
+    /**
+ * @brief Checks if both send and receive sockets are currently active.
+ * @return True if both sockets are valid and bound; false otherwise.
+ */
+    bool isConnected() const;
+
     /**
      * @brief Constructs the UDP chat socket manager.
      * @param parent The parent QObject.
@@ -183,6 +190,5 @@ private:
      */
     std::pair<QString, QString> parseUserMessage(const QByteArray &raw) const;
 };
-
 
 #endif // UDPCHATSOCKETMANAGER_H

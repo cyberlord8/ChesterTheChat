@@ -60,8 +60,8 @@ struct Settings {
     /** @brief Whether to allow receiving own sent UDP messages (loopback). */
     bool b_loopback = false;
 
-    /** @brief Whether the user interface uses a dark theme. */
-    bool b_isDarkThemed = false;
+    // /** @brief Whether the user interface uses a dark theme. */
+    // bool b_isDarkThemed = false;
 
     /** @brief The display name of the user. */
     QString userName;

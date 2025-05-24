@@ -27,6 +27,9 @@
 #include "toastnotification.h"
 #include "udpchatsocketmanager.h"
 
+#include "DemoChatSimulator.h"
+#include "StyleRotator.h"
+
 #include <QScrollBar>
 #include <QWheelEvent>
 
@@ -46,6 +49,30 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+    bool isDemoRunning = false;
+    QString realStyleSheetName = "";
+
+    /**
+ * @brief Simulates a timed, themed chat between Wonderland characters.
+ *
+ * This object runs a scripted sequence of messages using characters like
+ * Alice, the Mad Hatter, and the Cheshire Cat. Messages appear in real-time
+ * intervals, simulating a natural conversation.
+ *
+ * Used to demonstrate how the chat interface handles formatting, message stacking,
+ * and timestamping in a controlled environment.
+ */
+    DemoChatSimulator *demoSimulator = nullptr;
+
+    /**
+ * @brief Automatically rotates through available Chester stylesheets.
+ *
+ * This object cycles through all registered `.qss` themes via the stylesheet
+ * combo box. It's used to demonstrate the appearance of different UI themes
+ * during demo mode, highlighting light and dark theme support.
+ */
+    StyleRotator *styleRotator = nullptr;
 
     /**
  * @brief Debounce timer used to delay saving the user name after edits.
@@ -496,6 +523,19 @@ private:
  */
     void redrawCurrentMessages();
 
+    /**
+ * @brief Starts the chat application's demo mode.
+ *
+ * Launches a scripted Wonderland-themed chat simulation using `DemoChatSimulator`
+ * and begins automatic stylesheet rotation via `StyleRotator`. This mode visually
+ * demonstrates key UI features such as message formatting, stacking behavior,
+ * and style/theme transitions.
+ *
+ * Typically used for presentations or showcasing Chester's visual capabilities.
+ */
+    void startDemoMode();
+
+
 private slots:
 
     /** @name Help & About Actions
@@ -606,6 +646,7 @@ private slots:
      */
     void on_pushButtonDeleteDatabase_clicked();
     ///@}
+    void on_pushButtonStartStopDemo_clicked();
 };
 
 #endif // MAINWINDOW_H
