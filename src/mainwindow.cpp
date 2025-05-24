@@ -23,28 +23,30 @@ QString MainWindow::buildVersionSuffix(const QString &version) const
 {
     if (version.contains("alpha", Qt::CaseInsensitive)) {
         QString buildDate = tr(BUILDDATE);
-        int lastColonIndex = buildDate.lastIndexOf(':');
-        if (lastColonIndex != -1) {
-            buildDate = buildDate.left(lastColonIndex);
-        }
+        int trimIndex = buildDate.lastIndexOf(':');
+        if (trimIndex != -1)
+            buildDate = buildDate.left(trimIndex);
+
         return QString(" - %1 - %2").arg(version, buildDate);
-    } else if (version.contains("beta", Qt::CaseInsensitive)) {
-        return QString(" - %1 - %2").arg(version, tr(RELEASEDATE));
-    } else {
-        return QString(" - %1").arg(tr(RELEASEDATE));
     }
-} //buildVersionSuffix
+
+    if (version.contains("beta", Qt::CaseInsensitive)) {
+        return QString(" - %1 - %2").arg(version, tr(RELEASEDATE));
+    }
+
+    return QString(" - %1").arg(tr(RELEASEDATE));
+}//buildVersionSuffix
 
 void MainWindow::setAppWindowTitle()
 {
     const QString userName = configSettings.userName;
-    const QString baseTitle = tr(APP_NAME) + QString(" - %1_%2").arg(QString::number(instanceID), userName);
-    const QString version = tr(VERSION);
+    const QString baseTitle = tr(APP_NAME) + QString(" - %1_%2")
+                                                 .arg(QString::number(instanceID), userName);
 
-    const QString versionSuffix = buildVersionSuffix(version);
+    const QString versionSuffix = buildVersionSuffix(tr(VERSION));
 
     setWindowTitle(baseTitle + versionSuffix);
-} //setAppWindowTitle
+}//setAppWindowTitle
 
 QString MainWindow::getInstanceIdsFilePath() const
 {
@@ -60,28 +62,34 @@ QSet<int> MainWindow::loadInstanceIdsExcluding(int excludeId, const QString &fil
 {
     QSet<int> ids;
     QFile file(filePath);
-    if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&file);
-        while (!in.atEnd()) {
-            int id = in.readLine().toInt();
-            if (excludeId < 0 || id != excludeId)
-                ids.insert(id);
-        }
-        file.close();
+
+    if (!file.exists() || !file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return ids;
+
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        const QString line = in.readLine();
+        const int id = line.toInt();
+        if (excludeId < 0 || id != excludeId)
+            ids.insert(id);
     }
+
+    file.close();
     return ids;
 } //loadInstanceIdsExcluding
 
 void MainWindow::saveInstanceIds(const QSet<int> &ids, const QString &filePath) const
 {
     QFile file(filePath);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        QTextStream out(&file);
-        for (int id : std::as_const(ids)) {
-            out << id << "\n";
-        }
-        file.close();
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+        return;
+
+    QTextStream out(&file);
+    for (int id : std::as_const(ids)) {
+        out << id << '\n';
     }
+
+    file.close();
 } //saveInstanceIds
 
 void MainWindow::releaseInstanceId(int instanceId)
@@ -94,12 +102,13 @@ void MainWindow::releaseInstanceId(int instanceId)
 
     QLockFile lock(lockFilePath);
     if (!lock.tryLock(5000)) {
-        qWarning("Could not lock instance_ids.txt for release");
+        qWarning("[MainWindow] Failed to lock %s for releasing instance ID %d",
+                 qUtf8Printable(lockFilePath), instanceId);
         return;
     }
 
-    QSet<int> usedIds = loadInstanceIdsExcluding(instanceId, idsFilePath);
-    saveInstanceIds(usedIds, idsFilePath);
+    QSet<int> remainingIds = loadInstanceIdsExcluding(instanceId, idsFilePath);
+    saveInstanceIds(remainingIds, idsFilePath);
 
     lock.unlock();
 } //releaseInstanceId
@@ -111,13 +120,13 @@ int MainWindow::acquireInstanceId()
 
     QLockFile lock(lockFilePath);
     if (!lock.tryLock(5000)) {
-        qWarning("Could not lock instance_ids.txt");
+        qWarning("[MainWindow] Failed to lock %s for acquiring instance ID",
+                 qUtf8Printable(lockFilePath));
         return -1;
     }
 
-    QSet<int> usedIds = loadInstanceIdsExcluding(-1, idsFilePath); // -1 means load all
+    QSet<int> usedIds = loadInstanceIdsExcluding(-1, idsFilePath); // Load all IDs
 
-    // Find the first unused positive ID
     int newId = 1;
     while (usedIds.contains(newId)) {
         ++newId;
@@ -133,40 +142,48 @@ int MainWindow::acquireInstanceId()
 QString MainWindow::buildAppVersionString() const
 {
     QString version = VERSION;
-    if (version.contains("alpha", Qt::CaseInsensitive) || version.contains("bravo", Qt::CaseInsensitive)) {
-        version += " " + tr(__TIME__); // Append compile time
+
+    if (version.contains("alpha", Qt::CaseInsensitive) ||
+        version.contains("bravo", Qt::CaseInsensitive)) {
+        version += " " + tr(__TIME__); // Append compile time for dev builds
     }
+
     return version;
 } //buildAppVersionString
 
 QString MainWindow::detectCompilerInfo() const
 {
 #ifdef ENV32
-    return QString("Qt %1 MinGW (32-bit)").arg(qVersion());
+    return QString("Qt %1 - MinGW (32-bit)").arg(qVersion());
 #else
-    return QString("Qt %1 MinGW (64-bit)").arg(qVersion());
+    return QString("Qt %1 - MinGW (64-bit)").arg(qVersion());
 #endif
 } //detectCompilerInfo
 
-QString MainWindow::buildAboutText(const QString &version, const QString &compileDate, const QString &releaseDate, const QString &compilerInfo) const
+QString MainWindow::buildAboutText(const QString &version,
+                                   const QString &compileDate,
+                                   const QString &releaseDate,
+                                   const QString &compilerInfo) const
 {
     QString about;
-    about += tr(APP_LICENSE) + "\n";
-    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    const QString separator = tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    about += tr(APP_LICENSE) + '\n';
+    about += separator;
     about += QString(" - %1 %2 %3\n").arg(COPYRIGHT, compileDate, COMPANY);
     about += QString(" - %1\n").arg(RIGHTS);
-    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    about += separator;
     about += QString(" - %1%2\n").arg(tr("Version: "), version);
     about += QString(" - %1%2\n").arg(tr("Release date: "), releaseDate);
     about += QString(" - %1%2\n").arg(tr("Compiler: "), compilerInfo);
     about += QString(" - %1%2\n").arg(tr("Running on: "), SYSTEMINFO);
-    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    about += separator;
     about += QString("%1\n").arg(WARRANTY);
-    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    about += separator;
     about += tr("This product uses Qt Libraries:\n");
     about += QString(" - %1\n").arg(qt_COPYRIGHT);
     about += QString(" - %1%2\n").arg(tr("QT Library License: "), qt_LICENSE);
-    about += tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    about += separator;
 
     return about;
 } //buildAboutText
@@ -174,14 +191,16 @@ QString MainWindow::buildAboutText(const QString &version, const QString &compil
 void MainWindow::on_actionAbout_triggered()
 {
     const QString version = buildAppVersionString();
-    const QString compileDate = QDate::fromString(tr(__DATE__), "MMM dd yyyy").toString("yyyy");
-    const QString releaseDate = tr(__DATE__);
-    const QString compilerInfo = detectCompilerInfo();
+    const QString compileDate = QStringLiteral(__DATE__);  // e.g. "May 23 2025"
+    const QString releaseDate = QLocale().toString(
+        QDate::fromString(compileDate, "MMM dd yyyy"),
+        QLocale::ShortFormat);
 
+    const QString compilerInfo = detectCompilerInfo();
     const QString aboutText = buildAboutText(version, compileDate, releaseDate, compilerInfo);
 
     QMessageBox aboutBox(this);
-    aboutBox.setWindowTitle(APP_NAME);
+    aboutBox.setWindowTitle(tr(APP_NAME));
     aboutBox.setText(aboutText);
     aboutBox.exec();
 } //on_actionAbout_triggered
@@ -197,22 +216,27 @@ bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &
     QFile targetFile(targetPath);
 
     if (targetFile.exists()) {
-        if (!targetFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther)) {
-            qWarning().nospace() << "[copyResourceToFile] Cannot change permissions on: " << targetPath << " | Reason: " << targetFile.errorString();
+        // Try to set permissive file mode before removal (especially for read-only files)
+        if (!targetFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::WriteUser)) {
+            qWarning().nospace() << "[copyResourceToFile] Cannot change permissions on: "
+                                 << targetPath << " | Reason: " << targetFile.errorString();
         }
 
         if (!targetFile.remove()) {
-            qCritical().nospace() << "[copyResourceToFile] Failed to remove: " << targetPath << " | Reason: " << targetFile.errorString();
+            qCritical().nospace() << "[copyResourceToFile] Failed to remove: "
+                                  << targetPath << " | Reason: " << targetFile.errorString();
             return false;
         }
 
         qDebug().nospace() << "[copyResourceToFile] Existing file removed: " << targetPath;
     } else {
-        qDebug().nospace() << "[copyResourceToFile] No existing file to replace: " << targetPath;
+        qDebug().nospace() << "[copyResourceToFile] No existing file to replace at: " << targetPath;
     }
 
     if (!resourceFile.copy(targetPath)) {
-        qCritical().nospace() << "[copyResourceToFile] Copy failed: " << resourcePath << " → " << targetPath << " | Reason: " << resourceFile.errorString();
+        qCritical().nospace() << "[copyResourceToFile] Copy failed: "
+                              << resourcePath << " → " << targetPath
+                              << " | Reason: " << resourceFile.errorString();
         return false;
     }
 
@@ -222,15 +246,17 @@ bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &
 
 void MainWindow::openResourceFile(const QString &fileName)
 {
-    const QString resourcePath = ":/resources" + fileName;
-    const QString targetPath = qApp->applicationDirPath() + fileName;
+    const QString resourcePath = QStringLiteral(":/resources") + fileName;
+    const QString targetPath = qApp->applicationDirPath() + QDir::separator() + fileName;
 
     if (!copyResourceToFile(resourcePath, targetPath)) {
-        qWarning() << "Failed to open resource file:" << targetPath;
+        qWarning().nospace() << "[openResourceFile] Failed to open resource file: " << targetPath;
         return;
     }
 
-    QDesktopServices::openUrl(QUrl::fromLocalFile(targetPath));
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(targetPath))) {
+        qWarning().nospace() << "[openResourceFile] Failed to launch file: " << targetPath;
+    }
 } //openResourceFile
 
 void MainWindow::on_actionQt_License_triggered()
@@ -330,27 +356,9 @@ void MainWindow::displayMessages(const QList<Message> &messages)
         bool showUserName = (msg.user != previousUser);
         previousUser = msg.user;
 
-        m_formatter->appendMessage(ui->textEditChat,
-                                   showUserName ? msg.user : "",
-                                   msg.text,
-                                   msg.timestamp,
-                                   configSettings.b_isDarkThemed,
-                                   msg.isSentByMe);
+        m_formatter->appendMessage(ui->textEditChat, showUserName ? msg.user : "", msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
     }
-    // m_formatter->flushFinalTimestamp(ui->textEditChat, configSettings.b_isDarkThemed);
-
-}//
-
-// void MainWindow::displayMessages(const QList<Message> &messages)
-// {
-//     visibleOffset = currentOffset;
-//     visibleLimit = messages.count();
-
-//     ui->textEditChat->clear();
-//     for (const Message &msg : messages) {
-//         m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
-//     }
-// } //displayMessages
+} //displayMessages
 
 int MainWindow::calculateClampedOffset(int requestedOffset, int totalMessages) const
 {
@@ -503,11 +511,6 @@ void MainWindow::initializeDatabase()
 
     const QList<Message> messages = messageStore->fetchLastMessages(20);
 
-    // ui->textEditChat->clear();
-    // for (const Message &msg : messages) {
-    //     m_formatter->appendMessage(ui->textEditChat, msg.user, msg.text, msg.timestamp, configSettings.b_isDarkThemed, msg.isSentByMe);
-    // }
-
     currentOffset = messageStore->messageCount() - messages.size();
     displayMessages(messages);
 } //initializeDatabase
@@ -593,7 +596,8 @@ void MainWindow::on_pushButtonSend_clicked()
         storeAndDisplaySentMessage(userName, messageText, timestamp);
         ui->lineEditChatText->clear();
     } else {
-        const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
+        const QString error = tr("%1 - ERROR writing to UDP socket: %2")
+                                  .arg(Q_FUNC_INFO, udpManager->lastError());
         ui->labelStatus->setText(error);
     }
 } //on_pushButtonSend_clicked
@@ -740,7 +744,7 @@ void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &s
 
     loadStyleSheet();
 
-    redrawCurrentMessages();  // refresh visible messages with new theme context
+    redrawCurrentMessages(); // refresh visible messages with new theme context
 
     settingsManager->save(configSettings);
 } //on_comboBoxSelectStyleSheet_currentTextChanged
@@ -768,7 +772,6 @@ void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
     }
 
     SettingsManager::update(configSettings.b_loadStyleSheet, checked);
-
 } //on_checkBoxLoadStyleSheet_clicked
 
 void MainWindow::loadQStyleSheetFolder()
@@ -816,7 +819,7 @@ void MainWindow::redrawCurrentMessages()
     displayMessages(messages);
 
     ui->textEditChat->verticalScrollBar()->setValue(savedScrollValue);
-}//redrawCurrentMessages
+} //redrawCurrentMessages
 
 void MainWindow::loadStyleSheet()
 {
@@ -885,14 +888,21 @@ void MainWindow::on_pushButtonTestMsg_clicked()
 
 void MainWindow::on_pushButtonDeleteDatabase_clicked()
 {
-    if (QMessageBox::question(this, "Confirm Clear", "Are you sure you want to delete all chat messages?", QMessageBox::Yes | QMessageBox::No) ==
-        QMessageBox::Yes) {
-        if (messageStore->clearMessages()) {
-            ui->textEditChat->clear();
-            currentOffset = 0;
-            ui->labelStatus->setText("Chat history cleared.");
-        } else {
-            QMessageBox::warning(this, "Error", "Failed to clear chat history.");
-        }
+    const QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        tr("Confirm Clear"),
+        tr("Are you sure you want to delete all chat messages?"),
+        QMessageBox::Yes | QMessageBox::No
+        );
+
+    if (reply != QMessageBox::Yes)
+        return;
+
+    if (messageStore->clearMessages()) {
+        ui->textEditChat->clear();
+        currentOffset = 0;
+        ui->labelStatus->setText(tr("Chat history cleared."));
+    } else {
+        QMessageBox::warning(this, tr("Error"), tr("Failed to clear chat history."));
     }
 } //on_pushButtonDeleteDatabase_clicked
