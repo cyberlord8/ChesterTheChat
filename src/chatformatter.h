@@ -66,14 +66,12 @@ public:
      * @param user The name of the user who sent the message.
      * @param message The content of the message.
      * @param timestamp The time the message was sent.
-     * @param isDarkThemed Whether the UI is using a dark theme.
      * @param isSent Whether the message was sent by the local user.
      */
     void appendMessage(QTextEdit *textEdit,
                        const QString &user,
                        const QString &message,
                        const QDateTime &timestamp,
-                       // bool isDarkThemed,
                        bool isSent);
 
 private:
