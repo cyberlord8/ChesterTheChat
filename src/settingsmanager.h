@@ -20,8 +20,9 @@
 #define SETTINGSMANAGER_H
 
 #include <QObject>
-#include <QSettings>
+#include <QString>
 
+class QString;
 /**
  * @struct Settings
  * @brief Represents user-configurable application settings.

@@ -1,16 +1,22 @@
 #include "StyleRotator.h"
 #include "src/debugmacros.h"
 
+#include <QComboBox>
+
 StyleRotator::StyleRotator(QComboBox *comboBox, QMap<QString, QString> styleMap, QObject *parent)
     : QObject(parent)
     , comboBox(comboBox)
     , styleSheetMap(styleMap)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     connect(&rotateTimer, &QTimer::timeout, this, &StyleRotator::applyNextStyle);
 }//StyleRotator
 
 void StyleRotator::start()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (styleSheetMap.isEmpty())
         return;
     currentIndex = 0;
@@ -20,11 +26,15 @@ void StyleRotator::start()
 
 void StyleRotator::stop()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     rotateTimer.stop();
 }//stop
 
 void StyleRotator::applyNextStyle()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (styleSheetMap.isEmpty())
         return;
 

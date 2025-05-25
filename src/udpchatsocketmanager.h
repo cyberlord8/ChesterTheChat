@@ -19,12 +19,12 @@
 #ifndef UDPCHATSOCKETMANAGER_H
 #define UDPCHATSOCKETMANAGER_H
 
-#include "globals.h"
-
-#include <QDateTime>
-#include <QHostAddress>
 #include <QObject>
-#include <QUdpSocket>
+#include <QDateTime>
+
+class QHostAddress;
+class QUdpSocket;
+
 /**
  * @class UdpChatSocketManager
  * @brief Manages sending and receiving of UDP chat messages.

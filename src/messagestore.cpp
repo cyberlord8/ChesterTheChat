@@ -28,6 +28,8 @@ MessageStore::MessageStore(const QString &dbPath, int m_instanceID, QObject *par
     : QObject(parent)
     , m_connectionName(QString("chatdb_connection_%1").arg(m_instanceID))
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
         qCritical() << "[MessageStore] SQLite driver not available!";
         return;
@@ -43,6 +45,8 @@ MessageStore::MessageStore(const QString &dbPath, int m_instanceID, QObject *par
 
 MessageStore::~MessageStore()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!QSqlDatabase::contains(m_connectionName))
         return;
 
@@ -60,16 +64,22 @@ MessageStore::~MessageStore()
 
 void MessageStore::logDatabaseOpenError() const
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     qCritical() << "[MessageStore] Failed to open database:" << db.lastError().text();
 }//logDatabaseOpenError
 
 bool MessageStore::open()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     return initializeConnection() && initializeSchema();
 }//open
 
 bool MessageStore::initializeConnection()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!db.open()) {
         logDatabaseOpenError();
         return false;
@@ -79,6 +89,8 @@ bool MessageStore::initializeConnection()
 
 bool MessageStore::initializeSchema()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const QString createSql = R"(
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,6 +112,8 @@ bool MessageStore::initializeSchema()
 
 bool MessageStore::initializeSchemaWithVersioning()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QSqlQuery query(conn());
 
     // 1. Create meta table if it doesn't exist
@@ -164,6 +178,8 @@ bool MessageStore::initializeSchemaWithVersioning()
 
 void MessageStore::insertMessage(const QString &user, const QString &text, const QDateTime &timestamp, bool isSent)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QSqlQuery query(conn());
     query.prepare(R"(
         INSERT INTO messages (user, text, timestamp, is_sent)
@@ -182,6 +198,8 @@ void MessageStore::insertMessage(const QString &user, const QString &text, const
 
 Message MessageStore::extractMessageFromQuery(const QSqlQuery &query) const
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     Message m;
     m.user = query.value(0).toString();
     m.text = query.value(1).toString();
@@ -192,6 +210,8 @@ Message MessageStore::extractMessageFromQuery(const QSqlQuery &query) const
 
 QList<Message> MessageStore::fetchLastMessages(int count)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QList<Message> messages;
     QSqlQuery query(conn());
 
@@ -218,6 +238,8 @@ QList<Message> MessageStore::fetchLastMessages(int count)
 
 QList<Message> MessageStore::fetchMessages(int offset, int limit)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QList<Message> messages;
     QSqlQuery query(conn());
 
@@ -245,12 +267,16 @@ QList<Message> MessageStore::fetchMessages(int offset, int limit)
 
 int MessageStore::messageCount() const
 {
+    // LOG_DEBUG(Q_FUNC_INFO);
+
     QSqlQuery query("SELECT COUNT(*) FROM messages", conn());
     return query.next() ? query.value(0).toInt() : 0;
 } //messageCount
 
 bool MessageStore::clearMessages()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QSqlQuery query("DELETE FROM messages", conn());
     if (!query.exec()) {
         qWarning() << "[MessageStore] Failed to clear messages:" << query.lastError().text();

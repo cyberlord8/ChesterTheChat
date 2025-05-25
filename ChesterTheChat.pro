@@ -35,6 +35,7 @@ HEADERS += \
     src/udpchatsocketmanager.h \
     src/version.h \
     src/toastnotification.h \
+    structures.h \
     todo.h
 
 SOURCES += \

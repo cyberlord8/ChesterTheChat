@@ -22,8 +22,9 @@
 #include <QObject>
 #include <QTextCursor>
 #include <QDateTime>
+#include <QTextEdit>
 
-class QTextEdit;
+// class QTextEdit;
 
 /**
  * @class ChatFormatter

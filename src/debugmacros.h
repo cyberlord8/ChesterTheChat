@@ -4,18 +4,24 @@
 #include <QDebug>
 #include <QDateTime>
 
+#define I_NEED_HELP
+// #define ENABLE_VERBOSE_DEBUG
+
 /**
  * @brief Macro for debug logging with timestamp and function info.
  *
  * In Debug builds (QT_DEBUG defined), expands to qDebug() output with time + function name.
  * In Release builds, expands to nothing.
  */
+#ifdef I_NEED_HELP
 #ifdef QT_DEBUG
 #define LOG_DEBUG(msg) qDebug() << QDateTime::currentDateTime().toString("mm:ss.zz") << Q_FUNC_INFO << msg
 #else
 #define LOG_DEBUG(msg) do {} while(0)
 #endif
-
+#else
+#define LOG_DEBUG(msg) do {} while(0)
+#endif
 /**
  * @brief Macro for *verbose* debug logging.
  *

@@ -19,11 +19,9 @@
 #ifndef MESSAGESTORE_H
 #define MESSAGESTORE_H
 
-#include <QObject>
+#include "structures.h"
+
 #include <QSqlDatabase>
-#include <QDateTime>
-#include <QList>
-#include "globals.h"
 
 /**
  * @class MessageStore

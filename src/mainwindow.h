@@ -19,19 +19,20 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "globals.h"
+// #include "globals.h"
 
 #include "chatformatter.h"
 #include "messagestore.h"
 #include "settingsmanager.h"
-#include "toastnotification.h"
 #include "udpchatsocketmanager.h"
 
 #include "DemoChatSimulator.h"
 #include "StyleRotator.h"
 
-#include <QScrollBar>
-#include <QWheelEvent>
+#include <QMainWindow>
+#include <QObject>
+
+class QScrollBar;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

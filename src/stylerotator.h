@@ -2,10 +2,11 @@
 #define STYLEROTATOR_H
 
 #include <QObject>
-#include <QTimer>
-#include <QComboBox>
-#include <QStringList>
 #include <QMap>
+#include <QTimer>
+
+class QComboBox;
+class QString;
 
 /**
  * @class StyleRotator

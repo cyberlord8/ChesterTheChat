@@ -14,11 +14,15 @@ DemoChatSimulator::DemoChatSimulator(QTextEdit *display, ChatFormatter *formatte
     , chatDisplay(display)
     , formatter(formatter)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     connect(&messageTimer, &QTimer::timeout, this, &DemoChatSimulator::showNextMessage);
 }//DemoChatSimulator
 
 bool DemoChatSimulator::startDemo()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!queueMessages())
         return false;
 
@@ -36,6 +40,8 @@ void DemoChatSimulator::stopDemo()
 
 void DemoChatSimulator::loadDemoFileList(const QString &directory)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QDir dir(directory);
     if (!dir.exists()) {
         qWarning() << "[DemoChatSimulator] Directory not found:" << directory;
@@ -54,6 +60,8 @@ void DemoChatSimulator::loadDemoFileList(const QString &directory)
 
 bool DemoChatSimulator::queueMessages()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const QString demoDir = QCoreApplication::applicationDirPath() + "/demofiles";
 
     demoFiles.clear();
@@ -81,6 +89,8 @@ bool DemoChatSimulator::queueMessages()
 
 void DemoChatSimulator::showNextMessage()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (currentIndex >= messageQueue.size()) {
         messageTimer.stop();
 
@@ -133,6 +143,8 @@ void DemoChatSimulator::showNextMessage()
 
 int DemoChatSimulator::calculateDynamicDelay(const QString &text) const
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const int baseDelay = 500;
     const double readSpeedCharsPerSec = 5.0;
 
@@ -145,6 +157,8 @@ int DemoChatSimulator::calculateDynamicDelay(const QString &text) const
 } //calculateDynamicDelay
 
 void DemoChatSimulator::loadMessagesFromCsv(const QString &filePath) {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "[DemoChatSimulator] Failed to open CSV:" << filePath;

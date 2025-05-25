@@ -25,10 +25,13 @@ ChatFormatter::ChatFormatter(QObject *parent)
     : QObject(parent)
 {
     LOG_DEBUG(Q_FUNC_INFO);
+
 }
 
 int ChatFormatter::calculateDynamicMargin(QTextCursor &cursor, double percent, int fallback) const
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QTextEdit *edit = qobject_cast<QTextEdit *>(cursor.document()->parent());
     int editorWidth = edit ? edit->viewport()->width() : fallback;
     return static_cast<int>(editorWidth * percent);
@@ -36,6 +39,8 @@ int ChatFormatter::calculateDynamicMargin(QTextCursor &cursor, double percent, i
 
 void ChatFormatter::insertBlock(QTextCursor &cursor, bool isSent)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QTextBlockFormat blockFmt;
     blockFmt.setAlignment(isSent ? Qt::AlignRight : Qt::AlignLeft);
 
@@ -53,6 +58,8 @@ void ChatFormatter::insertBlock(QTextCursor &cursor, bool isSent)
 
 QColor ChatFormatter::generateUserColor(const QString &user)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!userColorMap.contains(user)) {
         userColorMap.insert(user, generateColorForUser(user));
     }
@@ -61,11 +68,15 @@ QColor ChatFormatter::generateUserColor(const QString &user)
 
 QColor ChatFormatter::resolveUserColor(const QString &user, bool isSent)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     return isSent ? QColorConstants::Cyan : generateUserColor(user);
 }
 
 void ChatFormatter::insertUserLine(QTextCursor &cursor, const QString &user, const QColor &color)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QTextCharFormat fmt;
     fmt.setForeground(color);
     fmt.setFontWeight(QFont::Bold);
@@ -76,6 +87,8 @@ void ChatFormatter::insertUserLine(QTextCursor &cursor, const QString &user, con
 
 void ChatFormatter::insertMessageLine(QTextCursor &cursor, const QString &message)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QTextCharFormat fmt;
     // fmt.setForeground(isDark ? Qt::white : Qt::black);
     fmt.setFontPointSize(14);
@@ -85,6 +98,8 @@ void ChatFormatter::insertMessageLine(QTextCursor &cursor, const QString &messag
 
 void ChatFormatter::insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, const bool &isDark)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QTextCharFormat fmt;
     fmt.setForeground(isDark ? Qt::gray : Qt::darkGray);
 
@@ -97,6 +112,8 @@ void ChatFormatter::insertTimestampLine(QTextCursor &cursor, const QDateTime &ts
 
 void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, const QString &message, const QDateTime &timestamp, bool isSent)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QTextCursor cursor = textEdit->textCursor();
     cursor.movePosition(QTextCursor::End);
 
@@ -121,6 +138,8 @@ void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, cons
 
 void ChatFormatter::insertLastReadMarker(QTextEdit *textEdit)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!textEdit)
         return;
 
@@ -142,6 +161,8 @@ void ChatFormatter::insertLastReadMarker(QTextEdit *textEdit)
 
 QColor ChatFormatter::generateColorForUser(const QString &user)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     // deterministic hash → HSV color
     QByteArray data = user.toUtf8();
     size_t hash = qHash(data);
