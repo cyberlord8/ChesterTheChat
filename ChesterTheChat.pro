@@ -33,7 +33,8 @@ HEADERS += \
     src/stylerotator.h \
     src/udpchatsocketmanager.h \
     src/version.h \
-    src/toastnotification.h
+    src/toastnotification.h \
+    todo.h
 
 SOURCES += \
     src/demochatsimulator.cpp \
