@@ -962,8 +962,10 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
         ui->pushButtonStartStopDemo->setText("Stop Demo Mode");
         ui->labelStatus->setText("Demo Mode Running");
 
-        ui->pushButtonConnect->setEnabled(false);
-        ui->frameUDPParameters->setEnabled(false);
+        ui->pushButtonConnect->setEnabled(!isDemoRunning);
+        ui->frameUDPParameters->setEnabled(!isDemoRunning);
+
+        ui->frameChatSend->setEnabled(!isDemoRunning);
 
         ui->labelStatus->setText(tr("Running demo..."));
         ui->tabWidget->setTabEnabled(0, true);
@@ -982,7 +984,11 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
         realStyleSheetName.clear();
 
         // Restore network controls
-        ui->pushButtonConnect->setEnabled(true);
-        ui->frameUDPParameters->setEnabled(true);
+        ui->pushButtonConnect->setEnabled(!isDemoRunning);
+        ui->frameUDPParameters->setEnabled(!isDemoRunning);
+
+        ui->frameChatSend->setEnabled(!isDemoRunning);
+
+        ui->tabWidget->setTabEnabled(0, false);
     }
 } //
