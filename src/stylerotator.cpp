@@ -29,12 +29,18 @@ void StyleRotator::applyNextStyle()
 
     static uint index = 0;
     while (!styleSheetMap.value(styleSheetMap.keys().at(index)).contains("/Chester/")) {
+
         index++;
 
-        if(index >= styleSheetMap.size())
+        if(index >= styleSheetMap.size()){
             index = 0;
+        }
     }
 
     qDebug() << "Loading demo stylesheet:" << styleSheetMap.value(styleSheetMap.keys().at(index));
     comboBox->setCurrentText(styleSheetMap.keys().at(index++));
+
+    if(index >= styleSheetMap.size()){
+        index = 0;
+    }
 }//applyNextStyle
