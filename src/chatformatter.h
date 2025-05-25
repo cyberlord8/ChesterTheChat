@@ -20,23 +20,8 @@
 #define CHATFORMATTER_H
 
 #include <QObject>
-#include <QMap>
-#include <QColor>
-#include <QString>
-#include <QDateTime>
-#include <QRegularExpression>
-#include <QRegularExpressionMatch>
-#include <QCryptographicHash>
-#include <QPalette>
-#include <QTextBlockFormat>
-#include <QTextCharFormat>
 #include <QTextCursor>
-#include <QTextEdit>
-#include <QtGlobal>
-#include <QTimer>
-#include <QTextBlock>
-
-#include "settingsmanager.h"
+#include <QDateTime>
 
 class QTextEdit;
 
@@ -74,7 +59,14 @@ public:
                        const QDateTime &timestamp,
                        bool isSent);
 
+    /**
+ * @brief Inserts a visual 'Last Read' marker into the chat window.
+ * @param textEdit Pointer to the QTextEdit to insert into.
+ */
+    void insertLastReadMarker(QTextEdit *textEdit);
+
 private:
+
     /**
  * @brief Stores the cursor position for the last message that may need a delayed timestamp.
  */

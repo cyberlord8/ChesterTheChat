@@ -49,6 +49,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    void changeEvent(QEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
 
@@ -545,6 +548,20 @@ private:
  * stylesheet, re-enables network UI controls, and resets the tab state.
  */
     void stopDemoModeUiReset();
+
+    /**
+ * @brief Checks whether the application window is currently visible and in focus.
+ *
+ * Determines if the main window is active and not minimized or obscured. This is used
+ * to decide whether to insert UI elements like the "Last Read" marker, which should only
+ * appear when the user has been away from the chat.
+ *
+ * @return True if the application is visible and active; false otherwise.
+ */
+    bool isAppVisible();
+
+    /** @brief True if the last read marker has already been inserted during this visibility lapse. */
+    bool lastReadMarkerInserted = false;
 
 private slots:
 

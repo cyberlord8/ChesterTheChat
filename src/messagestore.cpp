@@ -17,6 +17,7 @@
  */
 
 #include "messagestore.h"
+#include "src/debugmacros.h"
 
 #include <QDebug>
 #include <QSqlError>

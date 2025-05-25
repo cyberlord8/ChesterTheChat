@@ -17,6 +17,8 @@
  */
 
 #include "UdpChatSocketManager.h"
+#include "src/debugmacros.h"
+
 #include <QNetworkDatagram>
 #include <QStringList>
 #include <QDateTime>

@@ -24,6 +24,7 @@ FORMS += \
     src/mainwindow.ui
 
 HEADERS += \
+    src/debugmacros.h \
     src/demochatsimulator.h \
     src/messagestore.h \
     src/chatformatter.h \

@@ -1,4 +1,5 @@
 #include "StyleRotator.h"
+#include "src/debugmacros.h"
 
 StyleRotator::StyleRotator(QComboBox *comboBox, QMap<QString, QString> styleMap, QObject *parent)
     : QObject(parent)

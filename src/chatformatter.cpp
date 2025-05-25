@@ -16,14 +16,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ChatFormatter.h"
+#include "chatformatter.h"
+#include "src/debugmacros.h"
 
-#include "qapplication.h"
-#include "qtextcursor.h"
+#include <QTextEdit>
 
 ChatFormatter::ChatFormatter(QObject *parent)
     : QObject(parent)
-{}
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+}
 
 int ChatFormatter::calculateDynamicMargin(QTextCursor &cursor, double percent, int fallback) const
 {
@@ -115,7 +117,28 @@ void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, cons
     insertTimestampLine(cursor, timestamp, textEdit->font(), isDark);
 
     textEdit->setTextCursor(cursor);
-} //appendMessage
+}//appendMessage
+
+void ChatFormatter::insertLastReadMarker(QTextEdit *textEdit)
+{
+    if (!textEdit)
+        return;
+
+    QTextCursor cursor = textEdit->textCursor();
+    cursor.movePosition(QTextCursor::End);
+
+    QTextBlockFormat blockFmt;
+    blockFmt.setAlignment(Qt::AlignHCenter);
+    cursor.insertBlock(blockFmt);
+
+    QTextCharFormat charFmt;
+    charFmt.setForeground(Qt::red);
+    charFmt.setFontItalic(true);
+    charFmt.setFontPointSize(10);
+
+    cursor.insertText("──────────── Last Read ────────────\n", charFmt);
+    textEdit->setTextCursor(cursor);
+}//insertLastReadMarker
 
 QColor ChatFormatter::generateColorForUser(const QString &user)
 {

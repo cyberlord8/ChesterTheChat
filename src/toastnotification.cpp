@@ -17,6 +17,8 @@
  */
 
 #include "ToastNotification.h"
+#include "src/debugmacros.h"
+
 #include <QVBoxLayout>
 #include <QApplication>
 #include <QScreen>

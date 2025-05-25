@@ -18,6 +18,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "src/debugmacros.h"
 
 QString MainWindow::buildVersionSuffix(const QString &version) const
 {
@@ -464,6 +465,11 @@ void MainWindow::initializeUi()
     ui->textEditChat->verticalScrollBar()->installEventFilter(this);
 } //initializeUi
 
+bool MainWindow::isAppVisible()
+{
+    return !(isMinimized() || !isVisible() || !isActiveWindow());
+} //isAppVisible
+
 void MainWindow::connectSignals()
 {
     connect(ui->textEditChat->verticalScrollBar(), &QScrollBar::valueChanged, this, &MainWindow::onChatScrollBarChanged);
@@ -471,10 +477,21 @@ void MainWindow::connectSignals()
     connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
         const QDateTime timestamp = QDateTime::currentDateTimeUtc();
         messageStore->insertMessage(user, msg, timestamp, false);
+
+        bool isApplicationVisible = isAppVisible();
+        if (!isApplicationVisible && !lastReadMarkerInserted && !isApplicationStarting) {
+            redrawCurrentMessages();
+
+            m_formatter->insertLastReadMarker(ui->textEditChat);
+            lastReadMarkerInserted = true;
+            ui->labelStatus->setText("You have unread messages!");
+        }
+
         m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, false);
+
         ui->textEditChat->moveCursor(QTextCursor::End);
 
-        if (isMinimized() || !isVisible() || !isActiveWindow()) {
+        if (!isAppVisible()) {
             QApplication::alert(this, 3000);
             new ToastNotification(QString("%1: %2").arg(user, msg), this);
         }
@@ -537,7 +554,8 @@ MainWindow::MainWindow(QWidget *parent)
     userNameSaveDebounceTimer.setSingleShot(true);
     connect(&userNameSaveDebounceTimer, &QTimer::timeout, this, [this]() { settingsManager->save(configSettings); });
 
-    isApplicationStarting = false;
+    QTimer::singleShot(5000, this, [this]() { isApplicationStarting = false; });
+
 } //MainWindow
 
 MainWindow::~MainWindow()
@@ -556,6 +574,19 @@ MainWindow::~MainWindow()
     delete ui;
     ui = nullptr;
 } //~MainWindow
+
+void MainWindow::changeEvent(QEvent *event)
+{
+    QMainWindow::changeEvent(event);
+
+    if (event->type() == QEvent::WindowStateChange || event->type() == QEvent::ActivationChange || event->type() == QEvent::Show) {
+        if (!isApplicationStarting && isAppVisible()) {
+            lastReadMarkerInserted = false;
+        }
+    }
+
+    // event->ignore();
+} //changeEvent
 
 QByteArray MainWindow::buildRawUdpPayload(const QString &user, const QString &msg) const
 {

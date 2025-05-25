@@ -1,4 +1,8 @@
 #include "DemoChatSimulator.h"
+#include "src/debugmacros.h"
+
+#include <QCoreApplication>
+#include <QRegularExpression>
 
 DemoChatSimulator::DemoChatSimulator(QTextEdit *display, ChatFormatter *formatter, QObject *parent)
     : QObject(parent)
