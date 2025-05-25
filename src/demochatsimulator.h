@@ -1,21 +1,9 @@
 #ifndef DEMOCHATSIMULATOR_H
 #define DEMOCHATSIMULATOR_H
 
-#include <QObject>
-#include <QTimer>
-#include <QTextEdit>
-#include <QDateTime>
-
-#include <QDir>
-#include <QFile>
-#include <QFileInfoList>
-
-#include <QTextStream>
-#include <QDebug>
-
-#include <QRandomGenerator>
-
 #include "chatformatter.h"
+
+#include <QTimer>
 
 /**
  * @class DemoChatSimulator

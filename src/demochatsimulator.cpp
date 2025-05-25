@@ -3,6 +3,11 @@
 
 #include <QCoreApplication>
 #include <QRegularExpression>
+#include <QDir>
+#include <QFileInfoList>
+#include <QFileInfo>
+#include <QTextEdit>
+#include <QRandomGenerator>
 
 DemoChatSimulator::DemoChatSimulator(QTextEdit *display, ChatFormatter *formatter, QObject *parent)
     : QObject(parent)
