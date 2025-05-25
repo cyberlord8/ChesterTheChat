@@ -24,16 +24,16 @@
 bool UdpChatSocketManager::isConnected() const {
     return (sendSocket && sendSocket->state() == QAbstractSocket::BoundState) &&
            (recvSocket && recvSocket->state() == QAbstractSocket::BoundState);
-}//
+}//isConnected
 
 UdpChatSocketManager::UdpChatSocketManager(QObject *parent)
     : QObject(parent)
-{}
+{}//UdpChatSocketManager
 
 UdpChatSocketManager::~UdpChatSocketManager()
 {
     closeSockets();
-}
+}//UdpChatSocketManager
 
 bool UdpChatSocketManager::bindSendSocket(const QHostAddress &localAddress)
 {

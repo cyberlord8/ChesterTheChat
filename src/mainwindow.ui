@@ -14,21 +14,21 @@
    <string>FIX ME</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0">
     <property name="spacing">
-     <number>20</number>
+     <number>0</number>
     </property>
     <property name="leftMargin">
-     <number>20</number>
+     <number>0</number>
     </property>
     <property name="topMargin">
-     <number>20</number>
+     <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>20</number>
+     <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>20</number>
+     <number>0</number>
     </property>
     <item>
      <widget class="QTabWidget" name="tabWidget">
@@ -67,7 +67,7 @@
           <item>
            <widget class="QTextEdit" name="textEditChat">
             <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
+             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
             </property>
            </widget>
           </item>

@@ -39,6 +39,8 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+#define NUM_MSGS_PER_PAGE 20
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -121,7 +123,7 @@ private:
     /**
      * @brief Number of messages to load per page during scroll events.
      */
-    const int messagesPerPage = 20;
+    const int messagesPerPage = NUM_MSGS_PER_PAGE;
 
     /**
      * @brief True if messages are currently being loaded, used to prevent reentrant loads.
@@ -372,14 +374,6 @@ private:
     QString readStyleSheetFile(const QString &path);
 
     /**
-     * @brief Detects whether a stylesheet specifies a dark or light theme.
-     * Uses a comment in the format: `theme: dark`.
-        * @param styleSheet The stylesheet content to analyze.
-            * @return True if dark theme is detected, false otherwise.
-                */
-    bool extractThemeFromStyleSheet(const QString &styleSheet) const;
-
-    /**
      * @brief Returns the current chat background style string based on user settings.
      * @return A QString with valid CSS style for QTextEdit background.
      */
@@ -535,6 +529,22 @@ private:
  */
     void startDemoMode();
 
+    /**
+ * @brief Updates UI and internal state to reflect demo mode activation.
+ *
+ * This function is called after the demo simulator has been successfully started.
+ * It disables network interaction, enables the demo tab, updates button labels,
+ * and begins automatic style rotation.
+ */
+    void startDemoModeUiSetup();
+
+    /**
+ * @brief Reverts UI and internal state after stopping demo mode.
+ *
+ * This function stops the demo simulator and style rotator, restores the original
+ * stylesheet, re-enables network UI controls, and resets the tab state.
+ */
+    void stopDemoModeUiReset();
 
 private slots:
 

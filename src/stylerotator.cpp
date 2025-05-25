@@ -6,7 +6,7 @@ StyleRotator::StyleRotator(QComboBox *comboBox, QMap<QString, QString> styleMap,
     , styleSheetMap(styleMap)
 {
     connect(&rotateTimer, &QTimer::timeout, this, &StyleRotator::applyNextStyle);
-}
+}//StyleRotator
 
 void StyleRotator::start()
 {
@@ -15,12 +15,12 @@ void StyleRotator::start()
     currentIndex = 0;
     applyNextStyle();
     rotateTimer.start(10000);
-}
+}//start
 
 void StyleRotator::stop()
 {
     rotateTimer.stop();
-}
+}//stop
 
 void StyleRotator::applyNextStyle()
 {
@@ -33,12 +33,8 @@ void StyleRotator::applyNextStyle()
 
         if(index >= styleSheetMap.size())
             index = 0;
-
     }
 
     qDebug() << "Loading demo stylesheet:" << styleSheetMap.value(styleSheetMap.keys().at(index));
     comboBox->setCurrentText(styleSheetMap.keys().at(index++));
-
-    // comboBox->setCurrentText(styleKeys[currentIndex]);
-    // currentIndex = (currentIndex + 1) % styleKeys.size();
-}
+}//applyNextStyle

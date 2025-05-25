@@ -65,7 +65,7 @@ void MessageStore::logDatabaseOpenError() const
 bool MessageStore::open()
 {
     return initializeConnection() && initializeSchema();
-}//
+}//open
 
 bool MessageStore::initializeConnection()
 {
@@ -74,7 +74,7 @@ bool MessageStore::initializeConnection()
         return false;
     }
     return true;
-}//
+}//initializeConnection
 
 bool MessageStore::initializeSchema()
 {

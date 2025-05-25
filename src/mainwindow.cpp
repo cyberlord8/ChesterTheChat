@@ -348,7 +348,6 @@ void MainWindow::displayMessages(const QList<Message> &messages)
                                    showUserName ? msg.user : "",
                                    msg.text,
                                    msg.timestamp,
-                                   // configSettings.b_isDarkThemed,
                                    msg.isSentByMe);
     }
 } //displayMessages
@@ -459,7 +458,6 @@ void MainWindow::initializeManagers()
     m_formatter = new ChatFormatter(this);
 
     demoSimulator = new DemoChatSimulator(ui->textEditChat, m_formatter, this);
-
 } //initializeManagers
 
 void MainWindow::initializeUi()
@@ -481,7 +479,6 @@ void MainWindow::connectSignals()
                                    user,
                                    msg,
                                    timestamp,
-                                   // configSettings.b_isDarkThemed,
                                    false);
         ui->textEditChat->moveCursor(QTextCursor::End);
 
@@ -521,7 +518,7 @@ void MainWindow::initializeDatabase()
         return;
     }
 
-    const QList<Message> messages = messageStore->fetchLastMessages(20);
+    const QList<Message> messages = messageStore->fetchLastMessages(messagesPerPage);
 
     currentOffset = messageStore->messageCount() - messages.size();
     displayMessages(messages);
@@ -582,7 +579,6 @@ void MainWindow::storeAndDisplaySentMessage(const QString &user, const QString &
                                user,
                                msg,
                                timestamp,
-                               // configSettings.b_isDarkThemed,
                                true);
 } //storeAndDisplaySentMessage
 
@@ -819,19 +815,6 @@ QString MainWindow::readStyleSheetFile(const QString &path)
     return content;
 } //readStyleSheetFile
 
-bool MainWindow::extractThemeFromStyleSheet(const QString &styleSheet) const
-{
-    QRegularExpression themeRegex(R"(/\*\s*theme:\s*(dark|light)\s*\*/)", QRegularExpression::CaseInsensitiveOption);
-    QRegularExpressionMatch match = themeRegex.match(styleSheet);
-
-    if (match.hasMatch()) {
-        const QString theme = match.captured(1).toLower();
-        return theme == "dark";
-    }
-
-    return false; // Default to light
-} //extractThemeFromStyleSheet
-
 void MainWindow::redrawCurrentMessages()
 {
     const QList<Message> messages = messageStore->fetchMessages(visibleOffset, visibleLimit);
@@ -854,10 +837,6 @@ void MainWindow::loadStyleSheet()
         ui->checkBoxLoadStyleSheet->setChecked(false);
         return;
     }
-
-    // configSettings.b_isDarkThemed = extractThemeFromStyleSheet(styleSheetContent);
-    // if (demoSimulator && isDemoRunning)
-    //     demoSimulator->setThemeDark(configSettings.b_isDarkThemed);
 
     QTimer::singleShot(0, this, [this, styleSheetContent]() {
         qApp->setStyleSheet(styleSheetContent);
@@ -936,6 +915,46 @@ void MainWindow::on_pushButtonDeleteDatabase_clicked()
     }
 } //on_pushButtonDeleteDatabase_clicked
 
+void MainWindow::startDemoModeUiSetup()
+{
+    isDemoRunning = true;
+    styleRotator->start();
+
+    ui->pushButtonStartStopDemo->setText("Stop Demo Mode");
+    ui->labelStatus->setText("Demo Mode Running");
+
+    ui->pushButtonConnect->setEnabled(false);
+    ui->frameUDPParameters->setEnabled(false);
+    ui->frameChatSend->setEnabled(false);
+
+    ui->labelStatus->setText(tr("Running demo..."));
+    ui->tabWidget->setTabEnabled(0, true);
+    ui->tabWidget->setCurrentIndex(0);
+}//startDemoModeUiSetup
+
+void MainWindow::stopDemoModeUiReset()
+{
+    demoSimulator->stopDemo();
+    styleRotator->stop();
+
+    ui->pushButtonStartStopDemo->setText("Start Demo Mode");
+    ui->labelStatus->setText("Demo Mode Stopped");
+
+    isDemoRunning = false;
+
+    configSettings.stylesheetName = QStyleSheetMap.key(realStyleSheetName);
+    ui->comboBoxSelectStyleSheet->setCurrentText(realStyleSheetName);
+    setStyleSheet();
+    redrawCurrentMessages();
+    realStyleSheetName.clear();
+
+    ui->pushButtonConnect->setEnabled(true);
+    ui->frameUDPParameters->setEnabled(true);
+    ui->frameChatSend->setEnabled(true);
+
+    ui->tabWidget->setTabEnabled(0, false);
+}//stopDemoModeUiReset
+
 void MainWindow::on_pushButtonStartStopDemo_clicked()
 {
     if (!demoSimulator || !styleRotator || !udpManager)
@@ -946,6 +965,7 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
             QMessageBox::warning(this, tr("Cannot Start Demo"), tr("Please disconnect from the UDP session before starting demo mode."));
             return;
         }
+
         if (realStyleSheetName.isEmpty()) {
             realStyleSheetName = QStyleSheetMap.key(configSettings.stylesheetName);
         }
@@ -956,39 +976,9 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
             QMessageBox::warning(this, tr("Demo Start Failed"), tr("No demo files found or all files are empty.\nPlease check the 'demofiles' folder."));
             return;
         }
-        isDemoRunning = true;
 
-        styleRotator->start();
-        ui->pushButtonStartStopDemo->setText("Stop Demo Mode");
-        ui->labelStatus->setText("Demo Mode Running");
-
-        ui->pushButtonConnect->setEnabled(!isDemoRunning);
-        ui->frameUDPParameters->setEnabled(!isDemoRunning);
-
-        ui->frameChatSend->setEnabled(!isDemoRunning);
-
-        ui->labelStatus->setText(tr("Running demo..."));
-        ui->tabWidget->setTabEnabled(0, true);
-        ui->tabWidget->setCurrentIndex(0);
+        startDemoModeUiSetup();
     } else {
-        demoSimulator->stopDemo();
-        styleRotator->stop();
-        ui->pushButtonStartStopDemo->setText("Start Demo Mode");
-        ui->labelStatus->setText("Demo Mode Stopped");
-        isDemoRunning = false;
-
-        configSettings.stylesheetName = QStyleSheetMap.key(realStyleSheetName);
-        ui->comboBoxSelectStyleSheet->setCurrentText(realStyleSheetName);
-        setStyleSheet();
-        redrawCurrentMessages();
-        realStyleSheetName.clear();
-
-        // Restore network controls
-        ui->pushButtonConnect->setEnabled(!isDemoRunning);
-        ui->frameUDPParameters->setEnabled(!isDemoRunning);
-
-        ui->frameChatSend->setEnabled(!isDemoRunning);
-
-        ui->tabWidget->setTabEnabled(0, false);
+        stopDemoModeUiReset();
     }
-} //
+}//on_pushButtonStartStopDemo_clicked

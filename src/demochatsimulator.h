@@ -53,11 +53,11 @@ public:
      */
     void stopDemo();
 
-    void setThemeDark(bool dark);
+    // void setThemeDark(bool dark);
 
 private:
 
-    bool isDarkTheme = false;
+    // bool isDarkTheme = false;
 
 
     /**
