@@ -344,11 +344,7 @@ void MainWindow::displayMessages(const QList<Message> &messages)
         bool showUserName = (msg.user != previousUser);
         previousUser = msg.user;
 
-        m_formatter->appendMessage(ui->textEditChat,
-                                   showUserName ? msg.user : "",
-                                   msg.text,
-                                   msg.timestamp,
-                                   msg.isSentByMe);
+        m_formatter->appendMessage(ui->textEditChat, showUserName ? msg.user : "", msg.text, msg.timestamp, msg.isSentByMe);
     }
 } //displayMessages
 
@@ -475,11 +471,7 @@ void MainWindow::connectSignals()
     connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
         const QDateTime timestamp = QDateTime::currentDateTimeUtc();
         messageStore->insertMessage(user, msg, timestamp, false);
-        m_formatter->appendMessage(ui->textEditChat,
-                                   user,
-                                   msg,
-                                   timestamp,
-                                   false);
+        m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, false);
         ui->textEditChat->moveCursor(QTextCursor::End);
 
         if (isMinimized() || !isVisible() || !isActiveWindow()) {
@@ -550,6 +542,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    if (isDemoRunning)
+        on_pushButtonStartStopDemo_clicked();
+
     if (settingsManager) {
         userNameSaveDebounceTimer.stop();
         settingsManager->save(configSettings);
@@ -575,11 +570,7 @@ bool MainWindow::sendUdpMessage(const QByteArray &data, const QHostAddress &addr
 void MainWindow::storeAndDisplaySentMessage(const QString &user, const QString &msg, const QDateTime &timestamp)
 {
     messageStore->insertMessage(user, msg, timestamp, true);
-    m_formatter->appendMessage(ui->textEditChat,
-                               user,
-                               msg,
-                               timestamp,
-                               true);
+    m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, true);
 } //storeAndDisplaySentMessage
 
 void MainWindow::on_pushButtonSend_clicked()
@@ -840,10 +831,9 @@ void MainWindow::loadStyleSheet()
 
     QTimer::singleShot(0, this, [this, styleSheetContent]() {
         qApp->setStyleSheet(styleSheetContent);
-        if (!isDemoRunning){
+        if (!isDemoRunning) {
             redrawCurrentMessages();
-        }
-        else {
+        } else {
             ui->textEditChat->verticalScrollBar()->setValue(ui->textEditChat->verticalScrollBar()->maximum());
             QString styleName = QStyleSheetMap.key(configSettings.stylesheetName);
             ui->labelStatus->setText(tr("Demo running - Applied stylesheet: %1").arg(styleName));
@@ -930,7 +920,7 @@ void MainWindow::startDemoModeUiSetup()
     ui->labelStatus->setText(tr("Running demo..."));
     ui->tabWidget->setTabEnabled(0, true);
     ui->tabWidget->setCurrentIndex(0);
-}//startDemoModeUiSetup
+} //startDemoModeUiSetup
 
 void MainWindow::stopDemoModeUiReset()
 {
@@ -953,7 +943,7 @@ void MainWindow::stopDemoModeUiReset()
     ui->frameChatSend->setEnabled(true);
 
     ui->tabWidget->setTabEnabled(0, false);
-}//stopDemoModeUiReset
+} //stopDemoModeUiReset
 
 void MainWindow::on_pushButtonStartStopDemo_clicked()
 {
@@ -979,6 +969,7 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
 
         startDemoModeUiSetup();
     } else {
+        demoSimulator->stopDemo();
         stopDemoModeUiReset();
     }
-}//on_pushButtonStartStopDemo_clicked
+} //on_pushButtonStartStopDemo_clicked
