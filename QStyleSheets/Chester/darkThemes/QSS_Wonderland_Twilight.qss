@@ -1,0 +1,116 @@
+
+QWidget {
+    background-color: #231933;
+    color: #f8f5f2;
+    font-family: "Georgia", "Segoe UI", serif;
+    font-size: 10pt;
+}
+
+QWidget:disabled
+{
+    color: #583f81;
+    background-color: #7251a6;
+}
+
+/* Inputs & Chat Fields */
+QLineEdit, QTextEdit, QPlainTextEdit {
+    background-color: #2d2144;
+    color: #ffffff;
+    border: 1px solid #aa70a2;
+    border-radius: 3px;
+    selection-background-color: #bd70d2;
+    selection-color: #fff;
+    font-family: "Book Antiqua", "Palatino Linotype", "Georgia", serif;
+    font-size: 15pt;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #5a2a5d;
+    color: #f2e4f4;
+    border: 1px solid #a870d4;
+    padding: 2px 4px;
+    border-radius: 6;
+
+    font-family: "Segoe Script", "Lucida Calligraphy", "Gabriola", cursive;
+    font-size: 10pt;
+}
+
+QPushButton:hover {
+    background-color: #74397c;
+    border-color: #d187e6;
+}
+
+/* Dropdowns, checkboxes, etc. */
+QComboBox, QSpinBox, QCheckBox {
+    background-color: #2f213b;
+    color: #f8f5f2;
+    border: 1px solid #a870d4;
+    padding: 0px;
+    font-family: "Georgia", "Cambria", serif;
+    font-size: 10pt;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #39284a;
+    selection-background-color: #a870d4;
+    selection-color: white;
+}
+
+/* Tabs with Cursive Flair */
+QTabWidget::pane {
+    border: 1px solid #764f91;
+    background-color: #2b1d3a;
+}
+
+QTabBar::tab {
+    background: #3a2a4e;
+    color: #f8f5f2;
+    padding: 6px;
+    margin: 1px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-family: "Cambria", "Georgia", serif;
+    font-size: 11pt;
+}
+
+QTabBar::tab:selected {
+    background: #a870d4;
+    color: white;
+}
+
+/* Scrollbars */
+QScrollBar:vertical {
+    background: #2b1d3a;
+    width: 12px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+    background: #c483f0;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+/* Tooltips */
+QToolTip {
+    background-color: #3c2b4a;
+    color: #ffffff;
+    border: 1px solid #a870d4;
+}
+
+/* Optional: Stylize QLabel headers (e.g., usernames) */
+QLabel#usernameLabel {
+    font-family: "Segoe Script", "Comic Sans MS", "Georgia", serif;
+    font-weight: bold;
+    font-size: 11pt;
+}
+
+QTextEdit#textEditChat {
+    color: white;
+}

@@ -1,0 +1,10 @@
+UnZip and install the QStyleSheet folder under MSC
+
+Do not rename the folder or its contents.  These paths 
+are referred to in the Q StyleSheet.  The QSS_Dark_Orange sytlesheet
+requires the small .png files in the /images folder.
+
+You may (and should) add other Q StyleSheets to the MSC/QStyleSheet/..
+folder.  
+
+Select the style sheet from the settings tab in the application.

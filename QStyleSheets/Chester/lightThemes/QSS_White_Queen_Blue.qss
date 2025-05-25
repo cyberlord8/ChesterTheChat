@@ -1,0 +1,106 @@
+
+
+QWidget {
+    background-color: #F4F7FB; /* Soft silver-blue base */
+    color: #2D2D3D;
+    font-family: "Georgia", serif;
+
+}
+
+QWidget:disabled
+{
+    color: #8b8d8f;
+    background-color: #babcbf;
+}
+
+QPushButton {
+    background-color: #E6EAF5;
+    color: #2D2D3D;
+    border: 1px solid #B7BFEA;
+    padding: 2px 4px;
+    border-radius: 6;
+    font-family: "Gabriola", "Perpetua", "Segoe Script", cursive;
+    font-size: 12pt;
+}
+
+QPushButton:hover {
+    background-color: #D9DFF0;
+}
+
+QLineEdit, QTextEdit {
+    background-color: #FFFFFF;
+    color: #2D2D3D;
+    border: 1px solid #B7BFEA;
+    font-family: "Book Antiqua", "Palatino Linotype", "Cambria", serif;
+    font-size: 15pt;
+}
+
+QComboBox {
+    padding: 4px;
+    background-color: #FFFFFF;
+    border: 1px solid #B7BFEA;
+    color: #2D2D3D;
+    font-family: "Georgia", "Segoe UI", serif;
+    font-size: 11pt;
+}
+
+QComboBox QAbstractItemView {
+    border: 1px solid #B7BFEA;
+    selection-background-color: #E4E9F5;
+    selection-color: #2D2D3D;
+}
+
+QCheckBox, QRadioButton {
+    spacing: 6px;
+    color: #2D2D3D;
+    font-family: "Georgia", "Segoe UI", serif;
+    font-size: 11pt;
+}
+
+QTabWidget::pane {
+    border: 1px solid #C9D2F2;
+    background-color: #F4F7FB;
+}
+
+QTabBar::tab {
+    background: #EBEFFA;
+    color: #2D2D3D;
+    padding: 6px;
+    margin: 1px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-family: "Georgia", "Segoe UI", serif;
+    font-size: 11pt;
+}
+
+QTabBar::tab:selected {
+    background: #C9D2F2;
+    color: #2D2D3D;
+}
+
+QScrollBar:vertical {
+    background: #F4F7FB;
+    width: 12px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+    background: #C9D2F2;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QToolTip {
+    background-color: #EBEFFA;
+    color: #2D2D3D;
+    border: 1px solid #B7BFEA;
+}
+
+QTextEdit#textEditChat {
+    color: black;
+}

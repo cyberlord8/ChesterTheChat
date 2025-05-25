@@ -1,7 +1,0 @@
-Do not rename the folder or its contents.  These paths 
-are referred to in the Q StyleSheet.  
-
-You may (and should) add other Q StyleSheets to the QStyleSheet/..
-folder.  
-
-Select the style sheet from the settings tab in the application.

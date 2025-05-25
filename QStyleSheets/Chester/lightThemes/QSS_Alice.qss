@@ -1,0 +1,107 @@
+
+QWidget {
+    background-color: #B0D8FF; /* Richer Alice-style blue */
+    color: #000000;
+    font-family: "Garamond ", serif;
+    font-size: 11pt;
+
+}
+
+QWidget:disabled
+{
+    color: #6e93ca;
+    background-color: #5c7ba8;
+    font-family: "Garamond ", serif;
+}
+
+QPushButton {
+    background-color: #75a5ff;
+    color: #000000;
+    border: 1px solid #7DA0CA;
+    padding: 2px 4px;
+    border-radius: 6;
+    font-family: "Segoe Script", "Segoe Print", cursive;
+    font-size: 10pt;
+}
+
+QPushButton:hover {
+    background-color: #577bbe;
+}
+
+QLineEdit, QTextEdit {
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 1px solid #C0C0C0;
+    font-family: "Garamond", "Georgia", serif;
+    font-size: 10pt;
+}
+
+QComboBox {
+    padding: 4px;
+    background-color: #FFFFFF;
+    border: 1px solid #7DA0CA;
+    font-family: "Garamond ", serif;
+    font-size: 10pt;
+}
+
+QComboBox QAbstractItemView {
+    border: 1px solid #7DA0CA;
+    selection-background-color: #B0E0E6;
+    selection-color: #000000;
+    font-family: "Garamond ", serif;
+}
+
+QCheckBox, QRadioButton {
+    spacing: 6px;
+    font-family: "Georgia", serif;
+}
+
+QTabWidget::pane {
+    border: 1px solid #C0C0C0;
+    background-color: #B0D8FF;
+}
+
+QTabBar::tab {
+    background: #D0E8FF;
+    color: #000000;
+    padding: 2px 4px;
+    margin: 1px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-family: "Garamond ", serif;
+    font-size: 10pt;
+}
+
+QTabBar::tab:selected {
+    background: #A0C4FF;
+    color: #000000;
+    font-family: "Garamond ", serif;
+}
+
+QScrollBar:vertical {
+    background: #E6E6E6;
+    width: 12px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+    background: #A9A9A9;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QToolTip {
+    background-color: #B0E0E6;
+    color: #000000;
+    border: 1px solid #7DA0CA;
+    font-family: "Garamond ", serif;
+}
+
+QTextEdit#textEditChat {
+    color: black;
+}

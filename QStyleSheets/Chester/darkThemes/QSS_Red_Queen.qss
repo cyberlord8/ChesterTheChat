@@ -1,0 +1,96 @@
+
+
+QWidget {
+    background-color: #1A1A1A;
+    color: #F9F6F2;
+    font-family: "Georgia", serif;
+}
+
+QWidget:disabled
+{
+    color: #5c5c5c;
+    background-color: #323232;
+}
+
+QPushButton {
+    background-color: #8B0000;
+    color: #F9F6F2;
+    border: 1px solid #800020;
+    padding: 2px 4px;
+    border-radius: 6;
+    font-family: "Copperplate Gothic Bold", "Garamond", serif;
+    font-size: 12pt;
+}
+
+QPushButton:hover {
+    background-color: #c80000;
+}
+
+QLineEdit, QTextEdit {
+    background-color: #300000;
+    color: #F9F6F2;
+    border: 1px solid #800020;
+    font-family: "Georgia", "Cambria", "Times New Roman", serif;
+    font-size: 15pt;
+}
+
+QCheckBox, QRadioButton {
+    spacing: 6px;
+}
+
+QComboBox {
+    padding: 4px;
+    min-width: 80px;
+}
+
+QComboBox QAbstractItemView {
+    border: 1px solid #888;
+    selection-background-color: #555;
+    selection-color: #fff;
+}
+
+QTabWidget::pane {
+    border: 1px solid #888;
+    background-color: inherit;
+}
+
+QTabBar::tab {
+    background: #444;
+    color: #fff;
+    padding: 6px;
+    margin: 1px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+QTabBar::tab:selected {
+    background: #888;
+    color: #fff;
+}
+
+QScrollBar:vertical {
+    background: #2e2e2e;
+    width: 12px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+    background: #666;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QToolTip {
+    background-color: #3c2b4a;
+    color: #ffffff;
+    border: 1px solid #888;
+}
+
+QTextEdit#textEditChat {
+    color: white;
+}

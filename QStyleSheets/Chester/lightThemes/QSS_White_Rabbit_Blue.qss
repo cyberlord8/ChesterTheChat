@@ -1,0 +1,103 @@
+
+
+QWidget {
+    background-color: #C6D9E8; /* Deeper blue-gray */
+    color: #0E1B2A;
+    font-family: "Georgia", serif;
+}
+
+QWidget:disabled
+{
+    color: #8b8d8f;
+    background-color: #babcbf;
+}
+
+QPushButton {
+    background-color: #A8C2DC;
+    color: #0E1B2A;
+    border: 1px solid #648AA9;
+    padding: 2px 4px;
+    border-radius: 6;
+    font-family: "Century Gothic", "Segoe UI", "Calibri", sans-serif;
+    font-size: 11pt;
+}
+
+QPushButton:hover {
+    background-color: #8CB3D6;
+}
+
+QLineEdit, QTextEdit {
+    background-color: #FFFFFF;
+    color: #0E1B2A;
+    border: 1px solid #648AA9;
+    font-family: "Consolas", "Lucida Sans Typewriter", "Georgia", monospace;
+    font-size: 14pt;
+}
+
+QComboBox {
+    padding: 0px;
+    background-color: #FFFFFF;
+    border: 1px solid #648AA9;
+    color: #0E1B2A;
+    font-family: "Segoe UI", "Verdana", sans-serif;
+    font-size: 10.5pt;
+}
+
+QComboBox QAbstractItemView {
+    border: 1px solid #648AA9;
+    selection-background-color: #A8C2DC;
+    selection-color: #0E1B2A;
+}
+
+QCheckBox, QRadioButton {
+    spacing: 6px;
+    color: #0E1B2A;
+    font-family: "Segoe UI", "Verdana", sans-serif;
+    font-size: 10.5pt;}
+
+QTabWidget::pane {
+    border: 1px solid #7FA4C2;
+    background-color: #C6D9E8;
+}
+
+QTabBar::tab {
+    background: #A8C2DC;
+    color: #0E1B2A;
+    padding: 6px;
+    margin: 1px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-family: "Segoe UI", "Verdana", sans-serif;
+    font-size: 10.5pt;}
+
+QTabBar::tab:selected {
+    background: #648AA9;
+    color: #FFFFFF;
+}
+
+QScrollBar:vertical {
+    background: #C6D9E8;
+    width: 12px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+    background: #648AA9;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QToolTip {
+    background-color: #A8C2DC;
+    color: #0E1B2A;
+    border: 1px solid #648AA9;
+}
+
+QTextEdit#textEditChat {
+    color: black;
+}
