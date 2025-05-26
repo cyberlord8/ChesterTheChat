@@ -25,6 +25,7 @@ FORMS += \
 
 HEADERS += \
     src/demochatsimulator.h \
+    src/features.h \
     src/messagestore.h \
     src/chatformatter.h \
     src/globals.h \

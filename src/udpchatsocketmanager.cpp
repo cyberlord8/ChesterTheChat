@@ -146,16 +146,6 @@ void UdpChatSocketManager::closeSockets()
     cleanupSocket(sendSocket);
 }//closeSockets
 
-void UdpChatSocketManager::setLoopbackMode(bool enabled)
-{
-    loopbackEnabled = enabled;
-}//setLoopbackMode
-
-void UdpChatSocketManager::setMulticastMode(bool enabled)
-{
-    multicastEnabled = enabled;
-}//setMulticastMode
-
 QByteArray UdpChatSocketManager::receiveDatagram(QHostAddress &sender, quint16 &port)
 {
     QByteArray datagram;
@@ -205,7 +195,6 @@ void UdpChatSocketManager::processPendingDatagrams()
             continue;
         }
 
-        // const QString messageText = QString::fromUtf8(datagram);
         const auto [user, message] = parseUserMessage(datagram);
         emit messageReceived(user, message);
     }

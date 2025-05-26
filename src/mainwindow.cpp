@@ -392,14 +392,15 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
 void MainWindow::handleChatScroll(QScrollBar *scrollBar, bool scrollingDown)
 {
-    if (isLoadingHistory) {
+    if (isLoadingHistory || isDemoRunning) {
         return;
     }
 
-    const int value = scrollBar->value();
-    const int min = scrollBar->minimum();
-    const int max = scrollBar->maximum();
-    const int total = messageStore->messageCount();
+    const int value   = scrollBar->value();
+    const int min     = scrollBar->minimum();
+    const int max     = scrollBar->maximum();
+    const int total   = messageStore->messageCount();
+    bool  scrollingUp = !scrollingDown;
 
     if (scrollingDown && value == max) {
         if ((currentOffset + messagesPerPage) < total) {
@@ -414,7 +415,7 @@ void MainWindow::handleChatScroll(QScrollBar *scrollBar, bool scrollingDown)
         }
     }
 
-    if (!scrollingDown && value == min) {
+    if (scrollingUp && value == min) {
         if (currentOffset > 0) {
             loadPage(currentOffset - messagesPerPage);
 
@@ -438,14 +439,9 @@ void MainWindow::onChatScrollBarChanged(int value)
     const bool scrollingDown = (value > lastScrollBarValue);
     lastScrollBarValue = value;
 
-    handleChatScroll(ui->textEditChat->verticalScrollBar(), scrollingDown);
+    if (!isDemoRunning)
+        handleChatScroll(ui->textEditChat->verticalScrollBar(), scrollingDown);
 } //onChatScrollBarChanged
-
-void MainWindow::startDemoMode()
-{
-    demoSimulator->startDemo();
-    styleRotator->start();
-}
 
 void MainWindow::initializeManagers()
 {
@@ -809,12 +805,7 @@ QString MainWindow::readStyleSheetFile(const QString &path)
 void MainWindow::redrawCurrentMessages()
 {
     const QList<Message> messages = messageStore->fetchMessages(visibleOffset, visibleLimit);
-
-    int savedScrollValue = ui->textEditChat->verticalScrollBar()->value();
-
     displayMessages(messages);
-
-    ui->textEditChat->verticalScrollBar()->setValue(savedScrollValue);
 } //redrawCurrentMessages
 
 void MainWindow::loadStyleSheet()
@@ -908,6 +899,9 @@ void MainWindow::on_pushButtonDeleteDatabase_clicked()
 void MainWindow::startDemoModeUiSetup()
 {
     isDemoRunning = true;
+
+    ui->textEditChat->clear();
+
     styleRotator->start();
 
     ui->pushButtonStartStopDemo->setText("Stop Demo Mode");
@@ -920,6 +914,7 @@ void MainWindow::startDemoModeUiSetup()
     ui->labelStatus->setText(tr("Running demo..."));
     ui->tabWidget->setTabEnabled(0, true);
     ui->tabWidget->setCurrentIndex(0);
+    currentOffset = messageStore->messageCount();
 } //startDemoModeUiSetup
 
 void MainWindow::stopDemoModeUiReset()
@@ -930,13 +925,16 @@ void MainWindow::stopDemoModeUiReset()
     ui->pushButtonStartStopDemo->setText("Start Demo Mode");
     ui->labelStatus->setText("Demo Mode Stopped");
 
-    isDemoRunning = false;
 
     configSettings.stylesheetName = QStyleSheetMap.key(realStyleSheetName);
     ui->comboBoxSelectStyleSheet->setCurrentText(realStyleSheetName);
-    setStyleSheet();
-    redrawCurrentMessages();
     realStyleSheetName.clear();
+
+    isDemoRunning = false;
+    const QList<Message> messages = messageStore->fetchLastMessages(messagesPerPage);
+
+    currentOffset = messageStore->messageCount() - messages.size();
+    displayMessages(messages);
 
     ui->pushButtonConnect->setEnabled(true);
     ui->frameUDPParameters->setEnabled(true);
@@ -959,8 +957,6 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
         if (realStyleSheetName.isEmpty()) {
             realStyleSheetName = QStyleSheetMap.key(configSettings.stylesheetName);
         }
-
-        ui->textEditChat->clear();
 
         if (!demoSimulator->startDemo()) {
             QMessageBox::warning(this, tr("Demo Start Failed"), tr("No demo files found or all files are empty.\nPlease check the 'demofiles' folder."));

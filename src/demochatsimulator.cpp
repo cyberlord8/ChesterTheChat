@@ -16,7 +16,6 @@ bool DemoChatSimulator::startDemo()
     currentIndex = 0;
     lastUser.clear();
     messageTimer.start(500);
-    chatDisplay->clear();
     return true;
 }//startDemo
 
@@ -57,7 +56,6 @@ bool DemoChatSimulator::queueMessages()
     messageQueue.clear();
     for (int demoFileIndex = 0; demoFileIndex < demoFiles.size(); ++demoFileIndex) {
         const QString filePath = demoFiles[demoFileIndex];
-        qDebug() << "[DemoChatSimulator] Loading demo file:" << filePath;
 
         loadMessagesFromCsv(filePath);
     }
@@ -116,7 +114,6 @@ void DemoChatSimulator::showNextMessage()
                              showUser ? msg.user : "",
                              msg.text,
                              now,
-                             // isDarkTheme,
                              msg.isSentByMe);
 
     messageTimer.start(msg.delayMs);
@@ -175,7 +172,6 @@ void DemoChatSimulator::loadMessagesFromCsv(const QString &filePath) {
     if (!tempUsers.isEmpty()) {
         int index = QRandomGenerator::global()->bounded(tempUsers.size());
         selectedLocalUser = tempUsers[index];
-        qDebug() << "[DemoChatSimulator] Selected local user for file:" << QFileInfo(filePath).fileName() << "→" << selectedLocalUser;
     }
 
     QString fileTitle = QFileInfo(filePath).baseName(); // e.g., "mad_tea_party"

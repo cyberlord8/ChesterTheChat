@@ -144,10 +144,10 @@ private:
  * If no version is present, it initializes the `messages` table and sets version to 1.
  * Future schema migrations can be handled based on the current version value stored in `meta`.
  *
- * @return True if schema initialization or upgrade was successful, false otherwise.
- * @note NOT CURRENTLY USED - For possible future expansion
- */
-    bool initializeSchemaWithVersioning();
+ // * @return True if schema initialization or upgrade was successful, false otherwise.
+ // * @note NOT CURRENTLY USED - For possible future expansion
+ // */
+ //    bool initializeSchemaWithVersioning();
 
     /**
  * @brief Opens the configured SQLite database connection.

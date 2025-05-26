@@ -97,69 +97,69 @@ bool MessageStore::initializeSchema()
     return true;
 } //initializeSchema
 
-bool MessageStore::initializeSchemaWithVersioning()
-{
-    QSqlQuery query(conn());
+// bool MessageStore::initializeSchemaWithVersioning()
+// {
+//     QSqlQuery query(conn());
 
-    // 1. Create meta table if it doesn't exist
-    if (!query.exec(R"(
-        CREATE TABLE IF NOT EXISTS meta (
-            key TEXT PRIMARY KEY,
-            value TEXT NOT NULL
-        )
-    )")) {
-        qCritical() << "[MessageStore] Failed to create 'meta' table:" << query.lastError().text();
-        return false;
-    }
+//     // 1. Create meta table if it doesn't exist
+//     if (!query.exec(R"(
+//         CREATE TABLE IF NOT EXISTS meta (
+//             key TEXT PRIMARY KEY,
+//             value TEXT NOT NULL
+//         )
+//     )")) {
+//         qCritical() << "[MessageStore] Failed to create 'meta' table:" << query.lastError().text();
+//         return false;
+//     }
 
-    // 2. Check schema version
-    QString schemaVersion = "0";
-    if (query.exec("SELECT value FROM meta WHERE key = 'schema_version'") && query.next()) {
-        schemaVersion = query.value(0).toString();
-    }
+//     // 2. Check schema version
+//     QString schemaVersion = "0";
+//     if (query.exec("SELECT value FROM meta WHERE key = 'schema_version'") && query.next()) {
+//         schemaVersion = query.value(0).toString();
+//     }
 
-    // 3. Apply schema based on version
-    if (schemaVersion == "0") {
-        // Initial schema setup
-        const QString createMessagesSql = R"(
-            CREATE TABLE IF NOT EXISTS messages (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user TEXT NOT NULL,
-                text TEXT NOT NULL,
-                timestamp TEXT NOT NULL,
-                is_sent INTEGER DEFAULT 0
-            )
-        )";
+//     // 3. Apply schema based on version
+//     if (schemaVersion == "0") {
+//         // Initial schema setup
+//         const QString createMessagesSql = R"(
+//             CREATE TABLE IF NOT EXISTS messages (
+//                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+//                 user TEXT NOT NULL,
+//                 text TEXT NOT NULL,
+//                 timestamp TEXT NOT NULL,
+//                 is_sent INTEGER DEFAULT 0
+//             )
+//         )";
 
-        if (!query.exec(createMessagesSql)) {
-            qCritical() << "[MessageStore] Failed to create 'messages' table:" << query.lastError().text();
-            return false;
-        }
+//         if (!query.exec(createMessagesSql)) {
+//             qCritical() << "[MessageStore] Failed to create 'messages' table:" << query.lastError().text();
+//             return false;
+//         }
 
-        // Update schema version to 1
-        QSqlQuery updateVersion(conn());
-        updateVersion.prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '1')");
-        if (!updateVersion.exec()) {
-            qWarning() << "[MessageStore] Failed to set schema version:" << updateVersion.lastError().text();
-            return false;
-        }
-    }
+//         // Update schema version to 1
+//         QSqlQuery updateVersion(conn());
+//         updateVersion.prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '1')");
+//         if (!updateVersion.exec()) {
+//             qWarning() << "[MessageStore] Failed to set schema version:" << updateVersion.lastError().text();
+//             return false;
+//         }
+//     }
 
-    // 4. Handle future migrations (example for version 2)
-    /*
-    if (schemaVersion == "1") {
-        // ALTER TABLE or other migration logic here
-        QSqlQuery alter;
-        alter.exec("ALTER TABLE messages ADD COLUMN message_type TEXT DEFAULT 'text'");
+//     // 4. Handle future migrations (example for version 2)
+//     /*
+//     if (schemaVersion == "1") {
+//         // ALTER TABLE or other migration logic here
+//         QSqlQuery alter;
+//         alter.exec("ALTER TABLE messages ADD COLUMN message_type TEXT DEFAULT 'text'");
 
-        QSqlQuery updateVersion;
-        updateVersion.prepare("UPDATE meta SET value = '2' WHERE key = 'schema_version'");
-        updateVersion.exec();
-    }
-    */
+//         QSqlQuery updateVersion;
+//         updateVersion.prepare("UPDATE meta SET value = '2' WHERE key = 'schema_version'");
+//         updateVersion.exec();
+//     }
+//     */
 
-    return true;
-} // initializeSchemaWithVersioning
+//     return true;
+// } // initializeSchemaWithVersioning
 
 void MessageStore::insertMessage(const QString &user, const QString &text, const QDateTime &timestamp, bool isSent)
 {

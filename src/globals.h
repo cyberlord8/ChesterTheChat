@@ -20,6 +20,7 @@
 #define GLOBALS_H
 
 #include "version.h"
+#include "features.h"
 
 #include <QApplication>
 #include <QCoreApplication>

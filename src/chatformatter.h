@@ -40,6 +40,7 @@
 
 class QTextEdit;
 
+#define BORDER_MARGIN 0.15
 /**
  * @class ChatFormatter
  * @brief Responsible for formatting and inserting chat messages into a QTextEdit.
@@ -53,15 +54,19 @@ class ChatFormatter : public QObject
     Q_OBJECT
 
 public:
+    ///@name Constructor
+    ///@{
     /**
      * @brief Constructs a ChatFormatter instance.
      * @param parent The parent QObject.
      */
     explicit ChatFormatter(QObject *parent = nullptr);
+    ///@}
 
+    ///@name Public Interface
+    ///@{
     /**
      * @brief Appends a formatted chat message to the given QTextEdit.
-     *
      * @param textEdit Pointer to the QTextEdit where the message will be appended.
      * @param user The name of the user who sent the message.
      * @param message The content of the message.
@@ -73,99 +78,242 @@ public:
                        const QString &message,
                        const QDateTime &timestamp,
                        bool isSent);
+    ///@}
 
 private:
+    ///@name Internal State
+    ///@{
+    QTextCursor lastTimestampCursor;  ///< Cursor for delayed timestamp insertion.
+    QDateTime lastTimestamp;          ///< Timestamp of the last message.
+    bool hasPendingTimestamp = false; ///< Indicates if a timestamp is pending.
+    QMap<QString, QColor> userColorMap; ///< Caches user-specific colors.
+    ///@}
+
+    ///@name Message Formatting Helpers
+    ///@{
     /**
- * @brief Stores the cursor position for the last message that may need a delayed timestamp.
+ * @brief Inserts a paragraph block into the chat with appropriate alignment and margin.
+ *
+ * @param textEdit The QTextEdit used to calculate dynamic margin width.
+ * @param cursor The text cursor at which to insert the block.
+ * @param isSent True if the message was sent by the local user; affects alignment.
  */
-    QTextCursor lastTimestampCursor;
+    void insertBlock(QTextEdit *textEdit, QTextCursor &cursor, bool isSent);
 
     /**
- * @brief Timestamp of the last message, used for delayed timestamp insertion.
+ * @brief Inserts the sender's name into the chat display with color formatting.
+ *
+ * Writes the user’s name into the QTextEdit, using a bold and color-styled font.
+ * Only shown when the sender changes or for the first message in a series.
+ *
+ * @param cursor The text cursor to insert at.
+ * @param user The name of the user to display.
+ * @param color The QColor to use for the user label.
  */
-    QDateTime lastTimestamp;
-
-    /**
- * @brief Flag indicating whether a timestamp is pending for insertion.
- */
-    bool hasPendingTimestamp = false;
-
-    /**
-     * @brief Generates a consistent color for a given user.
-     * @param user The user identifier.
-     * @return A QColor object deterministically based on the user's name.
-     */
-    QColor generateColorForUser(const QString &user);
-
-    /**
-     * @brief Inserts a new text block with appropriate alignment into the text cursor.
-     * @param cursor The text cursor to modify.
-     * @param isSent Whether the message was sent by the local user.
-     */
-    void insertBlock(QTextCursor &cursor, bool isSent);
-
-    /**
-     * @brief Resolves or generates the display color for a given user.
-     * @param user The user identifier.
-     * @param isSent Whether the message was sent by the local user.
-     * @return The QColor associated with the user.
-     */
-    QColor resolveUserColor(const QString &user, bool isSent);
-
-    /**
-     * @brief Inserts the user name line with specific formatting.
-     * @param cursor The text cursor to insert into.
-     * @param user The user name.
-     * @param color The color to use for the text.
-     */
     void insertUserLine(QTextCursor &cursor, const QString &user, const QColor &color);
 
     /**
-     * @brief Inserts the main message line with formatting.
-     * @param cursor The text cursor to insert into.
-     * @param message The message content.
-     * @param isDark Whether the theme is dark.
-     */
+ * @brief Inserts the main chat message content.
+ *
+ * Adds the body of the chat message using the appropriate style.
+ * Text inherits the default formatting unless overridden by the stylesheet.
+ *
+ * @param cursor The text cursor to insert at.
+ * @param message The actual message text.
+ */
     void insertMessageLine(QTextCursor &cursor, const QString &message);
 
     /**
-     * @brief Inserts the timestamp line beneath the message.
-     * @param cursor The text cursor to insert into.
-     * @param ts The message timestamp.
-     * @param baseFont The base font to inherit style from.
-     * @param isDark Whether the theme is dark.
-     */
-    void insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, const bool &isDark);
-
-    /**
-     * @brief Stores user-to-color mappings for consistent chat display.
-     */
-    QMap<QString, QColor> userColorMap;
-
-    /**
- * @brief Calculates a dynamic margin based on the width of the parent QTextEdit.
+ * @brief Inserts a timestamp line below the chat message.
  *
- * This utility determines a margin value as a percentage of the visible width of the QTextEdit
- * that owns the given QTextCursor. If the QTextEdit cannot be determined, a fallback value is used.
+ * Renders a timestamp beneath the chat message in a lighter style and smaller font.
+ * Intended to visually separate message clusters and provide time context.
  *
- * @param cursor A QTextCursor from which the parent QTextEdit is inferred.
- * @param percent The margin as a fraction of the QTextEdit's width (e.g., 0.15 for 15%).
- * @param fallback The pixel value to use if the QTextEdit or its viewport cannot be resolved.
- * @return The calculated margin in pixels.
+ * @param cursor The text cursor to insert at.
+ * @param ts The UTC timestamp of the message.
+ * @param baseFont The base font to derive size and style from.
+ * @param isDark Whether the current theme is dark (affects timestamp color).
  */
-    int calculateDynamicMargin(QTextCursor &cursor, double percent, int fallback) const;
+    void insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, const bool &isDark);
+    ///@}
+
+    ///@name Color Handling
+    ///@{
+    /**
+ * @brief Resolves the display color for a user, considering message direction.
+ *
+ * If the user has a cached color in the internal map, it is returned directly.
+ * Otherwise, a new color is generated using the user's name. Messages sent by
+ * the local user may use a distinct default color.
+ *
+ * @param user The name of the user whose color is to be resolved.
+ * @param isSent True if the message was sent by the local user; affects fallback color.
+ * @return The resolved or generated color for the user.
+ */
+    QColor resolveUserColor(const QString &user, bool isSent);
 
     /**
- * @brief Retrieves the color assigned to a specific user, generating and caching a new color if needed.
+ * @brief Generates a deterministic color for a given username.
  *
- * This function ensures consistent user-specific coloring in the chat display. If the user has not
- * yet been assigned a color, one is generated deterministically using a hash-based method and stored
- * in the internal cache for future reuse.
+ * Uses a hash of the username to create a visually distinct and consistent color.
+ * Does not cache the result internally — intended for one-time color generation.
  *
- * @param user The identifier (typically a username) whose color should be retrieved.
- * @return A QColor uniquely associated with the specified user.
+ * @param user The user name or identifier.
+ * @return A QColor derived from the hashed user name.
+ */
+    QColor generateColorForUser(const QString &user);
+
+    /**
+ * @brief Retrieves or generates and caches a color for the given user.
+ *
+ * Ensures consistent color use throughout the chat. If the user already has a
+ * cached color in the `userColorMap`, that color is returned. Otherwise, a new
+ * color is generated using `generateColorForUser()` and stored for reuse.
+ *
+ * @param user The username or identifier.
+ * @return A cached or newly generated QColor.
  */
     QColor generateUserColor(const QString &user);
+    ///@}
+
+    ///@name Layout Utility
+    ///@{
+    /**
+ * @brief Calculates a horizontal margin relative to the QTextEdit width.
+ *
+ * Determines a pixel-based margin based on a percentage of the width of the
+ * parent QTextEdit associated with the given cursor. If the parent cannot
+ * be determined (e.g., null cursor or missing widget), a fallback value is returned.
+ *
+ * Commonly used to align message blocks with appropriate indentation depending on layout width.
+ *
+ * @param cursor The QTextCursor from which the parent QTextEdit is inferred.
+ * @param percent A fractional value (e.g., 0.15 for 15%) of the QTextEdit's width.
+ * @param fallback The pixel value to return if no valid width can be determined.
+ * @return The calculated margin in pixels, or the fallback if width could not be computed.
+ */
+    int calculateDynamicMargin(QTextEdit *textEdit, double percent, int fallback) const;
+    ///@}
 };
+
+// class ChatFormatter : public QObject
+// {
+//     Q_OBJECT
+
+// public:
+//     /**
+//      * @brief Constructs a ChatFormatter instance.
+//      * @param parent The parent QObject.
+//      */
+//     explicit ChatFormatter(QObject *parent = nullptr);
+
+//     /**
+//      * @brief Appends a formatted chat message to the given QTextEdit.
+//      *
+//      * @param textEdit Pointer to the QTextEdit where the message will be appended.
+//      * @param user The name of the user who sent the message.
+//      * @param message The content of the message.
+//      * @param timestamp The time the message was sent.
+//      * @param isSent Whether the message was sent by the local user.
+//      */
+//     void appendMessage(QTextEdit *textEdit,
+//                        const QString &user,
+//                        const QString &message,
+//                        const QDateTime &timestamp,
+//                        bool isSent);
+
+// private:
+//     /**
+//  * @brief Stores the cursor position for the last message that may need a delayed timestamp.
+//  */
+//     QTextCursor lastTimestampCursor;
+
+//     /**
+//  * @brief Timestamp of the last message, used for delayed timestamp insertion.
+//  */
+//     QDateTime lastTimestamp;
+
+//     /**
+//  * @brief Flag indicating whether a timestamp is pending for insertion.
+//  */
+//     bool hasPendingTimestamp = false;
+
+//     /**
+//      * @brief Generates a consistent color for a given user.
+//      * @param user The user identifier.
+//      * @return A QColor object deterministically based on the user's name.
+//      */
+//     QColor generateColorForUser(const QString &user);
+
+//     /**
+//      * @brief Inserts a new text block with appropriate alignment into the text cursor.
+//      * @param cursor The text cursor to modify.
+//      * @param isSent Whether the message was sent by the local user.
+//      */
+//     void insertBlock(QTextCursor &cursor, bool isSent);
+
+//     /**
+//      * @brief Resolves or generates the display color for a given user.
+//      * @param user The user identifier.
+//      * @param isSent Whether the message was sent by the local user.
+//      * @return The QColor associated with the user.
+//      */
+//     QColor resolveUserColor(const QString &user, bool isSent);
+
+//     /**
+//      * @brief Inserts the user name line with specific formatting.
+//      * @param cursor The text cursor to insert into.
+//      * @param user The user name.
+//      * @param color The color to use for the text.
+//      */
+//     void insertUserLine(QTextCursor &cursor, const QString &user, const QColor &color);
+
+//     /**
+//      * @brief Inserts the main message line with formatting.
+//      * @param cursor The text cursor to insert into.
+//      * @param message The message content.
+//      * @param isDark Whether the theme is dark.
+//      */
+//     void insertMessageLine(QTextCursor &cursor, const QString &message);
+
+//     /**
+//      * @brief Inserts the timestamp line beneath the message.
+//      * @param cursor The text cursor to insert into.
+//      * @param ts The message timestamp.
+//      * @param baseFont The base font to inherit style from.
+//      * @param isDark Whether the theme is dark.
+//      */
+//     void insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, const bool &isDark);
+
+//     /**
+//      * @brief Stores user-to-color mappings for consistent chat display.
+//      */
+//     QMap<QString, QColor> userColorMap;
+
+//     /**
+//  * @brief Calculates a dynamic margin based on the width of the parent QTextEdit.
+//  *
+//  * This utility determines a margin value as a percentage of the visible width of the QTextEdit
+//  * that owns the given QTextCursor. If the QTextEdit cannot be determined, a fallback value is used.
+//  *
+//  * @param cursor A QTextCursor from which the parent QTextEdit is inferred.
+//  * @param percent The margin as a fraction of the QTextEdit's width (e.g., 0.15 for 15%).
+//  * @param fallback The pixel value to use if the QTextEdit or its viewport cannot be resolved.
+//  * @return The calculated margin in pixels.
+//  */
+//     int calculateDynamicMargin(QTextCursor &cursor, double percent, int fallback) const;
+
+//     /**
+//  * @brief Retrieves the color assigned to a specific user, generating and caching a new color if needed.
+//  *
+//  * This function ensures consistent user-specific coloring in the chat display. If the user has not
+//  * yet been assigned a color, one is generated deterministically using a hash-based method and stored
+//  * in the internal cache for future reuse.
+//  *
+//  * @param user The identifier (typically a username) whose color should be retrieved.
+//  * @return A QColor uniquely associated with the specified user.
+//  */
+//     QColor generateUserColor(const QString &user);
+// };
 
 #endif // CHATFORMATTER_H

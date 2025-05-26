@@ -25,19 +25,21 @@ ChatFormatter::ChatFormatter(QObject *parent)
     : QObject(parent)
 {}
 
-int ChatFormatter::calculateDynamicMargin(QTextCursor &cursor, double percent, int fallback) const
+int ChatFormatter::calculateDynamicMargin(QTextEdit *textEdit, double percent, int fallback) const
 {
-    QTextEdit *edit = qobject_cast<QTextEdit *>(cursor.document()->parent());
-    int editorWidth = edit ? edit->viewport()->width() : fallback;
+    if (!textEdit || !textEdit->viewport())
+        return fallback;
+
+    int editorWidth = textEdit ? textEdit->viewport()->width() : fallback;
     return static_cast<int>(editorWidth * percent);
 } //calculateDynamicMargin
 
-void ChatFormatter::insertBlock(QTextCursor &cursor, bool isSent)
+void ChatFormatter::insertBlock(QTextEdit * textEdit, QTextCursor &cursor, bool isSent)
 {
     QTextBlockFormat blockFmt;
     blockFmt.setAlignment(isSent ? Qt::AlignRight : Qt::AlignLeft);
 
-    int margin = calculateDynamicMargin(cursor, 0.25, 600);
+    int margin = calculateDynamicMargin(textEdit, BORDER_MARGIN, 600);
 
     if (isSent) {
         blockFmt.setLeftMargin(margin);
@@ -75,7 +77,6 @@ void ChatFormatter::insertUserLine(QTextCursor &cursor, const QString &user, con
 void ChatFormatter::insertMessageLine(QTextCursor &cursor, const QString &message)
 {
     QTextCharFormat fmt;
-    // fmt.setForeground(isDark ? Qt::white : Qt::black);
     fmt.setFontPointSize(14);
 
     cursor.insertText(message + "\n", fmt);
@@ -101,7 +102,7 @@ void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, cons
     const QColor userColor = resolveUserColor(user, isSent);
 
     if (!user.isEmpty()) {
-        insertBlock(cursor, isSent);
+        insertBlock(textEdit, cursor, isSent);
         insertUserLine(cursor, user, userColor);
         insertMessageLine(cursor, message);
     } else {

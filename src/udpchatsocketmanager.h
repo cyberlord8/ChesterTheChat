@@ -86,18 +86,6 @@ public:
     void closeSockets();
 
     /**
-     * @brief Enables or disables loopback mode (self-receiving).
-     * @param enabled True to allow loopback, false to disable.
-     */
-    void setLoopbackMode(bool enabled);
-
-    /**
-     * @brief Enables or disables multicast transmission mode.
-     * @param enabled True to enable multicast, false otherwise.
-     */
-    void setMulticastMode(bool enabled);
-
-    /**
      * @brief Returns the last socket error as a human-readable string.
      * @return A QString describing the last error.
      */

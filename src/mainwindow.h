@@ -252,13 +252,6 @@ private:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
     /**
-     * @brief Restores the scrollbar position after a page load.
-     * @param scrollToTop True if scrolling to the top of the view.
-     * @param edgeOfDatabase True if the scroll is at the beginning or end of the history.
-     */
-    void restoreScrollPositionAfterLoad(bool scrollToTop, bool edgeOfDatabase);
-
-    /**
      * @brief Renders a list of messages into the chat view.
      * @param messages The list of Message objects to display.
      */
@@ -271,20 +264,6 @@ private:
      * @return A clamped offset within valid range.
      */
     int calculateClampedOffset(int requestedOffset, int totalMessages) const;
-
-    /**
-     * @brief Checks whether scrolling upward is possible based on current offset.
-     * @return True if there are earlier messages to load.
-     */
-    bool canScrollUp() const;
-
-    /**
-     * @brief Checks whether scrolling downward is possible based on current offset.
-     * @param totalMessages The total number of messages available.
-     * @return True if there are newer messages to load.
-     */
-    bool canScrollDown(int totalMessages) const;
-    ///@}
 
     /** @name Instance ID Management
      *  Handles reservation, release, and persistence of application instance IDs.
@@ -518,18 +497,6 @@ private:
     void redrawCurrentMessages();
 
     /**
- * @brief Starts the chat application's demo mode.
- *
- * Launches a scripted Wonderland-themed chat simulation using `DemoChatSimulator`
- * and begins automatic stylesheet rotation via `StyleRotator`. This mode visually
- * demonstrates key UI features such as message formatting, stacking behavior,
- * and style/theme transitions.
- *
- * Typically used for presentations or showcasing Chester's visual capabilities.
- */
-    void startDemoMode();
-
-    /**
  * @brief Updates UI and internal state to reflect demo mode activation.
  *
  * This function is called after the demo simulator has been successfully started.
@@ -656,6 +623,24 @@ private slots:
      */
     void on_pushButtonDeleteDatabase_clicked();
     ///@}
+    /**
+ * @brief Starts or stops the demo mode.
+ *
+ * This slot is triggered when the "Start Demo Mode" or "Stop Demo Mode" button is clicked.
+ * If demo mode is not currently running:
+ * - Ensures the application is disconnected from the network.
+ * - Stores the current stylesheet as a fallback.
+ * - Attempts to start the demo simulator and stylesheet rotator.
+ * - Updates the UI to reflect demo state.
+ *
+ * If demo mode is already running:
+ * - Stops the demo simulator and stylesheet rotator.
+ * - Restores the previously active stylesheet.
+ * - Reloads the most recent messages from the database.
+ * - Re-enables network and chat input UI controls.
+ *
+ * Demo mode simulates an automated chat sequence and theme rotation for visual demonstration.
+ */
     void on_pushButtonStartStopDemo_clicked();
 };
 

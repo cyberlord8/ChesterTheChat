@@ -37,7 +37,6 @@ void StyleRotator::applyNextStyle()
         }
     }
 
-    qDebug() << "Loading demo stylesheet:" << styleSheetMap.value(styleSheetMap.keys().at(index));
     comboBox->setCurrentText(styleSheetMap.keys().at(index++));
 
     if(index >= styleSheetMap.size()){

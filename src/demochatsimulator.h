@@ -53,12 +53,7 @@ public:
      */
     void stopDemo();
 
-    // void setThemeDark(bool dark);
-
 private:
-
-    // bool isDarkTheme = false;
-
 
     /**
  * @brief List of full file paths to available demo CSV scripts.
