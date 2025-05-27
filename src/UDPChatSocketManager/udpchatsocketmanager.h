@@ -19,7 +19,7 @@
 #ifndef UDPCHATSOCKETMANAGER_H
 #define UDPCHATSOCKETMANAGER_H
 
-#include "globals.h"
+#include "../globals.h"
 
 #include <QDateTime>
 #include <QHostAddress>

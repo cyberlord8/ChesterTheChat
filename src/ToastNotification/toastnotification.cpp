@@ -17,6 +17,9 @@
  */
 
 #include "ToastNotification.h"
+
+#include "../Utils/debugmacros.h"
+
 #include <QVBoxLayout>
 #include <QApplication>
 #include <QScreen>
@@ -24,6 +27,8 @@
 
 void ToastNotification::setupLabel(const QString &text)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     label = new QLabel(text, this);
     label->setStyleSheet(R"(
         background-color: rgba(0, 0, 0, 180);
@@ -35,6 +40,8 @@ void ToastNotification::setupLabel(const QString &text)
 
 void ToastNotification::setupLayout()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(label);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -43,6 +50,8 @@ void ToastNotification::setupLayout()
 
 void ToastNotification::positionBottomRight()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (QScreen *screen = QGuiApplication::primaryScreen()) {
         const QRect screenGeometry = screen->availableGeometry();
         move(screenGeometry.right() - width() - kPadding,
@@ -53,6 +62,8 @@ void ToastNotification::positionBottomRight()
 ToastNotification::ToastNotification(const QString &text, QWidget *parent)
     : QWidget(parent, Qt::ToolTip | Qt::FramelessWindowHint)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     setAttribute(Qt::WA_TransparentForMouseEvents);
     setAttribute(Qt::WA_ShowWithoutActivating);
 

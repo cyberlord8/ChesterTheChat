@@ -18,12 +18,20 @@
 
 #include "SettingsManager.h"
 
+#include "../Utils/debugmacros.h"
+
 SettingsManager::SettingsManager(int instanceID, const QString &appPath, QObject *parent)
     : QObject(parent), m_instanceID(instanceID), m_appPath(appPath)
-{}
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+
+
+}
 
 void SettingsManager::load(Settings &s)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const QString settingsFile = QString("%1/instance_%2_settings.ini")
     .arg(m_appPath)
         .arg(m_instanceID);
@@ -50,6 +58,8 @@ void SettingsManager::load(Settings &s)
 
 void SettingsManager::save(const Settings &s)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const QString settingsFile = QString("%1/instance_%2_settings.ini")
     .arg(m_appPath)
         .arg(m_instanceID);
@@ -76,12 +86,16 @@ void SettingsManager::save(const Settings &s)
 
 void SettingsManager::saveGeometry(const QByteArray &geometry)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QSettings settings(m_appPath + QString("/instance_%1_settings.ini").arg(m_instanceID), QSettings::IniFormat);
     settings.setValue("WindowGeometry", geometry);
 }//saveGeometry
 
 QByteArray SettingsManager::loadGeometry() const
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QSettings settings(m_appPath + QString("/instance_%1_settings.ini").arg(m_instanceID), QSettings::IniFormat);
     return settings.value("WindowGeometry").toByteArray();
 }//loadGeometry

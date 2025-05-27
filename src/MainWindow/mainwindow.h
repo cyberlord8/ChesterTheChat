@@ -19,16 +19,20 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "globals.h"
+#include "../globals.h"
 
-#include "chatformatter.h"
-#include "messagestore.h"
-#include "settingsmanager.h"
-#include "toastnotification.h"
-#include "udpchatsocketmanager.h"
 
-#include "DemoChatSimulator.h"
-#include "StyleRotator.h"
+#include "../ChatFormatter/chatformatter.h"
+#include "../MessageStore/messagestore.h"
+#include "../SettingsManager/settingsmanager.h"
+#include "../ToastNotification/toastnotification.h"
+#include "../UdpChatSocketManager/udpchatsocketmanager.h"
+#include "../DemoChatSimulator/demochatsimulator.h"
+#include "../StyleRotator/stylerotator.h"
+#include "../StyleManager/stylemanager.h"
+#include "../InstanceIdManager/instanceidmanager.h"
+
+#include "../ChatPager/chatpager.h"
 
 #include <QScrollBar>
 #include <QWheelEvent>
@@ -49,11 +53,25 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+
 private:
+    std::unique_ptr<StyleManager> styleManager;
+    std::unique_ptr<InstanceIdManager> instanceIdManager;
+
+    std::unique_ptr<ChatPager> chatPager;
+
     Ui::MainWindow *ui;
 
     bool isDemoRunning = false;
     QString realStyleSheetName = "";
+
+    /**
+     * @brief Event filter for intercepting and handling custom scroll behavior.
+     * @param obj The object that received the event.
+     * @param event The event to process.
+     * @return True if the event was handled internally; otherwise false.
+     */
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
     /**
  * @brief Simulates a timed, themed chat between Wonderland characters.
@@ -65,7 +83,8 @@ private:
  * Used to demonstrate how the chat interface handles formatting, message stacking,
  * and timestamping in a controlled environment.
  */
-    DemoChatSimulator *demoSimulator = nullptr;
+    // DemoChatSimulator *demoSimulator = nullptr;
+    QScopedPointer<DemoChatSimulator> demoSimulator;
 
     /**
  * @brief Automatically rotates through available Chester stylesheets.
@@ -84,21 +103,21 @@ private:
  */
     QTimer userNameSaveDebounceTimer;
 
-    /**
- * @brief Index offset of the first message currently visible in the chat window.
- *
- * Used for pagination and redrawing the current message block, especially after
- * theme changes or scroll-triggered refreshes.
- */
-    int visibleOffset;
+ //    /**
+ // * @brief Index offset of the first message currently visible in the chat window.
+ // *
+ // * Used for pagination and redrawing the current message block, especially after
+ // * theme changes or scroll-triggered refreshes.
+ // */
+ //    int visibleOffset;
 
-    /**
- * @brief Number of messages currently visible in the chat window.
- *
- * Helps redraw only the displayed message block without reloading the entire history.
- * Typically set after fetching a paged result from the message store.
- */
-    qsizetype visibleLimit;
+ //    /**
+ // * @brief Number of messages currently visible in the chat window.
+ // *
+ // * Helps redraw only the displayed message block without reloading the entire history.
+ // * Typically set after fetching a paged result from the message store.
+ // */
+ //    qsizetype visibleLimit;
 
 
     /** @name Chat Message State
@@ -115,26 +134,26 @@ private:
      */
     MessageStore *messageStore = nullptr;
 
-    /**
-     * @brief Current offset into the message list for pagination.
-     */
-    int currentOffset = 0;
+    // /**
+    //  * @brief Current offset into the message list for pagination.
+    //  */
+    // int currentOffset = 0;
 
-    /**
-     * @brief Number of messages to load per page during scroll events.
-     */
-    const int messagesPerPage = NUM_MSGS_PER_PAGE;
+    // /**
+    //  * @brief Number of messages to load per page during scroll events.
+    //  */
+    // const int messagesPerPage = NUM_MSGS_PER_PAGE;
 
-    /**
-     * @brief True if messages are currently being loaded, used to prevent reentrant loads.
-     */
-    bool isLoadingHistory = false;
+    // /**
+    //  * @brief True if messages are currently being loaded, used to prevent reentrant loads.
+    //  */
+    // bool isLoadingHistory = false;
 
-    /**
-     * @brief Tracks the last known scrollbar value to determine scroll direction.
-     */
-    int lastScrollBarValue = -1;
-    ///@}
+    // /**
+    //  * @brief Tracks the last known scrollbar value to determine scroll direction.
+    //  */
+    // int lastScrollBarValue = -1;
+    // ///@}
 
     /** @name UDP Communication
      *  Handles networking via UDP sockets.
@@ -230,26 +249,18 @@ private:
      *  Handles chat history paging and scrollbar-driven navigation.
      */
     ///@{
-    /**
-     * @brief Loads a page of messages starting at the given offset.
-     * @param offset The starting index into the message list.
-     */
-    void loadPage(int offset);
+    // /**
+    //  * @brief Loads a page of messages starting at the given offset.
+    //  * @param offset The starting index into the message list.
+    //  */
+    // void loadPage(int offset);
 
-    /**
-     * @brief Responds to user scroll actions and loads the appropriate message page.
-     * @param scrollBar The vertical scrollbar of the chat view.
-     * @param scrollingDown True if the user is scrolling downward; otherwise false.
-     */
-    void handleChatScroll(QScrollBar *scrollBar, bool scrollingDown);
-
-    /**
-     * @brief Event filter for intercepting and handling custom scroll behavior.
-     * @param obj The object that received the event.
-     * @param event The event to process.
-     * @return True if the event was handled internally; otherwise false.
-     */
-    bool eventFilter(QObject *obj, QEvent *event) override;
+    // /**
+    //  * @brief Responds to user scroll actions and loads the appropriate message page.
+    //  * @param scrollBar The vertical scrollbar of the chat view.
+    //  * @param scrollingDown True if the user is scrolling downward; otherwise false.
+    //  */
+    // void handleChatScroll(QScrollBar *scrollBar, bool scrollingDown);
 
     /**
      * @brief Renders a list of messages into the chat view.
@@ -257,57 +268,57 @@ private:
      */
     void displayMessages(const QList<Message> &messages);
 
-    /**
-     * @brief Ensures the requested offset is clamped within valid message bounds.
-     * @param requestedOffset The requested offset.
-     * @param totalMessages The total number of available messages.
-     * @return A clamped offset within valid range.
-     */
-    int calculateClampedOffset(int requestedOffset, int totalMessages) const;
+    // /**
+    //  * @brief Ensures the requested offset is clamped within valid message bounds.
+    //  * @param requestedOffset The requested offset.
+    //  * @param totalMessages The total number of available messages.
+    //  * @return A clamped offset within valid range.
+    //  */
+    // int calculateClampedOffset(int requestedOffset, int totalMessages) const;
 
-    /** @name Instance ID Management
-     *  Handles reservation, release, and persistence of application instance IDs.
-     */
-    ///@{
-    /**
-     * @brief Acquires a unique instance ID for the running application.
-     * @return An integer representing a unique instance ID.
-     */
-    int acquireInstanceId();
+    // /** @name Instance ID Management
+    //  *  Handles reservation, release, and persistence of application instance IDs.
+    //  */
+    // ///@{
+    // /**
+    //  * @brief Acquires a unique instance ID for the running application.
+    //  * @return An integer representing a unique instance ID.
+    //  */
+    // int acquireInstanceId();
 
-    /**
-     * @brief Releases a previously acquired instance ID, making it reusable.
-     * @param instanceId The ID to release.
-     */
-    void releaseInstanceId(int instanceId);
+    // /**
+    //  * @brief Releases a previously acquired instance ID, making it reusable.
+    //  * @param instanceId The ID to release.
+    //  */
+    // void releaseInstanceId(int instanceId);
 
-    /**
-     * @brief Retrieves the full file path where instance IDs are stored.
-     * @return The path to instance_ids.txt.
-     */
-    QString getInstanceIdsFilePath() const;
+    // /**
+    //  * @brief Retrieves the full file path where instance IDs are stored.
+    //  * @return The path to instance_ids.txt.
+    //  */
+    // QString getInstanceIdsFilePath() const;
 
-    /**
-     * @brief Retrieves the full file path to the instance ID lock file.
-     * @return The path to instance_ids.lock.
-     */
-    QString getInstanceIdsLockFilePath() const;
+    // /**
+    //  * @brief Retrieves the full file path to the instance ID lock file.
+    //  * @return The path to instance_ids.lock.
+    //  */
+    // QString getInstanceIdsLockFilePath() const;
 
-    /**
-     * @brief Loads a set of instance IDs from a file, excluding a specific ID.
-     * @param excludeId The ID to omit from the result.
-     * @param filePath Path to the instance ID file.
-     * @return A set of all stored instance IDs except the excluded one.
-     */
-    QSet<int> loadInstanceIdsExcluding(int excludeId, const QString &filePath) const;
+    // /**
+    //  * @brief Loads a set of instance IDs from a file, excluding a specific ID.
+    //  * @param excludeId The ID to omit from the result.
+    //  * @param filePath Path to the instance ID file.
+    //  * @return A set of all stored instance IDs except the excluded one.
+    //  */
+    // QSet<int> loadInstanceIdsExcluding(int excludeId, const QString &filePath) const;
 
-    /**
-     * @brief Saves a set of instance IDs to a file, overwriting its contents.
-     * @param ids The set of instance IDs to write.
-     * @param filePath The destination file path.
-     */
-    void saveInstanceIds(const QSet<int> &ids, const QString &filePath) const;
-    ///@}
+    // /**
+    //  * @brief Saves a set of instance IDs to a file, overwriting its contents.
+    //  * @param ids The set of instance IDs to write.
+    //  * @param filePath The destination file path.
+    //  */
+    // void saveInstanceIds(const QSet<int> &ids, const QString &filePath) const;
+    // ///@}
 
     /** @name UI Style and Appearance
      *  Handles dynamic stylesheet loading and customization of the chat interface.
@@ -318,10 +329,10 @@ private:
      */
     void setStyleSheet();
 
-    /**
-     * @brief Loads the stylesheet from file, applies it, and detects theme mode.
-     */
-    void loadStyleSheet();
+    // /**
+    //  * @brief Loads the stylesheet from file, applies it, and detects theme mode.
+    //  */
+    // void loadStyleSheet();
 
     /**
      * @brief Sets or clears the background image of the chat window.
@@ -345,12 +356,12 @@ private:
      */
     void populateStyleSheetComboBox();
 
-    /**
-     * @brief Reads the content of a stylesheet file.
-     * @param path The full file path to the .qss file.
-     * @return The stylesheet contents as a QString, or an empty string if failed.
-     */
-    QString readStyleSheetFile(const QString &path);
+    // /**
+    //  * @brief Reads the content of a stylesheet file.
+    //  * @param path The full file path to the .qss file.
+    //  * @return The stylesheet contents as a QString, or an empty string if failed.
+    //  */
+    // QString readStyleSheetFile(const QString &path);
 
     /**
      * @brief Returns the current chat background style string based on user settings.
@@ -642,6 +653,14 @@ private slots:
  * Demo mode simulates an automated chat sequence and theme rotation for visual demonstration.
  */
     void on_pushButtonStartStopDemo_clicked();
+
+signals:
+
+    void signalRequestScrollToTopAdjustment();
+    void signalRequestScrollToBottomAdjustment();
+    void signalRequestTabSwitchToChat();
+    void signalRequestRedrawCurrentMessages();
+
 };
 
 #endif // MAINWINDOW_H

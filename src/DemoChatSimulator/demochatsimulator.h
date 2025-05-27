@@ -15,7 +15,25 @@
 
 #include <QRandomGenerator>
 
-#include "chatformatter.h"
+#include <QPointer>
+
+#include "../ChatFormatter/chatformatter.h"
+
+/**
+ * @struct DemoMessage
+ * @brief Represents a single scripted chat message in the demo sequence.
+ *
+ * Each DemoMessage holds metadata necessary to render a chat entry in the UI
+ * as part of the demo mode. Messages include sender identity, message content,
+ * timing, and whether the message is to be treated as if it were sent by the
+ * local user (for right-aligned formatting).
+ */
+struct DemoMessage {
+    QString user;         ///< Name of the user (e.g., "Alice").
+    QString text;         ///< The actual chat message content.
+    int delayMs;          ///< Delay in milliseconds after the previous message.
+    bool isSentByMe = false; ///< True if this message should appear as if sent by the local user.
+};
 
 /**
  * @class DemoChatSimulator
@@ -55,6 +73,8 @@ public:
 
 private:
 
+    bool isRunning = false;
+
     /**
  * @brief List of full file paths to available demo CSV scripts.
  *
@@ -64,27 +84,14 @@ private:
  */
     QStringList demoFiles;
 
-    /**
- * @struct DemoMessage
- * @brief Represents a single scripted chat message in the demo sequence.
- *
- * Each DemoMessage holds metadata necessary to render a chat entry in the UI
- * as part of the demo mode. Messages include sender identity, message content,
- * timing, and whether the message is to be treated as if it were sent by the
- * local user (for right-aligned formatting).
- */
-    struct DemoMessage {
-        QString user;         ///< Name of the user (e.g., "Alice").
-        QString text;         ///< The actual chat message content.
-        int delayMs;          ///< Delay in milliseconds after the previous message.
-        bool isSentByMe = false; ///< True if this message should appear as if sent by the local user.
-    };
+
 
 
     /**
      * @brief Pointer to the chat display widget where messages are appended.
      */
-    QTextEdit *chatDisplay;
+    // QTextEdit *chatDisplay;
+    QPointer<QTextEdit> chatDisplay;
 
     /**
      * @brief Pointer to the ChatFormatter used to format and color messages.
@@ -177,6 +184,9 @@ private:
  *       with an additional 100–300 ms depending on punctuation.
  */
     int calculateDynamicDelay(const QString &text) const;
+
+signals:
+    void signalRequestClearChatDisplay();
 };
 
 #endif // DEMOCHATSIMULATOR_H

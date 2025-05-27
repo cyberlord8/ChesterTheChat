@@ -17,26 +17,39 @@
  */
 
 #include "UdpChatSocketManager.h"
+
+#include "../Utils/debugmacros.h"
+
 #include <QNetworkDatagram>
 #include <QStringList>
 #include <QDateTime>
 
 bool UdpChatSocketManager::isConnected() const {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     return (sendSocket && sendSocket->state() == QAbstractSocket::BoundState) &&
            (recvSocket && recvSocket->state() == QAbstractSocket::BoundState);
 }//isConnected
 
 UdpChatSocketManager::UdpChatSocketManager(QObject *parent)
     : QObject(parent)
-{}//UdpChatSocketManager
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+
+
+}//UdpChatSocketManager
 
 UdpChatSocketManager::~UdpChatSocketManager()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     closeSockets();
 }//UdpChatSocketManager
 
 bool UdpChatSocketManager::bindSendSocket(const QHostAddress &localAddress)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (sendSocket) {
         sendSocket->close();
         delete sendSocket;
@@ -60,6 +73,8 @@ bool UdpChatSocketManager::bindSendSocket(const QHostAddress &localAddress)
 
 void UdpChatSocketManager::cleanupReceiveSocket()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (recvSocket) {
         recvSocket->close();
         delete recvSocket;
@@ -69,6 +84,8 @@ void UdpChatSocketManager::cleanupReceiveSocket()
 
 bool UdpChatSocketManager::createAndBindReceiveSocket(const QHostAddress &localAddress, quint16 port)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     recvSocket = new QUdpSocket(this);
 
     const bool success = recvSocket->bind(localAddress, port,
@@ -87,6 +104,8 @@ bool UdpChatSocketManager::createAndBindReceiveSocket(const QHostAddress &localA
 
 void UdpChatSocketManager::joinMulticastGroupSafely(const QHostAddress &groupAddress)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!recvSocket->joinMulticastGroup(groupAddress)) {
         qWarning().nospace() << "[UdpChatSocketManager] Failed to join multicast group "
                              << groupAddress.toString() << ": " << recvSocket->errorString();
@@ -97,6 +116,8 @@ bool UdpChatSocketManager::bindReceiveSocket(const QHostAddress &localAddress,
                                              const QHostAddress &groupAddress,
                                              quint16 port)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     cleanupReceiveSocket();
 
     if (!createAndBindReceiveSocket(localAddress, port))
@@ -113,6 +134,8 @@ bool UdpChatSocketManager::bindReceiveSocket(const QHostAddress &localAddress,
 
 qint64 UdpChatSocketManager::sendMessage(const QByteArray &data, const QHostAddress &targetAddress, quint16 targetPort)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!sendSocket) {
         qWarning() << "[UdpChatSocketManager] Send failed: sendSocket is null.";
         return -1;
@@ -133,6 +156,8 @@ qint64 UdpChatSocketManager::sendMessage(const QByteArray &data, const QHostAddr
 
 void UdpChatSocketManager::cleanupSocket(QUdpSocket *&socket)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (socket) {
         socket->close();
         delete socket;
@@ -142,12 +167,16 @@ void UdpChatSocketManager::cleanupSocket(QUdpSocket *&socket)
 
 void UdpChatSocketManager::closeSockets()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     cleanupSocket(recvSocket);
     cleanupSocket(sendSocket);
 }//closeSockets
 
 QByteArray UdpChatSocketManager::receiveDatagram(QHostAddress &sender, quint16 &port)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QByteArray datagram;
     datagram.resize(int(recvSocket->pendingDatagramSize()));
     recvSocket->readDatagram(datagram.data(), datagram.size(), &sender, &port);
@@ -156,6 +185,8 @@ QByteArray UdpChatSocketManager::receiveDatagram(QHostAddress &sender, quint16 &
 
 bool UdpChatSocketManager::isSelfEcho(const QByteArray &datagram) const
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const int echoSuppressionMs = 250;
 
     if (datagram != lastSentData)
@@ -167,6 +198,8 @@ bool UdpChatSocketManager::isSelfEcho(const QByteArray &datagram) const
 
 std::pair<QString, QString> UdpChatSocketManager::parseUserMessage(const QByteArray &raw) const
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const QString fallbackText = QString::fromUtf8(raw);
     const QStringList parts = fallbackText.split(" - ", Qt::KeepEmptyParts);
 
@@ -181,6 +214,8 @@ std::pair<QString, QString> UdpChatSocketManager::parseUserMessage(const QByteAr
 
 void UdpChatSocketManager::processPendingDatagrams()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!recvSocket)
         return;
 
@@ -201,5 +236,7 @@ void UdpChatSocketManager::processPendingDatagrams()
 }//processPendingDatagrams
 
 QString UdpChatSocketManager::lastError() const {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     return sendSocket ? sendSocket->errorString() : "No socket";
 }//lastError

@@ -1,17 +1,25 @@
 #include "DemoChatSimulator.h"
 
+#include "../Utils/debugmacros.h"
+
 DemoChatSimulator::DemoChatSimulator(QTextEdit *display, ChatFormatter *formatter, QObject *parent)
     : QObject(parent)
     , chatDisplay(display)
     , formatter(formatter)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     connect(&messageTimer, &QTimer::timeout, this, &DemoChatSimulator::showNextMessage);
 }//DemoChatSimulator
 
 bool DemoChatSimulator::startDemo()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (!queueMessages())
         return false;
+
+    isRunning = true;
 
     currentIndex = 0;
     lastUser.clear();
@@ -21,11 +29,22 @@ bool DemoChatSimulator::startDemo()
 
 void DemoChatSimulator::stopDemo()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     messageTimer.stop();
+    disconnect();  // Disconnects all slots from this object
+
+    currentIndex = 0;
+    messageQueue.clear();
+    lastUser.clear();
+
+    isRunning = false;
 }//stopDemo
 
 void DemoChatSimulator::loadDemoFileList(const QString &directory)
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QDir dir(directory);
     if (!dir.exists()) {
         qWarning() << "[DemoChatSimulator] Directory not found:" << directory;
@@ -44,6 +63,8 @@ void DemoChatSimulator::loadDemoFileList(const QString &directory)
 
 bool DemoChatSimulator::queueMessages()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const QString demoDir = QCoreApplication::applicationDirPath() + "/demofiles";
 
     demoFiles.clear();
@@ -70,22 +91,37 @@ bool DemoChatSimulator::queueMessages()
 
 void DemoChatSimulator::showNextMessage()
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     if (currentIndex >= messageQueue.size()) {
+        LOG_DEBUG(Q_FUNC_INFO);
         messageTimer.stop();
 
+
+        QPointer<DemoChatSimulator> self(this);  // weak pointer to self
+        emit signalRequestClearChatDisplay();
+
         // Optional: add a pause before restarting
-        QTimer::singleShot(2000, this, [this]() {
-            startDemo();
+        QTimer::singleShot(2000, this, [self]() {
+            if (!self || !self->isRunning)
+                return;
+            self->startDemo();
         });
 
         return;
-    }
+    }//if we're out of messages, restart demo
 
+    // if(!chatDisplay)
+    //     return;
 
     const DemoMessage &msg = messageQueue[currentIndex++];
 
     if (msg.user == "System") {
-        QTextCursor cursor = chatDisplay->textCursor();
+        // if(!chatDisplay)
+        //     return;
+        // QTextCursor cursor = chatDisplay->textCursor();
+        // cursor.movePosition(QTextCursor::End);
+        QTextCursor cursor(chatDisplay->document());
         cursor.movePosition(QTextCursor::End);
 
         QTextBlockFormat blockFmt;
@@ -99,6 +135,8 @@ void DemoChatSimulator::showNextMessage()
 
         cursor.insertText("\n" + msg.text, charFmt);
 
+        if(!chatDisplay)
+            return;
         chatDisplay->setTextCursor(cursor);
         messageTimer.start(msg.delayMs);
         return;
@@ -110,6 +148,8 @@ void DemoChatSimulator::showNextMessage()
     lastUser = msg.user;
 
     const QDateTime now = QDateTime::currentDateTimeUtc();
+    if(!chatDisplay)
+        return;
     formatter->appendMessage(chatDisplay,
                              showUser ? msg.user : "",
                              msg.text,
@@ -121,6 +161,8 @@ void DemoChatSimulator::showNextMessage()
 
 int DemoChatSimulator::calculateDynamicDelay(const QString &text) const
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const int baseDelay = 500;
     const double readSpeedCharsPerSec = 5.0;
 
@@ -133,6 +175,8 @@ int DemoChatSimulator::calculateDynamicDelay(const QString &text) const
 } //calculateDynamicDelay
 
 void DemoChatSimulator::loadMessagesFromCsv(const QString &filePath) {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "[DemoChatSimulator] Failed to open CSV:" << filePath;

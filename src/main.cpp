@@ -16,12 +16,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "mainwindow.h"
+#include "./MainWindow/mainwindow.h"
 
 #include <QApplication>
 #include <QSplashScreen>
 #include <QPixmap>
 #include <QThread>
+#include <QWidget>
 
 int main(int argc, char *argv[])
 {

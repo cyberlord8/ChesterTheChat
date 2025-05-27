@@ -19,11 +19,12 @@
 #ifndef MESSAGESTORE_H
 #define MESSAGESTORE_H
 
+#include "../globals.h"
+
 #include <QObject>
 #include <QSqlDatabase>
 #include <QDateTime>
 #include <QList>
-#include "globals.h"
 
 /**
  * @class MessageStore
@@ -138,18 +139,6 @@ private:
     QString m_connectionName;
 
     /**
- * @brief Initializes the database schema with version tracking support.
- *
- * Creates required tables including a `meta` table to track the schema version.
- * If no version is present, it initializes the `messages` table and sets version to 1.
- * Future schema migrations can be handled based on the current version value stored in `meta`.
- *
- // * @return True if schema initialization or upgrade was successful, false otherwise.
- // * @note NOT CURRENTLY USED - For possible future expansion
- // */
- //    bool initializeSchemaWithVersioning();
-
-    /**
  * @brief Opens the configured SQLite database connection.
  *
  * Attempts to open the database connection associated with this instance.
@@ -161,6 +150,19 @@ private:
  * @return True if the database connection was successfully opened, false otherwise.
  */
     bool initializeConnection();
+
+    /**
+ * @brief Initializes the database schema with version tracking support.
+ *
+ * Creates required tables including a `meta` table to track the schema version.
+ * If no version is present, it initializes the `messages` table and sets version to 1.
+ * Future schema migrations can be handled based on the current version value stored in `meta`.
+ *
+ // * @return True if schema initialization or upgrade was successful, false otherwise.
+ // * @note NOT CURRENTLY USED - For possible future expansion
+ // */
+ //    bool initializeSchemaWithVersioning();
+
 };
 
 #endif // MESSAGESTORE_H
