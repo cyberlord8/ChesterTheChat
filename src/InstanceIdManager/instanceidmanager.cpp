@@ -15,7 +15,7 @@ bool InstanceIdManager::isProcessRunning(int pid) const {
     DWORD ret = WaitForSingleObject(hProcess, 0);
     CloseHandle(hProcess);
     return ret == WAIT_TIMEOUT;
-}
+}//isProcessRunning
 #else
 #include <signal.h>
 bool InstanceIdManager::isProcessRunning(int pid) const {
@@ -25,15 +25,15 @@ bool InstanceIdManager::isProcessRunning(int pid) const {
 
 InstanceIdManager::InstanceIdManager(const QString &appDirPath)
     : basePath(appDirPath)
-{}
+{}//InstanceIdManager
 
 QString InstanceIdManager::idsFilePath() const {
     return basePath + "/instance_ids.txt";
-}
+}//idsFilePath
 
 QString InstanceIdManager::lockFilePath() const {
     return basePath + "/instance_ids.lock";
-}
+}//lockFilePath
 
 QMap<int, int> InstanceIdManager::loadValidIdPidMapExcluding(int excludeId) const {
     QMap<int, int> idPidMap;
@@ -58,7 +58,7 @@ QMap<int, int> InstanceIdManager::loadValidIdPidMapExcluding(int excludeId) cons
 
     file.close();
     return idPidMap;
-}
+}//loadValidIdPidMapExcluding
 
 void InstanceIdManager::saveIdPidMap(const QMap<int, int> &idPidMap) const {
     QFile file(idsFilePath());
@@ -71,7 +71,7 @@ void InstanceIdManager::saveIdPidMap(const QMap<int, int> &idPidMap) const {
     }
 
     file.close();
-}
+}//saveIdPidMap
 
 int InstanceIdManager::acquire() {
     QLockFile lock(lockFilePath());
@@ -91,7 +91,7 @@ int InstanceIdManager::acquire() {
 
     lock.unlock();
     return newId;
-}
+}//acquire
 
 void InstanceIdManager::release(int instanceId) {
     if (instanceId < 1)
@@ -107,4 +107,4 @@ void InstanceIdManager::release(int instanceId) {
     saveIdPidMap(remaining);
 
     lock.unlock();
-}
+}//release

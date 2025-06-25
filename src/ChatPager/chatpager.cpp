@@ -1,16 +1,21 @@
 #include "chatpager.h"
+#include "cmath"
 
 ChatPager::ChatPager(MessageStore *store, ChatFormatter *formatter, QObject *parent)
-    : QObject(parent), m_store(store), m_formatter(formatter)
+    : QObject(parent)
+    , m_store(store)
+    , m_formatter(formatter)
 {}
 
-void ChatPager::loadPage(int offset) {
+void ChatPager::loadPage(int offset)
+{
     if (m_isLoading || offset == m_currentOffset)
         return;
 
     m_isLoading = true;
 
     int total = m_store->messageCount();
+
     if (total == 0) {
         m_isLoading = false;
         return;
@@ -27,32 +32,47 @@ void ChatPager::loadPage(int offset) {
     m_visibleOffset = clamped;
     m_visibleLimit = messages.count();
 
+    m_totalPages = std::ceil((double) total / (double) m_messagesPerPage);
+    m_currentPage = std::ceil(((double) m_currentOffset / (double) m_messagesPerPage)) + 1;
+
     emit messagesReady(messages);
     m_isLoading = false;
-}
+} //loadPage
 
-void ChatPager::handleScroll(QScrollBar *scrollBar, bool scrollingDown) {
+void ChatPager::handleScroll(QScrollBar *scrollBar, bool scrollingDown)
+{
     if (m_isLoading)
         return;
 
-    int value = scrollBar->value();
-    int min = scrollBar->minimum();
-    int max = scrollBar->maximum();
-    int total = m_store->messageCount();
+    int sb_currValue = scrollBar->value();
+    int sb_min = scrollBar->minimum();
+    int sb_max = scrollBar->maximum();
+    int msgCount = m_store->messageCount();
     bool scrollingUp = !scrollingDown;
 
-    if (scrollingDown && value == max && (m_currentOffset + m_messagesPerPage) < total) {
+    if (scrollingDown && sb_currValue == sb_max && (m_currentOffset + m_messagesPerPage) < msgCount) {
         loadPage(m_currentOffset + m_messagesPerPage);
-        emit scrollToTopAdjustmentRequested();
+        if (m_currentPage < m_totalPages){
+            emit scrollToTopAdjustmentRequested();
+        }
+        else {
+            emit scrollToValueAdjustmentRequested(sb_max);
+        }
     }
 
-    if (scrollingUp && value == min && m_currentOffset > 0) {
+    else if (scrollingUp && sb_currValue == sb_min && m_currentOffset > 0) {
         loadPage(m_currentOffset - m_messagesPerPage);
-        emit scrollToBottomAdjustmentRequested();
+        if (m_currentPage > 1){
+            emit scrollToBottomAdjustmentRequested();
+        }
+        else {
+            emit scrollToValueAdjustmentRequested(sb_min);
+        }
     }
-}
+} //handleScroll
 
-int ChatPager::clampOffset(int requestedOffset, int totalMessages) const {
+int ChatPager::clampOffset(int requestedOffset, int totalMessages) const
+{
     int maxOffset = qMax(0, totalMessages - m_messagesPerPage);
     return qBound(0, requestedOffset, maxOffset);
-}
+} //clampOffset

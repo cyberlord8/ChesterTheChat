@@ -16,13 +16,13 @@
 
 [X] Style/theme handling        StyleManager
 
-[ ] UDP socket operations       UdpConnectionManager
+[X] UDP socket operations       UdpConnectionManager
 
-[ ] Chat formatting/display     ChatDisplayManager
+[X] Chat formatting/display     ChatDisplayManager
 
-[ ] Settings loading/saving     SettingsCoordinator
+[X] Settings loading/saving     SettingsCoordinator
 
-[ ] Demo playback               DemoPlaybackController
+[X] Demo playback               DemoPlaybackController
 
 */
 #endif // TODO_H

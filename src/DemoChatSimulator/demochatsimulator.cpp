@@ -99,7 +99,7 @@ void DemoChatSimulator::showNextMessage()
 
 
         QPointer<DemoChatSimulator> self(this);  // weak pointer to self
-        emit signalRequestClearChatDisplay();
+        // emit signalRequestClearChatDisplay();
 
         // Optional: add a pause before restarting
         QTimer::singleShot(2000, this, [self]() {

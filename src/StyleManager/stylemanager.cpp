@@ -13,7 +13,10 @@ void StyleManager::setStyleSheetMap(const QMap<QString, QString> &map) {
 
 bool StyleManager::loadStyleSheet(const QString &name)
 {
-    if (!styleSheetMap.contains(name)) return false;
+    if (!styleSheetMap.contains(name)){
+        qApp->setStyleSheet("");
+        return true;
+    }
 
     currentStyle = name;
     loadedStyle = readStyleSheetFile(styleSheetMap.value(name));

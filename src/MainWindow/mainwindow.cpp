@@ -53,107 +53,6 @@ void MainWindow::setAppWindowTitle()
     setWindowTitle(baseTitle + versionSuffix);
 } //setAppWindowTitle
 
-// QString MainWindow::getInstanceIdsFilePath() const
-// {
-//     LOG_DEBUG(Q_FUNC_INFO);
-
-//     return QCoreApplication::applicationDirPath() + "/instance_ids.txt";
-// } //getInstanceIdsFilePath
-
-// QString MainWindow::getInstanceIdsLockFilePath() const
-// {
-//     LOG_DEBUG(Q_FUNC_INFO);
-
-//     return QCoreApplication::applicationDirPath() + "/instance_ids.lock";
-// } //getInstanceIdsLockFilePath
-
-// QSet<int> MainWindow::loadInstanceIdsExcluding(int excludeId, const QString &filePath) const
-// {
-//     LOG_DEBUG(Q_FUNC_INFO);
-
-//     QSet<int> ids;
-//     QFile file(filePath);
-
-//     if (!file.exists() || !file.open(QIODevice::ReadOnly | QIODevice::Text))
-//         return ids;
-
-//     QTextStream in(&file);
-//     while (!in.atEnd()) {
-//         const QString line = in.readLine();
-//         const int id = line.toInt();
-//         if (excludeId < 0 || id != excludeId)
-//             ids.insert(id);
-//     }
-
-//     file.close();
-//     return ids;
-// } //loadInstanceIdsExcluding
-
-// void MainWindow::saveInstanceIds(const QSet<int> &ids, const QString &filePath) const
-// {
-//     LOG_DEBUG(Q_FUNC_INFO);
-
-//     QFile file(filePath);
-//     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-//         return;
-
-//     QTextStream out(&file);
-//     for (int id : std::as_const(ids)) {
-//         out << id << '\n';
-//     }
-
-//     file.close();
-// } //saveInstanceIds
-
-// void MainWindow::releaseInstanceId(int instanceId)
-// {
-//     LOG_DEBUG(Q_FUNC_INFO);
-
-//     if (instanceId < 1)
-//         return;
-
-//     const QString idsFilePath = getInstanceIdsFilePath();
-//     const QString lockFilePath = getInstanceIdsLockFilePath();
-
-//     QLockFile lock(lockFilePath);
-//     if (!lock.tryLock(5000)) {
-//         qWarning("[MainWindow] Failed to lock %s for releasing instance ID %d", qUtf8Printable(lockFilePath), instanceId);
-//         return;
-//     }
-
-//     QSet<int> remainingIds = loadInstanceIdsExcluding(instanceId, idsFilePath);
-//     saveInstanceIds(remainingIds, idsFilePath);
-
-//     lock.unlock();
-// } //releaseInstanceId
-
-// int MainWindow::acquireInstanceId()
-// {
-//     LOG_DEBUG(Q_FUNC_INFO);
-
-//     const QString idsFilePath = getInstanceIdsFilePath();
-//     const QString lockFilePath = getInstanceIdsLockFilePath();
-
-//     QLockFile lock(lockFilePath);
-//     if (!lock.tryLock(5000)) {
-//         qWarning("[MainWindow] Failed to lock %s for acquiring instance ID", qUtf8Printable(lockFilePath));
-//         return -1;
-//     }
-
-//     QSet<int> usedIds = loadInstanceIdsExcluding(-1, idsFilePath); // Load all IDs
-
-//     int newId = 1;
-//     while (usedIds.contains(newId)) {
-//         ++newId;
-//     }
-
-//     usedIds.insert(newId);
-//     saveInstanceIds(usedIds, idsFilePath);
-
-//     lock.unlock();
-//     return newId;
-// } //acquireInstanceId
-
 QString MainWindow::buildAppVersionString() const
 {
     LOG_DEBUG(Q_FUNC_INFO);
@@ -398,51 +297,9 @@ void MainWindow::displayMessages(const QList<Message> &messages)
     }
 } //displayMessages
 
-// int MainWindow::calculateClampedOffset(int requestedOffset, int totalMessages) const
-// {
-//     LOG_DEBUG(Q_FUNC_INFO);
-
-//     int maxOffset = qMax(0, totalMessages - messagesPerPage);
-//     return qBound(0, requestedOffset, maxOffset);
-// } //calculateClampedOffset
-
-// void MainWindow::loadPage(int offset)
-// {
-//     LOG_DEBUG(Q_FUNC_INFO);
-
-//     if (isLoadingHistory || offset == currentOffset)
-//         return;
-
-//     isLoadingHistory = true;
-
-//     const int total = messageStore->messageCount();
-//     if (total == 0) {
-//         isLoadingHistory = false;
-//         return;
-//     }
-
-//     const int clampedOffset = calculateClampedOffset(offset, total);
-//     if (clampedOffset == currentOffset) {
-//         isLoadingHistory = false;
-//         return;
-//     }
-
-//     const QList<Message> messages = messageStore->fetchMessages(clampedOffset, messagesPerPage);
-//     displayMessages(messages);
-
-//     currentOffset = clampedOffset;
-//     isLoadingHistory = false;
-// } //loadPage
-
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     // LOG_DEBUG(Q_FUNC_INFO);
-
-    // if (obj == ui->textEditChat->verticalScrollBar() && event->type() == QEvent::Type::Wheel) {
-    //     QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
-    //     const int delta = wheelEvent->angleDelta().y();
-    //     handleChatScroll(ui->textEditChat->verticalScrollBar(), delta < 0); // true if scrolling down
-    // }
 
     if (obj == ui->textEditChat->verticalScrollBar() && event->type() == QEvent::Type::Wheel) {
         QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
@@ -455,57 +312,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
     return QMainWindow::eventFilter(obj, event);
 } //eventFilter
-
-// void MainWindow::handleChatScroll(QScrollBar *scrollBar, bool scrollingDown)
-// {
-//     // LOG_DEBUG(Q_FUNC_INFO);
-
-//     if (isLoadingHistory || isDemoRunning) {
-//         return;
-//     }
-
-//     const int value = scrollBar->value();
-//     const int min = scrollBar->minimum();
-//     const int max = scrollBar->maximum();
-//     const int total = messageStore->messageCount();
-//     bool scrollingUp = !scrollingDown;
-
-//     if (scrollingDown && value == max) {
-//         if ((currentOffset + messagesPerPage) < total) {
-//             loadPage(currentOffset + messagesPerPage);
-
-//             QTimer::singleShot(0, [this]() { emit signalRequestScrollToTopAdjustment(); });
-//         } //if we're not at the bottom of the database (last received message)
-//     } //if scroll down
-
-//     if (scrollingUp && value == min) {
-//         if (currentOffset > 0) {
-//             loadPage(currentOffset - messagesPerPage);
-
-//             QTimer::singleShot(0, [this]() { emit signalRequestScrollToBottomAdjustment(); });
-//         } //if we're not at the top of the database (oldest received message)
-//     } //if scroll up
-// } //handleChatScroll
-
-void MainWindow::onChatScrollBarChanged(int value)
-{
-    // LOG_DEBUG(Q_FUNC_INFO);
-
-    if (!isDemoRunning)
-    if (chatPager)
-        chatPager->handleScroll(ui->textEditChat->verticalScrollBar(), value > chatPager->currentOffset());
-
-    // if (lastScrollBarValue < 0) {
-    //     lastScrollBarValue = value;
-    //     return;
-    // }
-
-    // const bool scrollingDown = (value > lastScrollBarValue);
-    // lastScrollBarValue = value;
-
-    // if (!isDemoRunning)
-    //     handleChatScroll(ui->textEditChat->verticalScrollBar(), scrollingDown);
-} //onChatScrollBarChanged
 
 void MainWindow::initializeManagers()
 {
@@ -524,13 +330,15 @@ void MainWindow::initializeManagers()
 
     chatPager = std::make_unique<ChatPager>(messageStore, m_formatter, this);
 
-
-
 } //initializeManagers
 
 void MainWindow::initializeUi()
 {
     LOG_DEBUG(Q_FUNC_INFO);
+
+#ifndef ENABLE_DEMO_MODE
+    ui->groupBoxDemoMode->hide();
+#endif
 
     ui->tabWidget->setCurrentIndex(1);
     ui->tabWidget->setTabEnabled(0, false); // Disable Chat tab
@@ -541,8 +349,6 @@ void MainWindow::initializeUi()
 void MainWindow::connectSignals()
 {
     LOG_DEBUG(Q_FUNC_INFO);
-
-    connect(ui->textEditChat->verticalScrollBar(), &QScrollBar::valueChanged, this, &MainWindow::onChatScrollBarChanged);
 
     connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
         const QDateTime timestamp = QDateTime::currentDateTimeUtc();
@@ -556,32 +362,6 @@ void MainWindow::connectSignals()
         }
     });
 
-    connect(this, &MainWindow::signalRequestScrollToTopAdjustment, this, [this]() {
-        if (!ui || !ui->textEditChat)
-            return;
-
-        QScrollBar *sb = ui->textEditChat->verticalScrollBar();
-        if (!sb)
-            return;
-
-        // if ((currentOffset + messagesPerPage) < messageStore->messageCount()) {
-        //     sb->setValue(sb->minimum() + 1);
-        // }
-    });
-
-    connect(this, &MainWindow::signalRequestScrollToBottomAdjustment, this, [this]() {
-        if (!ui || !ui->textEditChat)
-            return;
-
-        QScrollBar *sb = ui->textEditChat->verticalScrollBar();
-        if (!sb)
-            return;
-
-        // if (currentOffset == 0 || messageStore->messageCount() < messagesPerPage) {
-        //     sb->setValue(sb->minimum());
-        // }
-    });
-
     connect(this, &MainWindow::signalRequestTabSwitchToChat, this, [this]() {
         if (!ui || !ui->tabWidget)
             return;
@@ -590,18 +370,28 @@ void MainWindow::connectSignals()
         ui->tabWidget->setCurrentIndex(0);
     });
 
-    connect(this, &MainWindow::signalRequestRedrawCurrentMessages,
-            this, &MainWindow::redrawCurrentMessages);
+    connect(this, &MainWindow::signalRequestRedrawCurrentMessages, this, &MainWindow::redrawCurrentMessages);
 
     connect(chatPager.get(), &ChatPager::messagesReady, this, &MainWindow::displayMessages);
+
+
+
     connect(chatPager.get(), &ChatPager::scrollToTopAdjustmentRequested, this, [this]() {
         QScrollBar *sb = ui->textEditChat->verticalScrollBar();
-        if (sb) sb->setValue(sb->minimum() + 1);
+        if (sb)
+            sb->setValue(sb->minimum() + 1);
     });
     connect(chatPager.get(), &ChatPager::scrollToBottomAdjustmentRequested, this, [this]() {
         QScrollBar *sb = ui->textEditChat->verticalScrollBar();
-        if (sb) sb->setValue(sb->minimum());
+        if (sb)
+            sb->setValue(sb->maximum());
     });
+    connect(chatPager.get(), &ChatPager::scrollToValueAdjustmentRequested, this, [this](int value) {
+        QScrollBar *sb = ui->textEditChat->verticalScrollBar();
+        if (sb)
+            sb->setValue(value);
+    });
+
 } //connectSignals
 
 void MainWindow::loadInitialState()
@@ -613,9 +403,11 @@ void MainWindow::loadInitialState()
 
     loadQStyleSheetFolder();
 
+#ifdef ENABLE_DEMO_MODE
     if (!styleRotator) {
         styleRotator = new StyleRotator(ui->comboBoxSelectStyleSheet, QStyleSheetMap, this);
     }
+#endif
 
     setStyleSheet();
     setBackgroundImage();
@@ -628,17 +420,10 @@ void MainWindow::initializeDatabase()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
-    // const QString dbPath = QCoreApplication::applicationDirPath() + QString("/chat_messages_instance_%1.db").arg(instanceID);
-    // messageStore = new MessageStore(dbPath, instanceID, this);
-
     if (!messageStore->open()) {
         qCritical() << "Unable to load message database.";
         return;
     }
-
-    // const QList<Message> messages = messageStore->fetchLastMessages(messagesPerPage);
-
-    // currentOffset = messageStore->messageCount() - messages.size();
 
     const QList<Message> messages = messageStore->fetchLastMessages(chatPager->messagesPerPage());
 
@@ -676,8 +461,10 @@ MainWindow::~MainWindow()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
+#ifdef ENABLE_DEMO_MODE
     if (isDemoRunning)
         on_pushButtonStartStopDemo_clicked();
+#endif
 
     if (settingsManager) {
         userNameSaveDebounceTimer.stop();
@@ -687,7 +474,6 @@ MainWindow::~MainWindow()
 
     if (instanceID > 0 && instanceIdManager)
         instanceIdManager->release(instanceID);
-
 
     delete ui;
     ui = nullptr;
@@ -774,11 +560,8 @@ void MainWindow::updateUiOnConnectSuccess()
     ui->pushButtonConnect->setEnabled(false);
     ui->pushButtonDisconnect->setEnabled(true);
     ui->frameUDPParameters->setEnabled(false);
-    // ui->tabWidget->setTabEnabled(0, true);
 
     QTimer::singleShot(0, this, [this]() { emit signalRequestTabSwitchToChat(); });
-
-    ui->pushButtonStartStopDemo->setEnabled(!udpManager->isConnected());
 
 } //updateUiOnConnectSuccess
 
@@ -824,7 +607,7 @@ void MainWindow::resetUiAfterDisconnect()
     ui->frameUDPParameters->setEnabled(true);
     ui->tabWidget->setTabEnabled(0, false);
 
-    ui->pushButtonStartStopDemo->setEnabled(!udpManager->isConnected());
+    // ui->pushButtonStartStopDemo->setEnabled(!udpManager->isConnected());
 } //resetUiAfterDisconnect
 
 void MainWindow::on_pushButtonDisconnect_clicked()
@@ -922,14 +705,24 @@ void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &s
     if (isApplicationStarting)
         return;
 
+    if(styleName.isEmpty()){
+        ui->checkBoxLoadStyleSheet->setChecked(false);
+        settingsManager->update(configSettings.b_loadStyleSheet, false);
+    }
+
     const QString styleFile = QStyleSheetMap.value(styleName);
     settingsManager->update(configSettings.stylesheetName, styleFile);
     styleManager->loadStyleSheet(styleName);
 
+#ifdef ENABLE_DEMO_MODE
     if (!isDemoRunning) {
-        // redrawCurrentMessages(); // refresh visible messages with new theme context
+        redrawCurrentMessages(); // refresh visible messages with new theme context
         settingsManager->save(configSettings);
     }
+#else
+    redrawCurrentMessages(); // refresh visible messages with new theme context
+    settingsManager->save(configSettings);
+#endif
 } //on_comboBoxSelectStyleSheet_currentTextChanged
 
 void MainWindow::populateStyleSheetMap(const QString &folderPath)
@@ -976,32 +769,11 @@ void MainWindow::loadQStyleSheetFolder()
     styleManager->setStyleSheetMap(QStyleSheetMap);
 } //loadQStyleSheetFolder
 
-// QString MainWindow::readStyleSheetFile(const QString &path)
-// {
-//     LOG_DEBUG(Q_FUNC_INFO);
-
-//     QFile file(path);
-//     if (!file.exists() || !file.open(QFile::ReadOnly)) {
-//         qWarning() << "[readStyleSheetFile] Cannot read file:" << path;
-//         return {};
-//     }
-
-//     const QString content = QLatin1String(file.readAll());
-//     file.close();
-//     configSettings.stylesheetName = path;
-//     return content;
-// } //readStyleSheetFile
-
 void MainWindow::redrawCurrentMessages()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
-    // const QList<Message> messages = messageStore->fetchMessages(visibleOffset, visibleLimit);
-
-    const QList<Message> messages = messageStore->fetchMessages(
-        chatPager->visibleOffset(), chatPager->visibleLimit()
-        );
-
+    const QList<Message> messages = messageStore->fetchMessages(chatPager->visibleOffset(), chatPager->visibleLimit());
     displayMessages(messages);
 } //redrawCurrentMessages
 
@@ -1079,6 +851,134 @@ void MainWindow::on_pushButtonDeleteDatabase_clicked()
     }
 } //on_pushButtonDeleteDatabase_clicked
 
+#ifdef ENABLE_DEMO_MODE
+void MainWindow::stopDemoModeUiReset()
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+
+    if (demoSimulator) {
+        demoSimulator->stopDemo();
+        demoSimulator.reset(); // delete and nullify
+    }
+
+    styleRotator->stop();
+
+    ui->pushButtonStartStopDemo->setEnabled(false);
+    ui->pushButtonStartStopDemo->setText("Start Demo Mode");
+
+    QTimer::singleShot(5000, this, [this]() {
+        if (ui->pushButtonConnect->isEnabled())            //if not connected
+            ui->pushButtonStartStopDemo->setEnabled(true); //enable demo button again
+    });
+
+    ui->labelStatus->setText("Demo Mode Stopped");
+
+    configSettings.stylesheetName = QStyleSheetMap.key(realStyleSheetName);
+    ui->comboBoxSelectStyleSheet->setCurrentText(realStyleSheetName);
+    realStyleSheetName.clear();
+
+    isDemoRunning = false;
+
+    const QList<Message> messages = messageStore->fetchLastMessages(chatPager->messagesPerPage());
+    chatPager->loadPage(messageStore->messageCount() - messages.size());
+
+    ui->pushButtonConnect->setEnabled(true);
+    ui->frameUDPParameters->setEnabled(true);
+    ui->frameChatSend->setEnabled(true);
+    ui->tabWidget->setTabEnabled(0, false);
+} //stopDemoModeUiReset
+
+void MainWindow::startDemoModeUiSetup()
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+
+    isDemoRunning = true;
+
+    ui->textEditChat->clear();
+
+    styleRotator->start();
+
+    ui->pushButtonStartStopDemo->setText("Stop Demo Mode");
+    ui->labelStatus->setText(tr("Running demo..."));
+
+    ui->pushButtonConnect->setEnabled(false);
+    ui->frameUDPParameters->setEnabled(false);
+    ui->frameChatSend->setEnabled(false);
+
+    ui->tabWidget->setTabEnabled(0, true);
+    ui->tabWidget->setCurrentIndex(0);
+    // chatPager->loadPage(messageStore->messageCount());
+
+} //startDemoModeUiSetup
+
+void MainWindow::on_pushButtonStartStopDemo_clicked()
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+
+    if (!styleRotator || !udpManager)
+        return;
+
+    if (!isDemoRunning) {
+        if (udpManager->isConnected()) {
+            QMessageBox::warning(this, tr("Cannot Start Demo"), tr("Please disconnect from the UDP session before starting demo mode."));
+            return;
+        }
+
+        if (realStyleSheetName.isEmpty()) {
+            realStyleSheetName = QStyleSheetMap.key(configSettings.stylesheetName);
+        }
+
+        // Always create a new simulator for fresh state
+        demoSimulator.reset(new DemoChatSimulator(ui->textEditChat, m_formatter, this));
+
+        connect(demoSimulator.get(), &DemoChatSimulator::signalRequestClearChatDisplay, this, [this]() {
+            QTimer::singleShot(0, this, [this]() {
+                if (ui && ui->textEditChat)
+                    ui->textEditChat->clear(); // Safe on main thread
+            });
+        });
+
+        if (!demoSimulator->startDemo()) {
+            demoSimulator.reset(); // destroy faulty instance
+            QMessageBox::warning(this, tr("Demo Start Failed"), tr("No demo files found or all files are empty.\nPlease check the 'demofiles' folder."));
+            return;
+        }
+
+        startDemoModeUiSetup();
+
+    } else {
+        stopDemoModeUiReset(); // calls stopDemo() and deletes demoSimulator inside
+    }
+} //on_pushButtonStartStopDemo_clicked
+#endif
+
+// void MainWindow::on_pushButtonStartStopDemo_clicked()
+// {
+//     if (!demoSimulator || !styleRotator || !udpManager)
+//         return;
+
+//     if (!isDemoRunning) {
+//         if (udpManager->isConnected()) {
+//             QMessageBox::warning(this, tr("Cannot Start Demo"), tr("Please disconnect from the UDP session before starting demo mode."));
+//             return;
+//         }
+
+//         if (realStyleSheetName.isEmpty()) {
+//             realStyleSheetName = QStyleSheetMap.key(configSettings.stylesheetName);
+//         }
+
+//         if (!demoSimulator->startDemo()) {
+//             QMessageBox::warning(this, tr("Demo Start Failed"), tr("No demo files found or all files are empty.\nPlease check the 'demofiles' folder."));
+//             return;
+//         }
+
+//         startDemoModeUiSetup();
+//     } else {
+//         demoSimulator->stopDemo();
+//         stopDemoModeUiReset();
+//     }
+// } //on_pushButtonStartStopDemo_clicked
+
 // void MainWindow::startDemoModeUiSetup()
 // {
 //     isDemoRunning = true;
@@ -1124,133 +1024,3 @@ void MainWindow::on_pushButtonDeleteDatabase_clicked()
 
 //     ui->tabWidget->setTabEnabled(0, false);
 // } //stopDemoModeUiReset
-
-void MainWindow::stopDemoModeUiReset()
-{
-    LOG_DEBUG(Q_FUNC_INFO);
-
-    if (demoSimulator) {
-        demoSimulator->stopDemo();
-        demoSimulator.reset(); // delete and nullify
-    }
-
-    styleRotator->stop();
-
-    ui->pushButtonStartStopDemo->setEnabled(false);
-    ui->pushButtonStartStopDemo->setText("Start Demo Mode");
-
-    QTimer::singleShot(5000, this, [this]() {
-        if (ui->pushButtonConnect->isEnabled())            //if not connected
-            ui->pushButtonStartStopDemo->setEnabled(true); //enable demo button again
-    });
-
-    ui->labelStatus->setText("Demo Mode Stopped");
-
-    configSettings.stylesheetName = QStyleSheetMap.key(realStyleSheetName);
-    ui->comboBoxSelectStyleSheet->setCurrentText(realStyleSheetName);
-    realStyleSheetName.clear();
-
-    isDemoRunning = false;
-
-    // currentOffset = messageStore->messageCount() - messages.size();
-    // displayMessages(messages);
-    const QList<Message> messages = messageStore->fetchLastMessages(chatPager->messagesPerPage());
-    chatPager->loadPage(messageStore->messageCount() - messages.size());
-
-    ui->pushButtonConnect->setEnabled(true);
-    ui->frameUDPParameters->setEnabled(true);
-    ui->frameChatSend->setEnabled(true);
-    ui->tabWidget->setTabEnabled(0, false);
-} //stopDemoModeUiReset
-
-void MainWindow::startDemoModeUiSetup()
-{
-    LOG_DEBUG(Q_FUNC_INFO);
-
-    isDemoRunning = true;
-
-    ui->textEditChat->clear();
-
-    // ui->textEditChat->clear();
-    styleRotator->start();
-
-    ui->pushButtonStartStopDemo->setText("Stop Demo Mode");
-    ui->labelStatus->setText(tr("Running demo..."));
-
-    ui->pushButtonConnect->setEnabled(false);
-    ui->frameUDPParameters->setEnabled(false);
-    ui->frameChatSend->setEnabled(false);
-
-    ui->tabWidget->setTabEnabled(0, true);
-    ui->tabWidget->setCurrentIndex(0);
-    // currentOffset = messageStore->messageCount();
-    chatPager->loadPage(messageStore->messageCount());
-
-} //startDemoModeUiSetup
-
-void MainWindow::on_pushButtonStartStopDemo_clicked()
-{
-    LOG_DEBUG(Q_FUNC_INFO);
-
-    if (!styleRotator || !udpManager)
-        return;
-
-    if (!isDemoRunning) {
-        if (udpManager->isConnected()) {
-            QMessageBox::warning(this, tr("Cannot Start Demo"), tr("Please disconnect from the UDP session before starting demo mode."));
-            return;
-        }
-
-        if (realStyleSheetName.isEmpty()) {
-            realStyleSheetName = QStyleSheetMap.key(configSettings.stylesheetName);
-        }
-
-        // Always create a new simulator for fresh state
-        demoSimulator.reset(new DemoChatSimulator(ui->textEditChat, m_formatter, this));
-
-        connect(demoSimulator.get(), &DemoChatSimulator::signalRequestClearChatDisplay, this, [this]() {
-            QTimer::singleShot(0, this, [this]() {
-                if (ui && ui->textEditChat)
-                    ui->textEditChat->clear(); // Safe on main thread
-            });
-        });
-
-        if (!demoSimulator->startDemo()) {
-            demoSimulator.reset(); // destroy faulty instance
-            QMessageBox::warning(this, tr("Demo Start Failed"), tr("No demo files found or all files are empty.\nPlease check the 'demofiles' folder."));
-            return;
-        }
-
-        startDemoModeUiSetup();
-
-    } else {
-        stopDemoModeUiReset(); // calls stopDemo() and deletes demoSimulator inside
-    }
-} //on_pushButtonStartStopDemo_clicked
-
-// void MainWindow::on_pushButtonStartStopDemo_clicked()
-// {
-//     if (!demoSimulator || !styleRotator || !udpManager)
-//         return;
-
-//     if (!isDemoRunning) {
-//         if (udpManager->isConnected()) {
-//             QMessageBox::warning(this, tr("Cannot Start Demo"), tr("Please disconnect from the UDP session before starting demo mode."));
-//             return;
-//         }
-
-//         if (realStyleSheetName.isEmpty()) {
-//             realStyleSheetName = QStyleSheetMap.key(configSettings.stylesheetName);
-//         }
-
-//         if (!demoSimulator->startDemo()) {
-//             QMessageBox::warning(this, tr("Demo Start Failed"), tr("No demo files found or all files are empty.\nPlease check the 'demofiles' folder."));
-//             return;
-//         }
-
-//         startDemoModeUiSetup();
-//     } else {
-//         demoSimulator->stopDemo();
-//         stopDemoModeUiReset();
-//     }
-// } //on_pushButtonStartStopDemo_clicked
