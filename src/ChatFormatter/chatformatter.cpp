@@ -118,9 +118,6 @@ void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, cons
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
-    // QTextCursor cursor = textEdit->textCursor();
-    // cursor.movePosition(QTextCursor::End);
-
     QTextCursor cursor(textEdit->document());
     cursor.movePosition(QTextCursor::End);
 

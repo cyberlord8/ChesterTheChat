@@ -108,9 +108,7 @@ void DemoChatSimulator::showNextMessage()
 
 
         QPointer<DemoChatSimulator> self(this);  // weak pointer to self
-        // emit signalRequestClearChatDisplay();
 
-        // Optional: add a pause before restarting
         QTimer::singleShot(2000, this, [self]() {
             if (!self || !self->isRunning)
                 return;
@@ -120,16 +118,9 @@ void DemoChatSimulator::showNextMessage()
         return;
     }//if we're out of messages, restart demo
 
-    // if(!chatDisplay)
-    //     return;
-
     const DemoMessage &msg = messageQueue[currentIndex++];
 
     if (msg.user == "System") {
-        // if(!chatDisplay)
-        //     return;
-        // QTextCursor cursor = chatDisplay->textCursor();
-        // cursor.movePosition(QTextCursor::End);
         QTextCursor cursor(chatDisplay->document());
         cursor.movePosition(QTextCursor::End);
 

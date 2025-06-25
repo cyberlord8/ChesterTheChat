@@ -111,6 +111,7 @@ bool MessageStore::initializeSchema()
     return true;
 } //initializeSchema
 
+//TODO - Maybe use this at a later date
 // bool MessageStore::initializeSchemaWithVersioning()
 // {
 //     QSqlQuery query(conn());
