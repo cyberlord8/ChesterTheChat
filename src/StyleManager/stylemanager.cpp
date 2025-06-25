@@ -36,7 +36,3 @@ QString StyleManager::readStyleSheetFile(const QString &path) const {
 QString StyleManager::currentStyleName() const {
     return currentStyle;
 }
-
-// void StyleManager::applyStyleToChat(QTextEdit *chatWidget) {
-//     chatWidget->setStyleSheet(loadedStyle);
-// }
