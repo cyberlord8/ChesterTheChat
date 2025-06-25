@@ -17,9 +17,12 @@
  */
 
 #include "UdpChatSocketManager.h"
-#include "src/debugmacros.h"
 
-#include <QUdpSocket>
+#include "../Utils/debugmacros.h"
+
+#include <QNetworkDatagram>
+#include <QStringList>
+#include <QDateTime>
 
 bool UdpChatSocketManager::isConnected() const {
     LOG_DEBUG(Q_FUNC_INFO);
@@ -169,20 +172,6 @@ void UdpChatSocketManager::closeSockets()
     cleanupSocket(sendSocket);
 }//closeSockets
 
-void UdpChatSocketManager::setLoopbackMode(bool enabled)
-{
-    LOG_DEBUG(Q_FUNC_INFO);
-
-    loopbackEnabled = enabled;
-}//setLoopbackMode
-
-void UdpChatSocketManager::setMulticastMode(bool enabled)
-{
-    LOG_DEBUG(Q_FUNC_INFO);
-
-    multicastEnabled = enabled;
-}//setMulticastMode
-
 QByteArray UdpChatSocketManager::receiveDatagram(QHostAddress &sender, quint16 &port)
 {
     LOG_DEBUG(Q_FUNC_INFO);
@@ -208,6 +197,8 @@ bool UdpChatSocketManager::isSelfEcho(const QByteArray &datagram) const
 
 std::pair<QString, QString> UdpChatSocketManager::parseUserMessage(const QByteArray &raw) const
 {
+    LOG_DEBUG(Q_FUNC_INFO);
+
     const QString fallbackText = QString::fromUtf8(raw);
     const QStringList parts = fallbackText.split(" - ", Qt::KeepEmptyParts);
 
@@ -238,7 +229,6 @@ void UdpChatSocketManager::processPendingDatagrams()
             continue;
         }
 
-        // const QString messageText = QString::fromUtf8(datagram);
         const auto [user, message] = parseUserMessage(datagram);
         emit messageReceived(user, message);
     }

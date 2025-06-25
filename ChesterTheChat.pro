@@ -21,33 +21,41 @@ RESOURCES += \
     RC_ICONS = ./images/chester2.ico
 
 FORMS += \
-    src/mainwindow.ui
+    src/MainWindow/mainwindow.ui
 
 HEADERS += \
-    src/debugmacros.h \
-    src/demochatsimulator.h \
-    src/messagestore.h \
-    src/chatformatter.h \
+    ../Utils/debugmacros.h \
+    src/ChatPager/chatpager.h \
+    src/DemoChatSimulator/demochatsimulator.h \
+    src/InstanceIdManager/instanceidmanager.h \
+    src/MainWindow/mainwindow.h \
+    src/StyleManager/stylemanager.h \
+    src/features.h \
+    src/MessageStore/messagestore.h \
+    src/ChatFormatter/chatformatter.h \
     src/globals.h \
-    src/mainwindow.h \
-    src/settingsmanager.h \
-    src/stylerotator.h \
-    src/udpchatsocketmanager.h \
+    src/SettingsManager/settingsmanager.h \
+    src/StyleRotator/stylerotator.h \
+    src/UdpChatSocketManager/udpchatsocketmanager.h \
     src/version.h \
-    src/toastnotification.h \
-    structures.h \
+    src/ToastNotification/toastnotification.h \
     todo.h
 
 SOURCES += \
-    src/demochatsimulator.cpp \
-    src/messagestore.cpp \
-    src/chatformatter.cpp \
+    src/ChatPager/chatpager.cpp \
+    src/DemoChatSimulator/demochatsimulator.cpp \
+    src/InstanceIdManager/instanceidmanager.cpp \
+    src/MessageStore/messagestore.cpp \
+    src/ChatFormatter/chatformatter.cpp \
+    src/StyleManager/stylemanager.cpp \
     src/main.cpp \
-    src/mainwindow.cpp \
-    src/settingsmanager.cpp \
-    src/stylerotator.cpp \
-    src/udpchatsocketmanager.cpp \
-    src/toastnotification.cpp
+    src/MainWindow/mainwindow.cpp \
+    src/SettingsManager/settingsmanager.cpp \
+    src/StyleRotator/stylerotator.cpp \
+    src/UdpChatSocketManager/udpchatsocketmanager.cpp \
+    src/ToastNotification/toastnotification.cpp
 
 DISTFILES += \
     oldCode
+    INCLUDEPATH += $$PWD/
+

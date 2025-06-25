@@ -19,9 +19,12 @@
 #ifndef MESSAGESTORE_H
 #define MESSAGESTORE_H
 
-#include "structures.h"
+#include "../globals.h"
 
+#include <QObject>
 #include <QSqlDatabase>
+#include <QDateTime>
+#include <QList>
 
 /**
  * @class MessageStore
@@ -159,6 +162,19 @@ private:
  * @return True if the database connection was successfully opened, false otherwise.
  */
     bool initializeConnection();
+
+    /**
+ * @brief Initializes the database schema with version tracking support.
+ *
+ * Creates required tables including a `meta` table to track the schema version.
+ * If no version is present, it initializes the `messages` table and sets version to 1.
+ * Future schema migrations can be handled based on the current version value stored in `meta`.
+ *
+ // * @return True if schema initialization or upgrade was successful, false otherwise.
+ // * @note NOT CURRENTLY USED - For possible future expansion
+ // */
+ //    bool initializeSchemaWithVersioning();
+
 };
 
 #endif // MESSAGESTORE_H

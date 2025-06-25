@@ -19,12 +19,12 @@
 #ifndef UDPCHATSOCKETMANAGER_H
 #define UDPCHATSOCKETMANAGER_H
 
-#include <QObject>
+#include "../globals.h"
+
 #include <QDateTime>
-
-class QHostAddress;
-class QUdpSocket;
-
+#include <QHostAddress>
+#include <QObject>
+#include <QUdpSocket>
 /**
  * @class UdpChatSocketManager
  * @brief Manages sending and receiving of UDP chat messages.
@@ -84,18 +84,6 @@ public:
      * @brief Closes both send and receive sockets and frees resources.
      */
     void closeSockets();
-
-    /**
-     * @brief Enables or disables loopback mode (self-receiving).
-     * @param enabled True to allow loopback, false to disable.
-     */
-    void setLoopbackMode(bool enabled);
-
-    /**
-     * @brief Enables or disables multicast transmission mode.
-     * @param enabled True to enable multicast, false otherwise.
-     */
-    void setMulticastMode(bool enabled);
 
     /**
      * @brief Returns the last socket error as a human-readable string.

@@ -1,9 +1,57 @@
+/*
+ * Chester The Chat
+ * Copyright (C) 2024 Timothy Millea
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef DEMOCHATSIMULATOR_H
 #define DEMOCHATSIMULATOR_H
 
-#include "chatformatter.h"
-
+#include <QObject>
 #include <QTimer>
+#include <QTextEdit>
+#include <QDateTime>
+
+#include <QDir>
+#include <QFile>
+#include <QFileInfoList>
+
+#include <QTextStream>
+#include <QDebug>
+
+#include <QRandomGenerator>
+
+#include <QPointer>
+
+#include "../ChatFormatter/chatformatter.h"
+
+/**
+ * @struct DemoMessage
+ * @brief Represents a single scripted chat message in the demo sequence.
+ *
+ * Each DemoMessage holds metadata necessary to render a chat entry in the UI
+ * as part of the demo mode. Messages include sender identity, message content,
+ * timing, and whether the message is to be treated as if it were sent by the
+ * local user (for right-aligned formatting).
+ */
+struct DemoMessage {
+    QString user;         ///< Name of the user (e.g., "Alice").
+    QString text;         ///< The actual chat message content.
+    int delayMs;          ///< Delay in milliseconds after the previous message.
+    bool isSentByMe = false; ///< True if this message should appear as if sent by the local user.
+};
 
 /**
  * @class DemoChatSimulator
@@ -41,12 +89,9 @@ public:
      */
     void stopDemo();
 
-    // void setThemeDark(bool dark);
-
 private:
 
-    // bool isDarkTheme = false;
-
+    bool isRunning = false;
 
     /**
  * @brief List of full file paths to available demo CSV scripts.
@@ -77,7 +122,8 @@ private:
     /**
      * @brief Pointer to the chat display widget where messages are appended.
      */
-    QTextEdit *chatDisplay;
+
+    QPointer<QTextEdit> chatDisplay;
 
     /**
      * @brief Pointer to the ChatFormatter used to format and color messages.
@@ -170,6 +216,9 @@ private:
  *       with an additional 100–300 ms depending on punctuation.
  */
     int calculateDynamicDelay(const QString &text) const;
+
+signals:
+    void signalRequestClearChatDisplay();
 };
 
 #endif // DEMOCHATSIMULATOR_H

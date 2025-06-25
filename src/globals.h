@@ -20,6 +20,7 @@
 #define GLOBALS_H
 
 #include "version.h"
+#include "features.h"
 
 #define APP_NAME "Chester the Chat"
 #define RELEASEDATE __DATE__

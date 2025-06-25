@@ -1,0 +1,19 @@
+/*
+QStyle Sheet Windows Default
+For those that LOVE the windows default color scheme.
+
+Build your own StyleSheet!
+
+Qt StyleSheet Documentation:
+https://doc.qt.io/qt-5/stylesheet.html
+
+For a list of stylable Qt Widgets see:
+
+https://doc.qt.io/qt-5/stylesheet-reference.html#list-of-stylable-widgets
+
+To use color picker, double click hex color to highlight it and press the color picker button.
+Chose color from dialog, you can even chose a desktop color, and press OK.
+The color you picked will be inserted at the cursor location or will overwrite the selected color.
+
+Don't forget to save your stylesheet when you are satisfied with a change!
+*/

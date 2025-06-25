@@ -1,7 +1,5 @@
 #include "StyleRotator.h"
-#include "src/debugmacros.h"
-
-#include <QComboBox>
+#include "../Utils/debugmacros.h"
 
 StyleRotator::StyleRotator(QComboBox *comboBox, QMap<QString, QString> styleMap, QObject *parent)
     : QObject(parent)
@@ -48,7 +46,6 @@ void StyleRotator::applyNextStyle()
         }
     }
 
-    qDebug() << "Loading demo stylesheet:" << styleSheetMap.value(styleSheetMap.keys().at(index));
     comboBox->setCurrentText(styleSheetMap.keys().at(index++));
 
     if(index >= styleSheetMap.size()){

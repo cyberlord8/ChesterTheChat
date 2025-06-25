@@ -17,11 +17,13 @@
  */
 
 #include "ToastNotification.h"
-#include "src/debugmacros.h"
+
+#include "../Utils/debugmacros.h"
 
 #include <QVBoxLayout>
-#include <QGuiApplication>
+#include <QApplication>
 #include <QScreen>
+#include <QGuiApplication>
 
 void ToastNotification::setupLabel(const QString &text)
 {
