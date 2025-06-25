@@ -194,6 +194,7 @@ private:
  */
     int calculateDynamicMargin(QTextEdit *textEdit, double percent, int fallback) const;
     ///@}
+    void insertLastReadMarker(QTextEdit *textEdit);
 };
 
 #endif // CHATFORMATTER_H

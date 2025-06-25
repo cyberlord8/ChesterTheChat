@@ -24,9 +24,7 @@
 #include "../ChatFormatter/chatformatter.h"
 #include "../MessageStore/messagestore.h"
 #include "../SettingsManager/settingsmanager.h"
-#include "../ToastNotification/toastnotification.h"
 #include "../UdpChatSocketManager/udpchatsocketmanager.h"
-#include "../DemoChatSimulator/demochatsimulator.h"
 #include "../StyleRotator/stylerotator.h"
 #include "../StyleManager/stylemanager.h"
 #include "../InstanceIdManager/instanceidmanager.h"
@@ -35,6 +33,15 @@
 
 #include <QScrollBar>
 #include <QWheelEvent>
+#include <QMainWindow>
+#include <QMessageBox>
+#include <QDesktopServices>
+#include <QNetworkInterface>
+#include <QDirIterator>
+
+#ifdef ENABLE_DEMO_MODE
+#include "../DemoChatSimulator/demochatsimulator.h"
+#endif
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

@@ -21,6 +21,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QSettings>
 
 class QString;
 /**

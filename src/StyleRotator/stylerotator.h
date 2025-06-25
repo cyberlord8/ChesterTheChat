@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QMap>
 #include <QTimer>
+#include <QComboBox>
 
 class QComboBox;
 class QString;

@@ -18,6 +18,8 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "../ToastNotification/toastnotification.h"
+
 
 #include "../Utils/debugmacros.h"
 
