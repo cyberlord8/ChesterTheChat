@@ -17,8 +17,6 @@
  */
 
 #include "settingsmanager.h"
-#include "src/debugmacros.h"
-
 #include "../Utils/debugmacros.h"
 
 SettingsManager::SettingsManager(int instanceID, const QString &appPath, QObject *parent)

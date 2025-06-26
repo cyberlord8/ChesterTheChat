@@ -1,5 +1,5 @@
 #include "DemoChatSimulator.h"
-#include "src/debugmacros.h"
+#include "../Utils/debugmacros.h"
 
 #include <QCoreApplication>
 #include <QRegularExpression>
@@ -9,7 +9,6 @@
 #include <QTextEdit>
 #include <QRandomGenerator>
 
-#include "../Utils/debugmacros.h"
 
 DemoChatSimulator::DemoChatSimulator(QTextEdit *display, ChatFormatter *formatter, QObject *parent)
     : QObject(parent)
