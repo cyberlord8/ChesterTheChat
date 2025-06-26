@@ -142,6 +142,26 @@ private:
     QMap<QString, QString> QStyleSheetMap;      ///< Maps display names to .qss file paths.
     ///@}
 
+#ifdef EXPIRES
+    /**
+ * @brief Checks whether the application build has expired based on ALPHA or BETA age limits.
+ * @return True if the application is too old to run; otherwise, false.
+ *
+ * Uses the application's last modified timestamp and predefined time limits
+ * to determine expiration.
+ */
+    bool isTooOld();
+
+    /**
+ * @brief Displays an expiration warning message box to the user.
+ * @param days The allowed number of days before expiration.
+ * @param fileDate The date string representing the last modified time of the executable.
+ *
+ * Logs the expiration event and forces the application to exit after user acknowledgment.
+ */
+    void displayIsTooOld(int days, QString fileDate);
+#endif
+
     /** @name Initialization Sequence
      *  One-time setup methods called during construction.
      */

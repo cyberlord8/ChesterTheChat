@@ -20,24 +20,35 @@
 #define VERSION_H
 
 /**
- * @brief Application will expire after ALPHA/BETA TIME
+ * @def EXPIRES
+ * @brief Enables application expiration logic for alpha and beta builds.
+ *
+ * If defined, the application checks its build age and prevents execution
+ * if the allowed period has passed.
  */
-#define EXPIRES
+// #define EXPIRES
 
 /**
- * @brief Application version
+ * @def VERSION
+ * @brief Defines the application version type: "alpha", "beta", or "release".
+ *
+ * Only one version should be active at a time. The expiration period is determined
+ * based on whether it is an alpha or beta build.
  */
 // #define VERSION "release"
-#define VERSION "alpha"
-// #define VERSION "beta"
+// #define VERSION "alpha"
+#define VERSION "beta"
 
 /**
- * @brief Number of days before application expires
+ * @def ALPHA_TIME
+ * @brief Number of days after build date that an alpha version remains valid.
  */
 #define ALPHA_TIME 39
+
 /**
- * @brief Number of days before application expires
+ * @def BETA_TIME
+ * @brief Number of days after build date that a beta version remains valid.
  */
-#define BETA_TIME 99
+#define BETA_TIME 395
 
 #endif // VERSION_H

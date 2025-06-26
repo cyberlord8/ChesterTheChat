@@ -315,6 +315,45 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QMainWindow::eventFilter(obj, event);
 } //eventFilter
 
+
+#ifdef EXPIRES
+bool MainWindow::isTooOld()
+{
+    QFile thisApplication(QApplication::applicationFilePath());
+
+    QFileInfo thisApplicationFileInfo(thisApplication);
+    QString version(VERSION);
+
+    if (version.contains("alpha")) {
+        if (thisApplicationFileInfo.lastModified().addDays(ALPHA_TIME) < QDateTime::currentDateTime()) {
+            displayIsTooOld(ALPHA_TIME, thisApplicationFileInfo.lastModified().toString("MMM dd yyyy - hh:mm:ss"));
+            return true;
+        } else {
+            return false;
+        }
+    } // if alpha
+    else if (version.contains("beta")) {
+        if (thisApplicationFileInfo.lastModified().addDays(BETA_TIME) < QDateTime::currentDateTime()) {
+            displayIsTooOld(BETA_TIME, thisApplicationFileInfo.lastModified().toString("MMM dd yyyy - hh:mm:ss"));
+            return true;
+        } else {
+            return false;
+        }
+    } // if beta
+    return false;
+} // isTooOld
+
+void MainWindow::displayIsTooOld(int days, QString fileDate)
+{
+    QMessageBox messageBox;
+    messageBox.setWindowTitle("Application Expired!");
+    messageBox.setText("This application is older than " + QString::number(days) + " days - " + fileDate +
+                       " and has expired!\n\n"
+                       "Application will now exit.");
+    messageBox.exec();
+} // displayIsTooOld
+#endif
+
 void MainWindow::initializeManagers()
 {
     LOG_DEBUG(Q_FUNC_INFO);
@@ -441,6 +480,14 @@ MainWindow::MainWindow(QWidget *parent)
     LOG_DEBUG(Q_FUNC_INFO);
 
     ui->setupUi(this);
+
+
+#ifdef EXPIRES
+    if (isTooOld()) {
+        exit(0);
+    }
+#endif
+
 
     isApplicationStarting = true;
 
