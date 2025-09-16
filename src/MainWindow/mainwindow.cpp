@@ -584,6 +584,19 @@ void MainWindow::on_pushButtonSend_clicked()
     }
 } //on_pushButtonSend_clicked
 
+void MainWindow::updateUiOnConnectSuccess()
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+
+    ui->labelStatus->setText(tr("Connection established."));
+    ui->pushButtonConnect->setEnabled(false);
+    ui->pushButtonDisconnect->setEnabled(true);
+    ui->frameUDPParameters->setEnabled(false);
+
+    QTimer::singleShot(0, this, [this]() { emit signalRequestTabSwitchToChat(); });
+
+} //updateUiOnConnectSuccess
+
 QHostAddress MainWindow::parseLocalAddress() const
 {
     LOG_DEBUG(Q_FUNC_INFO);
@@ -600,19 +613,6 @@ bool MainWindow::bindUdpSockets(const QHostAddress &local, const QHostAddress &r
     bool sendBound = udpManager->bindSendSocket(local);
     return recvBound && sendBound;
 } //bindUdpSockets
-
-void MainWindow::updateUiOnConnectSuccess()
-{
-    LOG_DEBUG(Q_FUNC_INFO);
-
-    ui->labelStatus->setText(tr("Connection established."));
-    ui->pushButtonConnect->setEnabled(false);
-    ui->pushButtonDisconnect->setEnabled(true);
-    ui->frameUDPParameters->setEnabled(false);
-
-    QTimer::singleShot(0, this, [this]() { emit signalRequestTabSwitchToChat(); });
-
-} //updateUiOnConnectSuccess
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
