@@ -44,8 +44,8 @@ void SettingsManager::load(Settings &s)
     // Network settings
     s.localUDPAddress = settings.value("LocalUDPAddress", "0.0.0.0").toString();
     s.remoteUDPAddress = settings.value("RemoteUDPAddress", "224.0.0.2").toString();
-    s.localUDPPort = settings.value("LocalUDPPort", 9999).toUInt();
-    s.remoteUDPPort = settings.value("RemoteUDPPort", 9999).toUInt();
+    s.localUDPPort = settings.value("LocalUDPPort", 9998).toUInt();
+    s.remoteUDPPort = settings.value("RemoteUDPPort", 9998).toUInt();
     s.udpTTL = settings.value("UdpTTL", 5).toInt();
     s.b_multicast = settings.value("Multicast", true).toBool();
     s.b_loopback = settings.value("Loopback", true).toBool();
