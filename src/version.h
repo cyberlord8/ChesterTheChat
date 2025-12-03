@@ -35,19 +35,19 @@
  * Only one version should be active at a time. The expiration period is determined
  * based on whether it is an alpha or beta build.
  */
-// #define VERSION "release"
+#define VERSION "release"
 // #define VERSION "alpha"
-#define VERSION "beta"
+// #define VERSION "beta"
 
 /**
  * @def ALPHA_TIME
- * @brief Number of days after build date that an alpha version remains valid.
+ * @brief If EXPIRES is #defined, Number of days after build date that an alpha version remains valid.
  */
 #define ALPHA_TIME 39
 
 /**
  * @def BETA_TIME
- * @brief Number of days after build date that a beta version remains valid.
+ * @brief If EXPIRES is #defined, Number of days after build date that a beta version remains valid.
  */
 #define BETA_TIME 395
 

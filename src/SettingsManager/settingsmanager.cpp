@@ -47,7 +47,7 @@ void SettingsManager::load(Settings &s)
     s.localUDPPort = settings.value("LocalUDPPort", 9998).toUInt();
     s.remoteUDPPort = settings.value("RemoteUDPPort", 9998).toUInt();
     s.udpTTL = settings.value("UdpTTL", 5).toInt();
-    s.b_multicast = settings.value("Multicast", true).toBool();
+    // s.b_multicast = settings.value("Multicast", true).toBool();
     s.b_loopback = settings.value("Loopback", true).toBool();
 
     // Identity
@@ -75,7 +75,7 @@ void SettingsManager::save(const Settings &s)
     settings.setValue("LocalUDPPort", s.localUDPPort);
     settings.setValue("RemoteUDPPort", s.remoteUDPPort);
     settings.setValue("UdpTTL", s.udpTTL);
-    settings.setValue("Multicast", s.b_multicast);
+    // settings.setValue("Multicast", s.b_multicast);
     settings.setValue("Loopback", s.b_loopback);
 
     // Identity

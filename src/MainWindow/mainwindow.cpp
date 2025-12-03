@@ -225,7 +225,7 @@ void MainWindow::updateUIWidgets()
     // Network Settings
     ui->lineEditUserName->setText(configSettings.userName);
     ui->checkBoxLoopback->setChecked(configSettings.b_loopback);
-    ui->checkBoxMulticast->setChecked(configSettings.b_multicast);
+    // ui->checkBoxMulticast->setChecked(configSettings.b_multicast);
     ui->spinBoxTTL->setValue(configSettings.udpTTL);
     ui->comboBoxLocalUDPNetwork->setCurrentText(configSettings.localUDPAddress);
     ui->lineEditLocalUDPPort->setText(QString::number(configSettings.localUDPPort));
@@ -531,8 +531,8 @@ MainWindow::~MainWindow()
 QByteArray MainWindow::buildRawUdpPayload(const QString &user, const QString &msg) const
 {
     LOG_DEBUG(Q_FUNC_INFO);
-
-    return QString("%1 - %2").arg(user, msg).toLocal8Bit();
+    QByteArray returnArray = ui->checkBox->isChecked() ? QString("%1 - %2").arg(user, msg).toUtf8() : QString("%2").arg(msg).toUtf8();
+    return returnArray;
 } //buildRawUdpPayload
 
 bool MainWindow::sendUdpMessage(const QByteArray &data, const QHostAddress &address, quint16 port)
@@ -677,7 +677,7 @@ void MainWindow::on_checkBoxMulticast_clicked(bool checked)
     if (isApplicationStarting)
         return;
 
-    SettingsManager::update(configSettings.b_multicast, checked);
+    // SettingsManager::update(configSettings.b_multicast, checked);
 
 } //on_checkBoxMulticast_clicked
 

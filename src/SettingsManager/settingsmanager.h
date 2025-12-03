@@ -56,8 +56,8 @@ struct Settings {
     /** @brief Time-To-Live for UDP multicast packets. */
     int udpTTL = 1;
 
-    /** @brief Whether to enable multicast mode for outgoing UDP. */
-    bool b_multicast = false;
+    // /** @brief Whether to enable multicast mode for outgoing UDP. */
+    // bool b_multicast = false;
 
     /** @brief Whether to allow receiving own sent UDP messages (loopback). */
     bool b_loopback = false;
