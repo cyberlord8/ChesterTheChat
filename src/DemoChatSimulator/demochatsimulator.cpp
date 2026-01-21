@@ -1,4 +1,4 @@
-#include "DemoChatSimulator.h"
+#include "demochatsimulator.h"
 #include "../Utils/debugmacros.h"
 
 #include <QCoreApplication>

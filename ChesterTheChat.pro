@@ -36,7 +36,7 @@ HEADERS += \
     src/globals.h \
     src/SettingsManager/settingsmanager.h \
     src/StyleRotator/stylerotator.h \
-    src/UdpChatSocketManager/udpchatsocketmanager.h \
+    src/UDPChatSocketManager/udpchatsocketmanager.h \
     src/version.h \
     src/ToastNotification/toastnotification.h \
     todo.h
@@ -52,7 +52,7 @@ SOURCES += \
     src/MainWindow/mainwindow.cpp \
     src/SettingsManager/settingsmanager.cpp \
     src/StyleRotator/stylerotator.cpp \
-    src/UdpChatSocketManager/udpchatsocketmanager.cpp \
+    src/UDPChatSocketManager/udpchatsocketmanager.cpp \
     src/ToastNotification/toastnotification.cpp
 
 DISTFILES += \

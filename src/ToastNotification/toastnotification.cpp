@@ -16,7 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ToastNotification.h"
+#include "toastnotification.h"
 
 #include "../Utils/debugmacros.h"
 

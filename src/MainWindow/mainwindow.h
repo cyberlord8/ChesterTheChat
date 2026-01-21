@@ -24,7 +24,7 @@
 #include "../ChatFormatter/chatformatter.h"
 #include "../MessageStore/messagestore.h"
 #include "../SettingsManager/settingsmanager.h"
-#include "../UdpChatSocketManager/udpchatsocketmanager.h"
+#include "../UDPChatSocketManager/udpchatsocketmanager.h"
 #include "../StyleRotator/stylerotator.h"
 #include "../StyleManager/stylemanager.h"
 #include "../InstanceIdManager/instanceidmanager.h"
