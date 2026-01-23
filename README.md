@@ -2,7 +2,7 @@
 
 **Chester The Chat** is a lightweight IP/UDP-based local network chat application built with the Qt Framework (C++). It's designed to support multiple instances on the same machine, each with isolated configuration, making it ideal for local testing or LAN-based messaging scenarios.
 
-## 🎨 Stylesheets
+## Stylesheets
 ### Alice Stylesheet
 
 ![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Alice.png)
@@ -20,22 +20,22 @@
 
 ---
 
-## 🚀 Features
+## Features
 
-- 🗨️ Send and receive chat messages over UDP multicast or unicast.
-- 🔄 Supports multiple instances with auto-assigned configuration files.
-- 🎨 Optional custom stylesheets (`.qss`) for a personalized look.
-- 🖼️ Optional background image toggle.
-- 🔧 Configurable TTL, ports, network interfaces.
-- 💾 Persistent settings per instance (`instance_X_settings.ini`).
-- 🛠️ Built with Qt (C++), cross-platform compatible.
+- Send and receive chat messages over UDP multicast or unicast.
+- Supports multiple instances with auto-assigned configuration files.
+- Optional custom stylesheets (`.qss`) for a personalized look.
+- Optional background image toggle.
+- Configurable TTL, ports, network interfaces.
+- Persistent settings per instance (`instance_X_settings.ini`).
+- Built with Qt (C++), cross-platform compatible.
 
-## 📘 User Manual
+## User Manual
 [User Manual](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/UserManual.pdf)
 
 ---
 
-## 🛠️ Build Instructions
+## Build Instructions
 
 ### Requirements
 
@@ -56,19 +56,19 @@ Each instance creates its own `.ini` file (`instance_1_settings.ini`, `instance_
 
 ---
 
-## 📘 License
+## License
 Licensed under the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.html).
 
 ---
 
-## 🙌 Acknowledgements
+## Acknowledgements
 
 - Developed using the **Qt Framework**
 - Based on C++ best practices and Qt design patterns
 
 ---
 
-## 🧠 About the Author
+## About the Author
 
 Developed by cyberlord8 — if you use this project or find it helpful, give it a ⭐ on GitHub or drop a message!
 
