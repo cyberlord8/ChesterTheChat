@@ -138,6 +138,7 @@ private:
     Settings         configSettings;            ///< Loaded user/config settings.
     SettingsManager *settingsManager = nullptr; ///< Persists Settings to disk.
     int              instanceID      = 0;       ///< Unique ID for this app instance.
+    uint msgNumber = 1;
     bool             isApplicationStarting = false; ///< Flag suppressing signals during init.
     QMap<QString, QString> QStyleSheetMap;      ///< Maps display names to .qss file paths.
     ///@}
@@ -320,6 +321,8 @@ private slots:
      */
     void on_pushButtonStartStopDemo_clicked();
 #endif
+
+    void on_pushButtonResetMsgSeq_clicked();
 
 signals:
     /// Requests the main window to switch to the Chat tab.

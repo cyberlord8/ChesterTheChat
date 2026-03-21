@@ -868,7 +868,7 @@ QString MainWindow::generateNextTestMessage()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
-    static uint msgNumber = 1;
+    // static uint msgNumber = 1;
     return QString("Test %1").arg(msgNumber++);
 } //generateNextTestMessage
 
@@ -1001,4 +1001,7 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
 } //on_pushButtonStartStopDemo_clicked
 #endif
 
-
+void MainWindow::on_pushButtonResetMsgSeq_clicked()
+{
+    msgNumber = 1;
+}//on_pushButtonResetMsgSeq_clicked

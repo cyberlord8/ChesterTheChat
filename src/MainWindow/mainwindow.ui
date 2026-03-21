@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabChat">
        <attribute name="title">
@@ -81,7 +81,7 @@
           <property name="frameShadow">
            <enum>QFrame::Shadow::Raised</enum>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <layout class="QHBoxLayout" name="horizontalLayout">
            <property name="spacing">
             <number>2</number>
            </property>
@@ -98,35 +98,43 @@
             <number>0</number>
            </property>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
-              <widget class="QLineEdit" name="lineEditChatText">
-               <property name="toolTip">
-                <string>Enter text and press enter or press Send button to send message</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButtonTestMsg">
-               <property name="toolTip">
-                <string>Prints an incrementing test message</string>
-               </property>
-               <property name="text">
-                <string>Test</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButtonSend">
-               <property name="toolTip">
-                <string>Sends the current text (or you can press the Enter Key</string>
-               </property>
-               <property name="text">
-                <string>Send</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QPushButton" name="pushButtonResetMsgSeq">
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Reset Msg Seq.</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEditChatText">
+             <property name="toolTip">
+              <string>Enter text and press enter or press Send button to send message</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonTestMsg">
+             <property name="toolTip">
+              <string>Prints an incrementing test message</string>
+             </property>
+             <property name="text">
+              <string>Test</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonSend">
+             <property name="toolTip">
+              <string>Sends the current text (or you can press the Enter Key</string>
+             </property>
+             <property name="text">
+              <string>Send</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -730,7 +738,7 @@
      <x>0</x>
      <y>0</y>
      <width>370</width>
-     <height>25</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
