@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
 
-    QPixmap pixmap(":/images/BackgroundImage10.png");
+    QPixmap pixmap(":/images/ChesterBGND.png");
     pixmap = pixmap.scaled(512,512,Qt::KeepAspectRatio);
 
     QSplashScreen splash(pixmap);

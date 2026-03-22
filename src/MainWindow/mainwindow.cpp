@@ -264,10 +264,15 @@ void MainWindow::setStyleSheet()
 QString MainWindow::chatBackgroundStyle() const
 {
     LOG_DEBUG(Q_FUNC_INFO);
-
+#ifdef AMC_VERSION
     return QStringLiteral("QTextEdit#textEditChat { "
-                          "border-image: url(:/images/BackgroundImage10.png); "
+                          "border-image: url(:/images/AMC_LOGO_DARK.png); "
                           "}");
+#else
+    return QStringLiteral("QTextEdit#textEditChat { "
+                          "border-image: url(:/images/ChesterBGND.png); "
+                          "}");
+#endif
 } //chatBackgroundStyle
 
 void MainWindow::setBackgroundImage()
@@ -822,7 +827,8 @@ void MainWindow::redrawCurrentMessages()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
-    const QList<Message> messages = messageStore->fetchMessages(chatPager->visibleOffset(), chatPager->visibleLimit());
+    const QList<Message> messages = messageStore->fetchLastMessages(chatPager->messagesPerPage());
+
     displayMessages(messages);
 } //redrawCurrentMessages
 

@@ -19,6 +19,7 @@
 #ifndef VERSION_H
 #define VERSION_H
 
+// #define AMC_VERSION
 /**
  * @def EXPIRES
  * @brief Enables application expiration logic for alpha and beta builds.
