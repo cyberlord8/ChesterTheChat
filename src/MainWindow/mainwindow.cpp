@@ -536,7 +536,7 @@ MainWindow::~MainWindow()
 QByteArray MainWindow::buildRawUdpPayload(const QString &user, const QString &msg) const
 {
     LOG_DEBUG(Q_FUNC_INFO);
-    QByteArray returnArray = ui->checkBox->isChecked() ? QString("%1 - %2").arg(user, msg).toUtf8() : QString("%2").arg(msg).toUtf8();
+    QByteArray returnArray = ui->checkBoxIncludeName->isChecked() ? QString("%1 - %2").arg(user, msg).toUtf8() : QString("%2").arg(msg).toUtf8();
     return returnArray;
 } //buildRawUdpPayload
 
@@ -878,11 +878,108 @@ QString MainWindow::generateNextTestMessage()
     return QString("Test %1").arg(msgNumber++);
 } //generateNextTestMessage
 
+QStringList MainWindow::buildIncrementalPayloads(int firstSize, int lastSize)
+{
+    QStringList payloads;
+
+    if (firstSize < 1 || lastSize < firstSize) {
+        return payloads;
+    }
+
+    payloads.reserve(lastSize - firstSize + 1);
+
+    for (int size = firstSize; size <= lastSize; ++size) {
+        // Matches your test pattern:
+        // 1  -> "1"
+        // 2  -> "22"
+        // 3  -> "333"
+        // ...
+        // 9  -> "999999999"
+        // 10 -> "0000000000"
+        // 11 -> "11111111111"
+        const QChar fillChar = QChar(u'0' + (size % 10));
+
+        payloads.append(QString(size, fillChar));
+    }
+
+    return payloads;
+} //buildIncrementalPayloads
+
+QStringList MainWindow::buildRandomIncrementalPayloads(int firstSize, int lastSize)
+{
+    static const QString customBase64Chars =
+        QStringLiteral(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
+
+    QStringList payloads;
+
+    if (firstSize < 1 || lastSize < firstSize || customBase64Chars.isEmpty()) {
+        return payloads;
+    }
+
+    payloads.reserve(lastSize - firstSize + 1);
+
+    auto *rng = QRandomGenerator::global();
+
+    for (int size = firstSize; size <= lastSize; ++size) {
+        QString payload;
+        payload.reserve(size);
+
+        for (int i = 0; i < size; ++i) {
+            const int charIndex = rng->bounded(customBase64Chars.size());
+            payload.append(customBase64Chars.at(charIndex));
+        }
+
+        payloads.append(payload);
+    }
+
+    return payloads;
+} // buildRandomIncrementalPayloads
+
+void MainWindow::sendIncrementalMessageSizes(int firstSize, int lastSize)
+{
+    // QStringList payloads = buildIncrementalPayloads(firstSize, lastSize);
+    QStringList payloads = buildRandomIncrementalPayloads(firstSize, lastSize);
+    LOG_DEBUG(Q_FUNC_INFO);
+
+    for (const QString &payload : payloads) {
+        qDebug().noquote() << payload.length() << payload;
+
+        if (!udpManager)
+            return;
+
+        const QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
+        bool portOk = false;
+        const quint16 port = ui->lineEditRemoteUDPPort->text().toUShort(&portOk);
+
+        if (!portOk) {
+            ui->labelStatus->setText("Invalid UDP port.");
+            return;
+        }
+
+        const QDateTime timestamp = QDateTime::currentDateTimeUtc();
+        const QByteArray rawData = payload.toLocal8Bit();
+
+        if (sendUdpMessage(rawData, groupAddress, port)) {
+            storeAndDisplaySentMessage("TEST", rawData, timestamp);
+            QApplication::processEvents();
+            QThread::msleep(10);
+        } else {
+            const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
+            ui->labelStatus->setText(error);
+        }
+    }
+}//
+
 void MainWindow::on_pushButtonTestMsg_clicked()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
-    ui->lineEditChatText->setText(generateNextTestMessage());
+    if(ui->checkBoxIncrementSize->isChecked()){
+        sendIncrementalMessageSizes();
+    }
+    else {
+        ui->lineEditChatText->setText(generateNextTestMessage());
+    }
 } //on_pushButtonTestMsg_clicked
 
 void MainWindow::on_pushButtonDeleteDatabase_clicked()

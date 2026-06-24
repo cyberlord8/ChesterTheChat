@@ -39,6 +39,11 @@
 #include <QNetworkInterface>
 #include <QDirIterator>
 
+#include <QRandomGenerator>
+#include <QString>
+#include <QStringList>
+#include <QThread>
+
 #ifdef ENABLE_DEMO_MODE
 #include "../DemoChatSimulator/demochatsimulator.h"
 #endif
@@ -265,6 +270,9 @@ private:
     void stopDemoModeUiReset();
 #endif
 
+    QStringList buildIncrementalPayloads(int firstSize = 1, int lastSize = 160);
+    void sendIncrementalMessageSizes(int firstSize = 1, int lastSize = 160);
+    QStringList buildRandomIncrementalPayloads(int firstSize = 1, int lastSize = 160);
 private slots:
     /** @name Help & About Slots */
     ///@{
