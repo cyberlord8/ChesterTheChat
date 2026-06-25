@@ -1,6 +1,6 @@
 /*
  * Chester The Chat
- * Copyright (C) 2024 Timothy Millea
+ * Copyright (C) 2024 - 2026 Timothy Millea
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,8 @@
  */
 
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "../ToastNotification/toastnotification.h"
-
+#include "ui_mainwindow.h"
 
 #include "../Utils/debugmacros.h"
 
@@ -41,19 +40,20 @@ QString MainWindow::buildVersionSuffix(const QString &version) const
     }
 
     return QString(" - %1").arg(tr(RELEASEDATE));
-} //buildVersionSuffix
+} // buildVersionSuffix
 
 void MainWindow::setAppWindowTitle()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
     const QString userName = configSettings.userName;
-    const QString baseTitle = tr(APP_NAME) + QString(" - %1_%2").arg(QString::number(instanceID), userName);
+    const QString baseTitle = tr(APP_NAME)
+                              + QString(" - %1_%2").arg(QString::number(instanceID), userName);
 
     const QString versionSuffix = buildVersionSuffix(tr(VERSION));
 
     setWindowTitle(baseTitle + versionSuffix);
-} //setAppWindowTitle
+} // setAppWindowTitle
 
 QString MainWindow::buildAppVersionString() const
 {
@@ -61,12 +61,13 @@ QString MainWindow::buildAppVersionString() const
 
     QString version = VERSION;
 
-    if (version.contains("alpha", Qt::CaseInsensitive) || version.contains("bravo", Qt::CaseInsensitive)) {
+    if (version.contains("alpha", Qt::CaseInsensitive)
+        || version.contains("bravo", Qt::CaseInsensitive)) {
         version += " " + tr(__TIME__); // Append compile time for dev builds
     }
 
     return version;
-} //buildAppVersionString
+} // buildAppVersionString
 
 QString MainWindow::detectCompilerInfo() const
 {
@@ -77,9 +78,12 @@ QString MainWindow::detectCompilerInfo() const
 #else
     return QString("Qt %1 - MinGW (64-bit)").arg(qVersion());
 #endif
-} //detectCompilerInfo
+} // detectCompilerInfo
 
-QString MainWindow::buildAboutText(const QString &version, const QString &compileDate, const QString &releaseDate, const QString &compilerInfo) const
+QString MainWindow::buildAboutText(const QString &version,
+                                   const QString &compileDate,
+                                   const QString &releaseDate,
+                                   const QString &compilerInfo) const
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
@@ -104,7 +108,7 @@ QString MainWindow::buildAboutText(const QString &version, const QString &compil
     about += separator;
 
     return about;
-} //buildAboutText
+} // buildAboutText
 
 void MainWindow::on_actionAbout_triggered()
 {
@@ -112,7 +116,8 @@ void MainWindow::on_actionAbout_triggered()
 
     const QString version = buildAppVersionString();
     const QString compileDate = QStringLiteral(__DATE__); // e.g. "May 23 2025"
-    const QString releaseDate = QLocale().toString(QDate::fromString(compileDate, "MMM dd yyyy"), QLocale::ShortFormat);
+    const QString releaseDate = QLocale().toString(QDate::fromString(compileDate, "MMM dd yyyy"),
+                                                   QLocale::ShortFormat);
 
     const QString compilerInfo = detectCompilerInfo();
     const QString aboutText = buildAboutText(version, compileDate, releaseDate, compilerInfo);
@@ -121,14 +126,14 @@ void MainWindow::on_actionAbout_triggered()
     aboutBox.setWindowTitle(tr(APP_NAME));
     aboutBox.setText(aboutText);
     aboutBox.exec();
-} //on_actionAbout_triggered
+} // on_actionAbout_triggered
 
 void MainWindow::on_actionAbout_Qt_triggered()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
     qApp->aboutQt();
-} //on_actionAbout_Qt_triggered
+} // on_actionAbout_Qt_triggered
 
 bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &targetPath)
 {
@@ -139,12 +144,15 @@ bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &
 
     if (targetFile.exists()) {
         // Try to set permissive file mode before removal (especially for read-only files)
-        if (!targetFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::WriteUser)) {
-            qWarning().nospace() << "[copyResourceToFile] Cannot change permissions on: " << targetPath << " | Reason: " << targetFile.errorString();
+        if (!targetFile.setPermissions(QFileDevice::ReadOther | QFileDevice::WriteOther
+                                       | QFileDevice::WriteUser)) {
+            qWarning().nospace() << "[copyResourceToFile] Cannot change permissions on: "
+                                 << targetPath << " | Reason: " << targetFile.errorString();
         }
 
         if (!targetFile.remove()) {
-            qCritical().nospace() << "[copyResourceToFile] Failed to remove: " << targetPath << " | Reason: " << targetFile.errorString();
+            qCritical().nospace() << "[copyResourceToFile] Failed to remove: " << targetPath
+                                  << " | Reason: " << targetFile.errorString();
             return false;
         }
 
@@ -154,13 +162,14 @@ bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &
     }
 
     if (!resourceFile.copy(targetPath)) {
-        qCritical().nospace() << "[copyResourceToFile] Copy failed: " << resourcePath << " → " << targetPath << " | Reason: " << resourceFile.errorString();
+        qCritical().nospace() << "[copyResourceToFile] Copy failed: " << resourcePath << " → "
+                              << targetPath << " | Reason: " << resourceFile.errorString();
         return false;
     }
 
     qDebug().nospace() << "[copyResourceToFile] Resource copied successfully to: " << targetPath;
     return true;
-} //copyResourceToFile
+} // copyResourceToFile
 
 void MainWindow::openResourceFile(const QString &fileName)
 {
@@ -177,28 +186,28 @@ void MainWindow::openResourceFile(const QString &fileName)
     if (!QDesktopServices::openUrl(QUrl::fromLocalFile(targetPath))) {
         qWarning().nospace() << "[openResourceFile] Failed to launch file: " << targetPath;
     }
-} //openResourceFile
+} // openResourceFile
 
 void MainWindow::on_actionQt_License_triggered()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
     openResourceFile("/LGPLv3.pdf");
-} //on_actionQt_License_triggered
+} // on_actionQt_License_triggered
 
 void MainWindow::on_actionUser_Manual_triggered()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
     openResourceFile("/UserManual.pdf");
-} //on_actionUser_Manual_triggered
+} // on_actionUser_Manual_triggered
 
 bool MainWindow::isValidIPv4Address(const QString &ip) const
 {
     // LOG_DEBUG(Q_FUNC_INFO);
 
     return !ip.contains(":") && !ip.startsWith("169.254");
-} //isValidIPv4Address
+} // isValidIPv4Address
 
 void MainWindow::fillNetworkWidgets()
 {
@@ -216,7 +225,7 @@ void MainWindow::fillNetworkWidgets()
             ui->comboBoxLocalUDPNetwork->addItem(ip);
         }
     }
-} //fillNetworkWidgets
+} // fillNetworkWidgets
 
 void MainWindow::updateUIWidgets()
 {
@@ -239,7 +248,11 @@ void MainWindow::updateUIWidgets()
     ui->checkBoxLoadStyleSheet->setChecked(configSettings.b_loadStyleSheet);
     QSignalBlocker block(ui->comboBoxSelectStyleSheet);
     ui->comboBoxSelectStyleSheet->setCurrentText(configSettings.stylesheetName);
-} //updateUIWidgets
+
+    //Enable Test Features
+    ui->checkBoxSpecialFeatures->setChecked(configSettings.b_enableTestFeatures);
+    ui->tabWidget->setTabVisible(1,configSettings.b_enableTestFeatures); // Hide Special tab
+} // updateUIWidgets
 
 void MainWindow::setStyleSheet()
 {
@@ -257,9 +270,10 @@ void MainWindow::setStyleSheet()
         ui->comboBoxSelectStyleSheet->setCurrentText(displayName);
         styleManager->loadStyleSheet(displayName);
     } else {
-        qWarning() << "[setStyleSheet] Style sheet not found in map for file:" << configSettings.stylesheetName;
+        qWarning() << "[setStyleSheet] Style sheet not found in map for file:"
+                   << configSettings.stylesheetName;
     }
-} //setStyleSheet
+} // setStyleSheet
 
 QString MainWindow::chatBackgroundStyle() const
 {
@@ -273,7 +287,7 @@ QString MainWindow::chatBackgroundStyle() const
                           "border-image: url(:/images/ChesterBGND.png); "
                           "}");
 #endif
-} //chatBackgroundStyle
+} // chatBackgroundStyle
 
 void MainWindow::setBackgroundImage()
 {
@@ -284,7 +298,7 @@ void MainWindow::setBackgroundImage()
     } else {
         ui->textEditChat->setStyleSheet(QString()); // reset to default
     }
-} //setBackgroundImage
+} // setBackgroundImage
 
 void MainWindow::displayMessages(const QList<Message> &messages)
 {
@@ -300,9 +314,13 @@ void MainWindow::displayMessages(const QList<Message> &messages)
         bool showUserName = (msg.user != previousUser);
         previousUser = msg.user;
 
-        m_formatter->appendMessage(ui->textEditChat, showUserName ? msg.user : "", msg.text, msg.timestamp, msg.isSentByMe);
+        m_formatter->appendMessage(ui->textEditChat,
+                                   showUserName ? msg.user : "",
+                                   msg.text,
+                                   msg.timestamp,
+                                   msg.isSentByMe);
     }
-} //displayMessages
+} // displayMessages
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
@@ -318,8 +336,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     }
 
     return QMainWindow::eventFilter(obj, event);
-} //eventFilter
-
+} // eventFilter
 
 #ifdef EXPIRES
 bool MainWindow::isTooOld()
@@ -330,16 +347,22 @@ bool MainWindow::isTooOld()
     QString version(VERSION);
 
     if (version.contains("alpha")) {
-        if (thisApplicationFileInfo.lastModified().addDays(ALPHA_TIME) < QDateTime::currentDateTime()) {
-            displayIsTooOld(ALPHA_TIME, thisApplicationFileInfo.lastModified().toString("MMM dd yyyy - hh:mm:ss"));
+        if (thisApplicationFileInfo.lastModified().addDays(ALPHA_TIME)
+            < QDateTime::currentDateTime()) {
+            displayIsTooOld(ALPHA_TIME,
+                            thisApplicationFileInfo.lastModified().toString(
+                                "MMM dd yyyy - hh:mm:ss"));
             return true;
         } else {
             return false;
         }
     } // if alpha
     else if (version.contains("beta")) {
-        if (thisApplicationFileInfo.lastModified().addDays(BETA_TIME) < QDateTime::currentDateTime()) {
-            displayIsTooOld(BETA_TIME, thisApplicationFileInfo.lastModified().toString("MMM dd yyyy - hh:mm:ss"));
+        if (thisApplicationFileInfo.lastModified().addDays(BETA_TIME)
+            < QDateTime::currentDateTime()) {
+            displayIsTooOld(BETA_TIME,
+                            thisApplicationFileInfo.lastModified().toString(
+                                "MMM dd yyyy - hh:mm:ss"));
             return true;
         } else {
             return false;
@@ -352,9 +375,10 @@ void MainWindow::displayIsTooOld(int days, QString fileDate)
 {
     QMessageBox messageBox;
     messageBox.setWindowTitle("Application Expired!");
-    messageBox.setText("This application is older than " + QString::number(days) + " days - " + fileDate +
-                       " and has expired!\n\n"
-                       "Application will now exit.");
+    messageBox.setText("This application is older than " + QString::number(days) + " days - "
+                       + fileDate
+                       + " and has expired!\n\n"
+                         "Application will now exit.");
     messageBox.exec();
 } // displayIsTooOld
 #endif
@@ -371,12 +395,13 @@ void MainWindow::initializeManagers()
     udpManager = new UdpChatSocketManager(this);
     m_formatter = new ChatFormatter(this);
 
-    const QString dbPath = QCoreApplication::applicationDirPath() + QString("/chat_messages_instance_%1.db").arg(instanceID);
+    const QString dbPath = QCoreApplication::applicationDirPath()
+                           + QString("/chat_messages_instance_%1.db").arg(instanceID);
     messageStore = new MessageStore(dbPath, instanceID, this);
 
     chatPager = std::make_unique<ChatPager>(messageStore, m_formatter, this);
 
-} //initializeManagers
+} // initializeManagers
 
 void MainWindow::initializeUi()
 {
@@ -386,27 +411,33 @@ void MainWindow::initializeUi()
     ui->groupBoxDemoMode->hide();
 #endif
 
-    ui->tabWidget->setCurrentIndex(1);
+    ui->pushButtonDisconnect->setEnabled(false);
+    ui->checkBoxSpecialFeatures->setEnabled(false);
     ui->tabWidget->setTabEnabled(0, false); // Disable Chat tab
+    ui->tabWidget->setTabEnabled(1, false); // Disable Test Features tab
+    ui->tabWidget->setCurrentIndex(2);
     ui->statusbar->addWidget(ui->labelStatus);
     ui->textEditChat->verticalScrollBar()->installEventFilter(this);
-} //initializeUi
+} // initializeUi
 
 void MainWindow::connectSignals()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
-    connect(udpManager, &UdpChatSocketManager::messageReceived, this, [this](const QString &user, const QString &msg) {
-        const QDateTime timestamp = QDateTime::currentDateTimeUtc();
-        messageStore->insertMessage(user, msg, timestamp, false);
-        m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, false);
-        ui->textEditChat->moveCursor(QTextCursor::End);
+    connect(udpManager,
+            &UdpChatSocketManager::messageReceived,
+            this,
+            [this](const QString &user, const QString &msg) {
+                const QDateTime timestamp = QDateTime::currentDateTimeUtc();
+                messageStore->insertMessage(user, msg, timestamp, false);
+                m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, false);
+                ui->textEditChat->moveCursor(QTextCursor::End);
 
-        if (isMinimized() || !isVisible() || !isActiveWindow()) {
-            QApplication::alert(this, 3000);
-            new ToastNotification(QString("%1: %2").arg(user, msg), this);
-        }
-    });
+                if (isMinimized() || !isVisible() || !isActiveWindow()) {
+                    QApplication::alert(this, 3000);
+                    new ToastNotification(QString("%1: %2").arg(user, msg), this);
+                }
+            });
 
     connect(this, &MainWindow::signalRequestTabSwitchToChat, this, [this]() {
         if (!ui || !ui->tabWidget)
@@ -416,11 +447,12 @@ void MainWindow::connectSignals()
         ui->tabWidget->setCurrentIndex(0);
     });
 
-    connect(this, &MainWindow::signalRequestRedrawCurrentMessages, this, &MainWindow::redrawCurrentMessages);
+    connect(this,
+            &MainWindow::signalRequestRedrawCurrentMessages,
+            this,
+            &MainWindow::redrawCurrentMessages);
 
     connect(chatPager.get(), &ChatPager::messagesReady, this, &MainWindow::displayMessages);
-
-
 
     connect(chatPager.get(), &ChatPager::scrollToTopAdjustmentRequested, this, [this]() {
         QScrollBar *sb = ui->textEditChat->verticalScrollBar();
@@ -438,7 +470,7 @@ void MainWindow::connectSignals()
             sb->setValue(value);
     });
 
-} //connectSignals
+} // connectSignals
 
 void MainWindow::loadInitialState()
 {
@@ -460,7 +492,7 @@ void MainWindow::loadInitialState()
     setAppWindowTitle();
     fillNetworkWidgets();
     updateUIWidgets();
-} //loadInitialState
+} // loadInitialState
 
 void MainWindow::initializeDatabase()
 {
@@ -476,7 +508,7 @@ void MainWindow::initializeDatabase()
     chatPager->loadPage(messageStore->messageCount());
 
     displayMessages(messages);
-} //initializeDatabase
+} // initializeDatabase
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -486,13 +518,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
 
-
 #ifdef EXPIRES
     if (isTooOld()) {
         exit(0);
     }
 #endif
-
 
     isApplicationStarting = true;
 
@@ -506,10 +536,17 @@ MainWindow::MainWindow(QWidget *parent)
 
     userNameSaveDebounceTimer.setInterval(500);
     userNameSaveDebounceTimer.setSingleShot(true);
-    connect(&userNameSaveDebounceTimer, &QTimer::timeout, this, [this]() { settingsManager->save(configSettings); });
+    connect(&userNameSaveDebounceTimer, &QTimer::timeout, this, [this]() {
+        settingsManager->save(configSettings);
+    });
+    autoTestMessageTimer.setInterval(1000);
+    autoTestMessageTimer.setSingleShot(false);
+    autoTestMessageTimer.setTimerType(Qt::PreciseTimer);
+
+    connect(&autoTestMessageTimer, &QTimer::timeout, this, &MainWindow::sendAutoTestMessage);
 
     isApplicationStarting = false;
-} //MainWindow
+} // MainWindow
 
 MainWindow::~MainWindow()
 {
@@ -531,29 +568,33 @@ MainWindow::~MainWindow()
 
     delete ui;
     ui = nullptr;
-} //~MainWindow
+} // ~MainWindow
 
 QByteArray MainWindow::buildRawUdpPayload(const QString &user, const QString &msg) const
 {
     LOG_DEBUG(Q_FUNC_INFO);
-    QByteArray returnArray = ui->checkBoxIncludeName->isChecked() ? QString("%1 - %2").arg(user, msg).toUtf8() : QString("%2").arg(msg).toUtf8();
+    QByteArray returnArray = ui->checkBoxIncludeName->isChecked()
+                                 ? QString("%1 - %2").arg(user, msg).toUtf8()
+                                 : QString("%2").arg(msg).toUtf8();
     return returnArray;
-} //buildRawUdpPayload
+} // buildRawUdpPayload
 
 bool MainWindow::sendUdpMessage(const QByteArray &data, const QHostAddress &address, quint16 port)
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
     return udpManager->sendMessage(data, address, port) == data.size();
-} //sendUdpMessage
+} // sendUdpMessage
 
-void MainWindow::storeAndDisplaySentMessage(const QString &user, const QString &msg, const QDateTime &timestamp)
+void MainWindow::storeAndDisplaySentMessage(const QString &user,
+                                            const QString &msg,
+                                            const QDateTime &timestamp)
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
     messageStore->insertMessage(user, msg, timestamp, true);
     m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, true);
-} //storeAndDisplaySentMessage
+} // storeAndDisplaySentMessage
 
 void MainWindow::on_pushButtonSend_clicked()
 {
@@ -584,10 +625,11 @@ void MainWindow::on_pushButtonSend_clicked()
         storeAndDisplaySentMessage(userName, messageText, timestamp);
         ui->lineEditChatText->clear();
     } else {
-        const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
+        const QString error = tr("%1 - ERROR writing to UDP socket: %2")
+                                  .arg(Q_FUNC_INFO, udpManager->lastError());
         ui->labelStatus->setText(error);
     }
-} //on_pushButtonSend_clicked
+} // on_pushButtonSend_clicked
 
 void MainWindow::updateUiOnConnectSuccess()
 {
@@ -597,10 +639,12 @@ void MainWindow::updateUiOnConnectSuccess()
     ui->pushButtonConnect->setEnabled(false);
     ui->pushButtonDisconnect->setEnabled(true);
     ui->frameUDPParameters->setEnabled(false);
-
+    ui->checkBoxSpecialFeatures->setEnabled(true);
     QTimer::singleShot(0, this, [this]() { emit signalRequestTabSwitchToChat(); });
 
-} //updateUiOnConnectSuccess
+    ui->tabWidget->setTabEnabled(1,true);
+    ui->tabWidget->setTabVisible(1,configSettings.b_enableTestFeatures);
+} // updateUiOnConnectSuccess
 
 QHostAddress MainWindow::parseLocalAddress() const
 {
@@ -608,7 +652,7 @@ QHostAddress MainWindow::parseLocalAddress() const
 
     const QString text = ui->comboBoxLocalUDPNetwork->currentText().trimmed();
     return (text == "ANY") ? QHostAddress(QHostAddress::AnyIPv4) : QHostAddress(text);
-} //parseLocalAddress
+} // parseLocalAddress
 
 bool MainWindow::bindUdpSockets(const QHostAddress &local, const QHostAddress &remote, quint16 port)
 {
@@ -617,7 +661,7 @@ bool MainWindow::bindUdpSockets(const QHostAddress &local, const QHostAddress &r
     bool recvBound = udpManager->bindReceiveSocket(local, remote, port);
     bool sendBound = udpManager->bindSendSocket(local);
     return recvBound && sendBound;
-} //bindUdpSockets
+} // bindUdpSockets
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
@@ -641,7 +685,7 @@ void MainWindow::on_pushButtonConnect_clicked()
     } else {
         ui->labelStatus->setText(tr("Failed to bind one or both sockets."));
     }
-} //on_pushButtonConnect_clicked
+} // on_pushButtonConnect_clicked
 
 void MainWindow::on_lineEditChatText_returnPressed()
 {
@@ -650,7 +694,7 @@ void MainWindow::on_lineEditChatText_returnPressed()
     if (ui->pushButtonSend->isEnabled()) {
         on_pushButtonSend_clicked();
     }
-} //on_lineEditChatText_returnPressed
+} // on_lineEditChatText_returnPressed
 
 void MainWindow::resetUiAfterDisconnect()
 {
@@ -660,20 +704,24 @@ void MainWindow::resetUiAfterDisconnect()
     ui->pushButtonDisconnect->setEnabled(false);
     ui->frameUDPParameters->setEnabled(true);
     ui->tabWidget->setTabEnabled(0, false);
-
+    // ui->checkBoxSpecialFeatures->setChecked(configSettings.b_enableTestFeatures);
+    ui->checkBoxSpecialFeatures->setEnabled(false);
+    ui->tabWidget->setTabEnabled(1,false);// disable Special tab
     // ui->pushButtonStartStopDemo->setEnabled(!udpManager->isConnected());
-} //resetUiAfterDisconnect
+} // resetUiAfterDisconnect
 
 void MainWindow::on_pushButtonDisconnect_clicked()
 {
     LOG_DEBUG(Q_FUNC_INFO);
+
+    stopAutoTestMessages();
 
     if (udpManager)
         udpManager->closeSockets();
 
     resetUiAfterDisconnect();
     ui->labelStatus->setText(tr("Disconnected from network."));
-} //on_pushButtonDisconnect_clicked
+} // on_pushButtonDisconnect_clicked
 
 void MainWindow::on_checkBoxMulticast_clicked(bool checked)
 {
@@ -684,7 +732,7 @@ void MainWindow::on_checkBoxMulticast_clicked(bool checked)
 
     // SettingsManager::update(configSettings.b_multicast, checked);
 
-} //on_checkBoxMulticast_clicked
+} // on_checkBoxMulticast_clicked
 
 void MainWindow::on_checkBoxLoopback_clicked(bool checked)
 {
@@ -695,7 +743,7 @@ void MainWindow::on_checkBoxLoopback_clicked(bool checked)
 
     SettingsManager::update(configSettings.b_loopback, checked);
 
-} //on_checkBoxLoopback_clicked
+} // on_checkBoxLoopback_clicked
 
 void MainWindow::on_comboBoxLocalUDPNetwork_currentTextChanged(const QString &arg1)
 {
@@ -706,7 +754,7 @@ void MainWindow::on_comboBoxLocalUDPNetwork_currentTextChanged(const QString &ar
 
     SettingsManager::update(configSettings.localUDPAddress, arg1);
 
-} //on_comboBoxLocalUDPNetwork_currentTextChanged
+} // on_comboBoxLocalUDPNetwork_currentTextChanged
 
 void MainWindow::on_lineEditLocalUDPPort_textChanged(const QString &arg1)
 {
@@ -717,7 +765,7 @@ void MainWindow::on_lineEditLocalUDPPort_textChanged(const QString &arg1)
 
     SettingsManager::update(configSettings.localUDPPort, arg1.toUShort());
 
-} //on_lineEditLocalUDPPort_textChanged
+} // on_lineEditLocalUDPPort_textChanged
 
 void MainWindow::on_lineEditRemoteUDPNetwork_textChanged(const QString &arg1)
 {
@@ -728,7 +776,7 @@ void MainWindow::on_lineEditRemoteUDPNetwork_textChanged(const QString &arg1)
 
     SettingsManager::update(configSettings.remoteUDPAddress, arg1);
 
-} //on_lineEditRemoteUDPNetwork_textChanged
+} // on_lineEditRemoteUDPNetwork_textChanged
 
 void MainWindow::on_lineEditRemoteUDPPort_textChanged(const QString &arg1)
 {
@@ -739,7 +787,7 @@ void MainWindow::on_lineEditRemoteUDPPort_textChanged(const QString &arg1)
 
     SettingsManager::update(configSettings.remoteUDPPort, arg1.toUShort());
 
-} //on_lineEditRemoteUDPPort_textChanged
+} // on_lineEditRemoteUDPPort_textChanged
 
 void MainWindow::on_spinBoxTTL_valueChanged(int arg1)
 {
@@ -750,7 +798,7 @@ void MainWindow::on_spinBoxTTL_valueChanged(int arg1)
 
     SettingsManager::update(configSettings.udpTTL, arg1);
 
-} //on_spinBoxTTL_valueChanged
+} // on_spinBoxTTL_valueChanged
 
 void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &styleName)
 {
@@ -759,7 +807,7 @@ void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &s
     if (isApplicationStarting)
         return;
 
-    if(styleName.isEmpty()){
+    if (styleName.isEmpty()) {
         ui->checkBoxLoadStyleSheet->setChecked(false);
         settingsManager->update(configSettings.b_loadStyleSheet, false);
     }
@@ -777,7 +825,7 @@ void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &s
     redrawCurrentMessages(); // refresh visible messages with new theme context
     settingsManager->save(configSettings);
 #endif
-} //on_comboBoxSelectStyleSheet_currentTextChanged
+} // on_comboBoxSelectStyleSheet_currentTextChanged
 
 void MainWindow::populateStyleSheetMap(const QString &folderPath)
 {
@@ -788,7 +836,7 @@ void MainWindow::populateStyleSheetMap(const QString &folderPath)
         QFileInfo fileInfo(it.next());
         QStyleSheetMap.insert(fileInfo.baseName(), fileInfo.absoluteFilePath());
     }
-} //populateStyleSheetMap
+} // populateStyleSheetMap
 
 void MainWindow::populateStyleSheetComboBox()
 {
@@ -798,7 +846,7 @@ void MainWindow::populateStyleSheetComboBox()
     QSignalBlocker block(ui->comboBoxSelectStyleSheet);
     ui->comboBoxSelectStyleSheet->addItem(""); // for 'none' or default
     ui->comboBoxSelectStyleSheet->addItems(QStyleSheetMap.keys());
-} //populateStyleSheetComboBox
+} // populateStyleSheetComboBox
 
 void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
 {
@@ -809,7 +857,7 @@ void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
     }
 
     SettingsManager::update(configSettings.b_loadStyleSheet, checked);
-} //on_checkBoxLoadStyleSheet_clicked
+} // on_checkBoxLoadStyleSheet_clicked
 
 void MainWindow::loadQStyleSheetFolder()
 {
@@ -821,7 +869,7 @@ void MainWindow::loadQStyleSheetFolder()
     populateStyleSheetMap(styleFolder);
     populateStyleSheetComboBox();
     styleManager->setStyleSheetMap(QStyleSheetMap);
-} //loadQStyleSheetFolder
+} // loadQStyleSheetFolder
 
 void MainWindow::redrawCurrentMessages()
 {
@@ -830,7 +878,7 @@ void MainWindow::redrawCurrentMessages()
     const QList<Message> messages = messageStore->fetchLastMessages(chatPager->messagesPerPage());
 
     displayMessages(messages);
-} //redrawCurrentMessages
+} // redrawCurrentMessages
 
 void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 {
@@ -843,7 +891,7 @@ void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
     settingsManager->save(configSettings);
 
     setBackgroundImage();
-} //on_checkBoxDisplayBackgroundImage_clicked
+} // on_checkBoxDisplayBackgroundImage_clicked
 
 void MainWindow::on_lineEditUserName_textChanged(const QString &newUserName)
 {
@@ -868,7 +916,7 @@ void MainWindow::on_lineEditUserName_textChanged(const QString &newUserName)
     configSettings.userName = localNewUserName;
     setAppWindowTitle();
     userNameSaveDebounceTimer.start();
-} //on_lineEditUserName_textChanged
+} // on_lineEditUserName_textChanged
 
 QString MainWindow::generateNextTestMessage()
 {
@@ -876,7 +924,7 @@ QString MainWindow::generateNextTestMessage()
 
     // static uint msgNumber = 1;
     return QString("Test %1").arg(msgNumber++);
-} //generateNextTestMessage
+} // generateNextTestMessage
 
 QStringList MainWindow::buildIncrementalPayloads(int firstSize, int lastSize)
 {
@@ -903,12 +951,12 @@ QStringList MainWindow::buildIncrementalPayloads(int firstSize, int lastSize)
     }
 
     return payloads;
-} //buildIncrementalPayloads
+} // buildIncrementalPayloads
 
 QStringList MainWindow::buildRandomIncrementalPayloads(int firstSize, int lastSize)
 {
-    static const QString customBase64Chars =
-        QStringLiteral(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
+    static const QString customBase64Chars = QStringLiteral(
+        " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
 
     QStringList payloads;
 
@@ -937,12 +985,15 @@ QStringList MainWindow::buildRandomIncrementalPayloads(int firstSize, int lastSi
 
 void MainWindow::sendIncrementalMessageSizes(int firstSize, int lastSize)
 {
-    // QStringList payloads = buildIncrementalPayloads(firstSize, lastSize);
-    QStringList payloads = buildRandomIncrementalPayloads(firstSize, lastSize);
     LOG_DEBUG(Q_FUNC_INFO);
+    QStringList payloads;
+
+    payloads = ui->checkBoxRandomText->isChecked()
+                   ? buildRandomIncrementalPayloads(firstSize, lastSize)
+                   : buildIncrementalPayloads(firstSize, lastSize);
 
     for (const QString &payload : payloads) {
-        qDebug().noquote() << payload.length() << payload;
+        // qDebug().noquote() << payload.length() << payload;
 
         if (!udpManager)
             return;
@@ -964,32 +1015,138 @@ void MainWindow::sendIncrementalMessageSizes(int firstSize, int lastSize)
             QApplication::processEvents();
             QThread::msleep(10);
         } else {
-            const QString error = tr("%1 - ERROR writing to UDP socket: %2").arg(Q_FUNC_INFO, udpManager->lastError());
+            const QString error = tr("%1 - ERROR writing to UDP socket: %2")
+                                      .arg(Q_FUNC_INFO, udpManager->lastError());
             ui->labelStatus->setText(error);
         }
     }
-}//
+} //
+
+int MainWindow::autoTestMessageIntervalMs() const
+{
+    bool ok = false;
+    const uint intervalValue = ui->lineEditAutoSchedule->text().trimmed().toUInt(&ok);
+
+    if (!ok || intervalValue == 0)
+        return 0;
+
+    if (ui->radioButtonAutoMinutes->isChecked())
+        return static_cast<int>(intervalValue * 60000);
+
+    return static_cast<int>(intervalValue * 1000);
+} //
+
+void MainWindow::sendAutoTestMessage()
+{
+    if (!udpManager || !udpManager->isConnected()) {
+        stopAutoTestMessages();
+        ui->labelStatus->setText(tr("Auto test stopped: UDP is not connected."));
+        return;
+    }
+
+    const QString userName = ui->lineEditUserName->text().trimmed();
+
+    if (userName.isEmpty()) {
+        stopAutoTestMessages();
+        ui->labelStatus->setText(tr("Auto test stopped: user name is empty."));
+        return;
+    }
+
+    const QString messageText = generateNextTestMessage();
+
+    const QHostAddress groupAddress(ui->lineEditRemoteUDPNetwork->text().trimmed());
+
+    bool portOk = false;
+    const quint16 port = ui->lineEditRemoteUDPPort->text().toUShort(&portOk);
+
+    if (!portOk || port == 0) {
+        stopAutoTestMessages();
+        ui->labelStatus->setText(tr("Auto test stopped: invalid UDP port."));
+        return;
+    }
+
+    const QDateTime timestamp = QDateTime::currentDateTimeUtc();
+    const QByteArray rawData = buildRawUdpPayload(userName, messageText);
+
+    if (sendUdpMessage(rawData, groupAddress, port)) {
+        storeAndDisplaySentMessage(userName, messageText, timestamp);
+        ui->textEditChat->moveCursor(QTextCursor::End);
+    } else {
+        const QString error = tr("%1 - ERROR writing to UDP socket: %2")
+        .arg(Q_FUNC_INFO, udpManager->lastError());
+
+        ui->labelStatus->setText(error);
+        stopAutoTestMessages();
+    }
+} //
+
+void MainWindow::stopAutoTestMessages()
+{
+    autoTestMessageTimer.stop();
+
+    ui->pushButtonStartAutoSchedule->setEnabled(true);
+    ui->pushButtonStopAutoSchedule->setEnabled(false);
+
+    ui->radioButtonAutoSeconds->setEnabled(true);
+    ui->radioButtonAutoMinutes->setEnabled(true);
+    ui->lineEditAutoSchedule->setEnabled(true);
+} //
+
+void MainWindow::on_pushButtonStartAutoSchedule_clicked()
+{
+    const int intervalMs = autoTestMessageIntervalMs();
+
+    if (intervalMs <= 0) {
+        ui->labelStatus->setText(tr("Invalid auto test interval."));
+        return;
+    }
+
+    if (!udpManager || !udpManager->isConnected()) {
+        ui->labelStatus->setText(tr("Connect UDP before starting auto test messages."));
+        return;
+    }
+
+    ui->pushButtonStartAutoSchedule->setEnabled(false);
+    ui->pushButtonStopAutoSchedule->setEnabled(true);
+
+    ui->radioButtonAutoSeconds->setEnabled(false);
+    ui->radioButtonAutoMinutes->setEnabled(false);
+    ui->lineEditAutoSchedule->setEnabled(false);
+
+    autoTestMessageTimer.start(intervalMs);
+
+    sendAutoTestMessage();   // Sends the first one immediately.
+    ui->tabWidget->setCurrentIndex(0);
+
+} //
+
+void MainWindow::on_pushButtonStopAutoSchedule_clicked()
+{
+    stopAutoTestMessages();
+} //
 
 void MainWindow::on_pushButtonTestMsg_clicked()
 {
     LOG_DEBUG(Q_FUNC_INFO);
+    ui->lineEditChatText->setText(generateNextTestMessage());
 
-    if(ui->checkBoxIncrementSize->isChecked()){
-        sendIncrementalMessageSizes();
-    }
-    else {
-        ui->lineEditChatText->setText(generateNextTestMessage());
-    }
+    // if(ui->checkBoxIncrementSize->isChecked()){
+    //     sendIncrementalMessageSizes();
+    // }
+    // else {
+    // ui->lineEditChatText->setText(generateNextTestMessage());
+    // }
 } //on_pushButtonTestMsg_clicked
 
 void MainWindow::on_pushButtonDeleteDatabase_clicked()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
-    const QMessageBox::StandardButton reply = QMessageBox::question(this,
-                                                                    tr("Confirm Clear"),
-                                                                    tr("Are you sure you want to delete all chat messages?"),
-                                                                    QMessageBox::Yes | QMessageBox::No);
+    const QMessageBox::StandardButton reply
+        = QMessageBox::question(this,
+                                tr("Confirm Clear"),
+                                tr("Are you sure you want to delete all chat messages?"),
+                                QMessageBox::Yes | QMessageBox::No);
 
     if (reply != QMessageBox::Yes)
         return;
@@ -1072,7 +1229,10 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
 
     if (!isDemoRunning) {
         if (udpManager->isConnected()) {
-            QMessageBox::warning(this, tr("Cannot Start Demo"), tr("Please disconnect from the UDP session before starting demo mode."));
+            QMessageBox::warning(
+                this,
+                tr("Cannot Start Demo"),
+                tr("Please disconnect from the UDP session before starting demo mode."));
             return;
         }
 
@@ -1083,16 +1243,22 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
         // Always create a new simulator for fresh state
         demoSimulator.reset(new DemoChatSimulator(ui->textEditChat, m_formatter, this));
 
-        connect(demoSimulator.get(), &DemoChatSimulator::signalRequestClearChatDisplay, this, [this]() {
-            QTimer::singleShot(0, this, [this]() {
-                if (ui && ui->textEditChat)
-                    ui->textEditChat->clear(); // Safe on main thread
-            });
-        });
+        connect(demoSimulator.get(),
+                &DemoChatSimulator::signalRequestClearChatDisplay,
+                this,
+                [this]() {
+                    QTimer::singleShot(0, this, [this]() {
+                        if (ui && ui->textEditChat)
+                            ui->textEditChat->clear(); // Safe on main thread
+                    });
+                });
 
         if (!demoSimulator->startDemo()) {
             demoSimulator.reset(); // destroy faulty instance
-            QMessageBox::warning(this, tr("Demo Start Failed"), tr("No demo files found or all files are empty.\nPlease check the 'demofiles' folder."));
+            QMessageBox::warning(this,
+                                 tr("Demo Start Failed"),
+                                 tr("No demo files found or all files are empty.\nPlease check the "
+                                    "'demofiles' folder."));
             return;
         }
 
@@ -1107,4 +1273,38 @@ void MainWindow::on_pushButtonStartStopDemo_clicked()
 void MainWindow::on_pushButtonResetMsgSeq_clicked()
 {
     msgNumber = 1;
-}//on_pushButtonResetMsgSeq_clicked
+} //on_pushButtonResetMsgSeq_clicked
+
+void MainWindow::on_checkBoxSpecialFeatures_clicked(bool checked)
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+
+    if (!udpManager)
+        return;
+
+    configSettings.b_enableTestFeatures = checked;
+    settingsManager->save(configSettings);
+
+    ui->tabWidget->setTabVisible(1, checked);
+
+    checked ? ui->tabWidget->setCurrentIndex(1) : ui->tabWidget->setCurrentIndex(2);
+} // on_checkBoxSpecialFeatures_clicked
+
+void MainWindow::on_pushButtonStartIncrementalMessages_clicked()
+{
+    sendIncrementalMessageSizes(ui->lineEditMinSize->text().toUInt(),
+                                ui->lineEditMaxSize->text().toUInt());
+    ui->tabWidget->setCurrentIndex(0);
+} //
+
+// void MainWindow::on_pushButtonStartAutoSchedule_clicked()
+// {
+//     ui->pushButtonStartAutoSchedule->setEnabled(false);
+//     ui->pushButtonStopAutoSchedule->setEnabled(true);
+// } //
+
+// void MainWindow::on_pushButtonStopAutoSchedule_clicked()
+// {
+//     ui->pushButtonStartAutoSchedule->setEnabled(true);
+//     ui->pushButtonStopAutoSchedule->setEnabled(false);
+// } //

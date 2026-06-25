@@ -1,6 +1,6 @@
 /*
  * Chester The Chat
- * Copyright (C) 2024 Timothy Millea
+ * Copyright (C) 2024 - 2026 Timothy Millea
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,7 +120,9 @@ private:
 
     /// Timer to debounce saving the username setting.
     QTimer userNameSaveDebounceTimer;
-
+    
+    /// Sends automatic test messages at the selected interval.
+    QTimer autoTestMessageTimer;
     /** @name Chat Message Components
      *  Objects related to message formatting and persistence.
      */
@@ -273,6 +275,10 @@ private:
     QStringList buildIncrementalPayloads(int firstSize = 1, int lastSize = 160);
     void sendIncrementalMessageSizes(int firstSize = 1, int lastSize = 160);
     QStringList buildRandomIncrementalPayloads(int firstSize = 1, int lastSize = 160);
+
+    int autoTestMessageIntervalMs() const;
+    void sendAutoTestMessage();
+    void stopAutoTestMessages();
 private slots:
     /** @name Help & About Slots */
     ///@{
@@ -331,6 +337,11 @@ private slots:
 #endif
 
     void on_pushButtonResetMsgSeq_clicked();
+    void on_checkBoxSpecialFeatures_clicked(bool checked);
+    void on_pushButtonStartIncrementalMessages_clicked();
+    void on_pushButtonStartAutoSchedule_clicked();
+
+    void on_pushButtonStopAutoSchedule_clicked();
 
 signals:
     /// Requests the main window to switch to the Chat tab.

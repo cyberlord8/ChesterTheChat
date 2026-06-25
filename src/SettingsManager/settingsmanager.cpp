@@ -1,6 +1,6 @@
 /*
  * Chester The Chat
- * Copyright (C) 2024 Timothy Millea
+ * Copyright (C) 2024 - 2026 Timothy Millea
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,9 @@ void SettingsManager::load(Settings &s)
 
     // Identity
     s.userName = settings.value("UserName", "Chester").toString();
+
+    //Test Features
+    s.b_enableTestFeatures = settings.value("EnableTestFeatures", false).toBool();
 }//load
 
 void SettingsManager::save(const Settings &s)
@@ -80,6 +83,9 @@ void SettingsManager::save(const Settings &s)
 
     // Identity
     settings.setValue("UserName", s.userName);
+
+    //Test Features
+    settings.setValue("EnableTestFeatures", s.b_enableTestFeatures);
 }//save
 
 void SettingsManager::saveGeometry(const QByteArray &geometry)

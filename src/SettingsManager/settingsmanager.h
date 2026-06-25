@@ -1,6 +1,6 @@
 /*
  * Chester The Chat
- * Copyright (C) 2024 Timothy Millea
+ * Copyright (C) 2024 - 2026 Timothy Millea
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,9 @@ struct Settings {
     /** @brief Whether to display a background image in the chat view. */
     bool b_displayBackgroundImage = false;
 
+    /** @brief Whether to enable Test Features at allpication start. */
+    bool b_enableTestFeatures = false;
+
     /** @brief The local IP address for UDP communication. */
     QString localUDPAddress;
 
@@ -55,9 +58,6 @@ struct Settings {
 
     /** @brief Time-To-Live for UDP multicast packets. */
     int udpTTL = 1;
-
-    // /** @brief Whether to enable multicast mode for outgoing UDP. */
-    // bool b_multicast = false;
 
     /** @brief Whether to allow receiving own sent UDP messages (loopback). */
     bool b_loopback = false;
