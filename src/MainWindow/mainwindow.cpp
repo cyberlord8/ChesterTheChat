@@ -248,6 +248,8 @@ void MainWindow::updateUIWidgets()
     ui->checkBoxLoadStyleSheet->setChecked(configSettings.b_loadStyleSheet);
     QSignalBlocker block(ui->comboBoxSelectStyleSheet);
     ui->comboBoxSelectStyleSheet->setCurrentText(configSettings.stylesheetName);
+    QSignalBlocker block2(ui->comboBoxSelectBackground);
+    ui->comboBoxSelectBackground->setCurrentText(configSettings.backgroundImageName);
 
     //Enable Test Features
     ui->checkBoxSpecialFeatures->setChecked(configSettings.b_enableTestFeatures);
@@ -289,16 +291,40 @@ QString MainWindow::chatBackgroundStyle() const
 #endif
 } // chatBackgroundStyle
 
-void MainWindow::setBackgroundImage()
+QString MainWindow::chatBackgroundStyle(QString filePath) const
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+
+    return QStringLiteral(
+               "QTextEdit#textEditChat { "
+               "border-image: url(\"%1\"); "
+               "}")
+        .arg(filePath);
+} //chatBackgroundStyle
+
+void MainWindow::setBackgroundImage(QString filePath)
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
     if (configSettings.b_displayBackgroundImage) {
-        ui->textEditChat->setStyleSheet(chatBackgroundStyle());
+        QString styleSheetString = chatBackgroundStyle(filePath);
+        qDebug() << styleSheetString;
+        ui->textEditChat->setStyleSheet(styleSheetString);
     } else {
         ui->textEditChat->setStyleSheet(QString()); // reset to default
     }
-} // setBackgroundImage
+} //setBackgroundImage
+
+// void MainWindow::setBackgroundImage()
+// {
+//     LOG_DEBUG(Q_FUNC_INFO);
+
+//     if (configSettings.b_displayBackgroundImage) {
+//         ui->textEditChat->setStyleSheet(chatBackgroundStyle());
+//     } else {
+//         ui->textEditChat->setStyleSheet(QString()); // reset to default
+//     }
+// } // setBackgroundImage
 
 void MainWindow::displayMessages(const QList<Message> &messages)
 {
@@ -480,6 +506,7 @@ void MainWindow::loadInitialState()
     restoreGeometry(settingsManager->loadGeometry());
 
     loadQStyleSheetFolder();
+    loadBackgroundImageFolder();
 
 #ifdef ENABLE_DEMO_MODE
     if (!styleRotator) {
@@ -488,7 +515,7 @@ void MainWindow::loadInitialState()
 #endif
 
     setStyleSheet();
-    setBackgroundImage();
+    setBackgroundImage(backgroundImageMap.value(configSettings.backgroundImageName));
     setAppWindowTitle();
     fillNetworkWidgets();
     updateUIWidgets();
@@ -880,6 +907,22 @@ void MainWindow::redrawCurrentMessages()
     displayMessages(messages);
 } // redrawCurrentMessages
 
+void MainWindow::loadBackgroundImageFolder()
+{
+    QString QStyleSheetFolder = QApplication::applicationDirPath() + "/../QStyleSheets/backgrounds";
+    QDirIterator fileIterator(QStyleSheetFolder, QStringList() << "*.jpg", QDir::Files, QDirIterator::Subdirectories);
+
+    while (fileIterator.hasNext()) {
+        QFile styleSheetFile(fileIterator.next());
+        QFileInfo fileInfo(styleSheetFile);
+        backgroundImageMap.insert(fileInfo.baseName(), styleSheetFile.fileName());
+    }
+
+    ui->comboBoxSelectBackground->clear();
+    ui->comboBoxSelectBackground->addItem("");
+    ui->comboBoxSelectBackground->addItems(backgroundImageMap.keys());
+} // loadBackgroundImageFolder
+
 void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 {
     LOG_DEBUG(Q_FUNC_INFO);
@@ -890,7 +933,7 @@ void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
     SettingsManager::update(configSettings.b_displayBackgroundImage, checked);
     settingsManager->save(configSettings);
 
-    setBackgroundImage();
+    setBackgroundImage(backgroundImageMap.value(configSettings.backgroundImageName));
 } // on_checkBoxDisplayBackgroundImage_clicked
 
 void MainWindow::on_lineEditUserName_textChanged(const QString &newUserName)
@@ -987,6 +1030,7 @@ void MainWindow::sendIncrementalMessageSizes(int firstSize, int lastSize)
 {
     LOG_DEBUG(Q_FUNC_INFO);
     QStringList payloads;
+    const QString userName = ui->lineEditUserName->text().trimmed();
 
     payloads = ui->checkBoxRandomText->isChecked()
                    ? buildRandomIncrementalPayloads(firstSize, lastSize)
@@ -1008,10 +1052,10 @@ void MainWindow::sendIncrementalMessageSizes(int firstSize, int lastSize)
         }
 
         const QDateTime timestamp = QDateTime::currentDateTimeUtc();
-        const QByteArray rawData = payload.toLocal8Bit();
+        const QByteArray rawData = buildRawUdpPayload(userName, payload.toLocal8Bit());
 
         if (sendUdpMessage(rawData, groupAddress, port)) {
-            storeAndDisplaySentMessage("TEST", rawData, timestamp);
+            storeAndDisplaySentMessage(userName, rawData, timestamp);
             QApplication::processEvents();
             QThread::msleep(10);
         } else {
@@ -1308,3 +1352,57 @@ void MainWindow::on_pushButtonStartIncrementalMessages_clicked()
 //     ui->pushButtonStartAutoSchedule->setEnabled(true);
 //     ui->pushButtonStopAutoSchedule->setEnabled(false);
 // } //
+
+
+void MainWindow::showBackgroundImage(QString filePath)
+{
+    QPixmap pixmap(filePath);
+    if (!pixmap.isNull()) {
+        QSize targetSize(200, 200);
+        QPixmap scaledPixmap = pixmap.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        ui->labelTestBackgroundImage->setPixmap(scaledPixmap);
+        ui->labelTestBackgroundImage->setFixedSize(targetSize); // Optional: force label size
+    } else {
+        ui->labelTestBackgroundImage->clear();
+    }
+} //showBackgroundImage
+
+void MainWindow::on_comboBoxSelectBackground_currentTextChanged(const QString &arg1)
+{
+    LOG_DEBUG(Q_FUNC_INFO);
+
+    if (isApplicationStarting)
+        return;
+
+    if(arg1.isEmpty()){
+        ui->checkBoxDisplayBackgroundImage->setChecked(false);
+        settingsManager->update(configSettings.b_displayBackgroundImage, false);
+    }
+
+    const QString image = backgroundImageMap.value(arg1);
+    settingsManager->update(configSettings.backgroundImageName, arg1);
+
+#ifdef ENABLE_DEMO_MODE
+    if (!isDemoRunning) {
+        redrawCurrentMessages(); // refresh visible messages with new theme context
+        settingsManager->save(configSettings);
+    }
+#else
+    redrawCurrentMessages(); // refresh visible messages with new theme context
+    settingsManager->save(configSettings);
+#endif
+
+    QString filePath = backgroundImageMap.value(arg1);
+    showBackgroundImage(filePath);
+    setBackgroundImage(filePath);
+
+    // if (isApplicationStarting)
+    //     return;
+
+    // configSettings.styleSheetSettings.backgroundImageName = arg1;
+    // configSettings.writeSettings();
+
+    // QString filePath = backgroundImageMap.value(arg1);
+    // showBackgroundImage(filePath);
+    // setBackgroundImage(filePath);
+} //on_comboBoxSelectBackground_currentTextChanged

@@ -44,6 +44,8 @@ struct Settings {
     /** @brief Whether to enable Test Features at allpication start. */
     bool b_enableTestFeatures = false;
 
+    QString backgroundImageName;
+
     /** @brief The local IP address for UDP communication. */
     QString localUDPAddress;
 

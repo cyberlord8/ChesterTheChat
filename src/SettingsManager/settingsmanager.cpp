@@ -40,7 +40,7 @@ void SettingsManager::load(Settings &s)
     s.stylesheetName = settings.value("StyleSheetName", "").toString();
     s.b_loadStyleSheet = settings.value("LoadStyleSheet", false).toBool();
     s.b_displayBackgroundImage = settings.value("DisplayBackgroundImage", false).toBool();
-
+    s.backgroundImageName = settings.value("BackgroundImageName").toString();
     // Network settings
     s.localUDPAddress = settings.value("LocalUDPAddress", "0.0.0.0").toString();
     s.remoteUDPAddress = settings.value("RemoteUDPAddress", "224.0.0.2").toString();
@@ -71,7 +71,7 @@ void SettingsManager::save(const Settings &s)
     settings.setValue("StyleSheetName", s.stylesheetName);
     settings.setValue("LoadStyleSheet", s.b_loadStyleSheet);
     settings.setValue("DisplayBackgroundImage", s.b_displayBackgroundImage);
-
+    settings.setValue("BackgroundImageName", s.backgroundImageName);
     // Network settings
     settings.setValue("LocalUDPAddress", s.localUDPAddress);
     settings.setValue("RemoteUDPAddress", s.remoteUDPAddress);

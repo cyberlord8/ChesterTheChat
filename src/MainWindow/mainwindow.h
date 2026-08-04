@@ -148,6 +148,7 @@ private:
     uint msgNumber = 1;
     bool             isApplicationStarting = false; ///< Flag suppressing signals during init.
     QMap<QString, QString> QStyleSheetMap;      ///< Maps display names to .qss file paths.
+    QMap<QString, QString> backgroundImageMap;      ///< Maps display names to .qss file paths.
     ///@}
 
 #ifdef EXPIRES
@@ -205,7 +206,7 @@ private:
      */
     ///@{
     void setStyleSheet();         ///< Applies selected .qss if enabled.
-    void setBackgroundImage();    ///< Toggles background graphic in chat.
+    // void setBackgroundImage();    ///< Toggles background graphic in chat.
     void loadQStyleSheetFolder(); ///< Scans directory for .qss files.
     void populateStyleSheetMap(const QString &folderPath);     ///< Fills QStyleSheetMap.
     void populateStyleSheetComboBox();                        ///< Populates UI combo box.
@@ -279,6 +280,10 @@ private:
     int autoTestMessageIntervalMs() const;
     void sendAutoTestMessage();
     void stopAutoTestMessages();
+    void showBackgroundImage(QString filePath);
+    void setBackgroundImage(QString filePath);
+    QString chatBackgroundStyle(QString filePath) const;
+    void loadBackgroundImageFolder();
 private slots:
     /** @name Help & About Slots */
     ///@{
@@ -342,6 +347,8 @@ private slots:
     void on_pushButtonStartAutoSchedule_clicked();
 
     void on_pushButtonStopAutoSchedule_clicked();
+
+    void on_comboBoxSelectBackground_currentTextChanged(const QString &arg1);
 
 signals:
     /// Requests the main window to switch to the Chat tab.
