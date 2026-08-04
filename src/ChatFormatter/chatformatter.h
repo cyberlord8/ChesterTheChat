@@ -125,7 +125,7 @@ private:
     void insertMessageLine(QTextCursor &cursor, const QString &message);
 
     /**
- * @brief Inserts a timestamp line below the chat message.
+ * @brief Inserts a timestamp line into the chat display.
  *
  * Renders a timestamp beneath the chat message in a lighter style and smaller font.
  * Intended to visually separate message clusters and provide time context.
@@ -134,8 +134,14 @@ private:
  * @param ts The UTC timestamp of the message.
  * @param baseFont The base font to derive size and style from.
  * @param isDark Whether the current theme is dark (affects timestamp color).
+ * @param isSent Whether the message was sent by the local user.
  */
-    void insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, const bool &isDark);
+    void insertTimestampLine(QTextCursor &cursor,
+                             const QDateTime &ts,
+                             const QFont &baseFont,
+                             const bool &isDark,
+                             bool isSent);
+
     ///@}
 
     ///@name Color Handling

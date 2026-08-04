@@ -100,7 +100,11 @@ void ChatFormatter::insertMessageLine(QTextCursor &cursor, const QString &messag
     cursor.insertText(message + "\n", fmt);
 } //insertMessageLine
 
-void ChatFormatter::insertTimestampLine(QTextCursor &cursor, const QDateTime &ts, const QFont &baseFont, const bool &isDark)
+void ChatFormatter::insertTimestampLine(QTextCursor &cursor,
+                                        const QDateTime &ts,
+                                        const QFont &baseFont,
+                                        const bool &isDark,
+                                        bool isSent)
 {
     // LOG_DEBUG(Q_FUNC_INFO);
 
@@ -111,7 +115,8 @@ void ChatFormatter::insertTimestampLine(QTextCursor &cursor, const QDateTime &ts
     f.setPointSize(10);
     fmt.setFont(f);
 
-    cursor.insertText(ts.toString("hh:mmZ"), fmt);
+    const QString direction = isSent ? "Sent" : "Received";
+    cursor.insertText(QString("%1 — %2").arg(direction, ts.toString("hh:mmZ")), fmt);
 } //insertTimestampLine
 
 void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, const QString &message, const QDateTime &timestamp, bool isSent)
@@ -135,7 +140,7 @@ void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, cons
 
     bool isDark = styleSheet.simplified().contains("QTextEdit#textEditChat { color: black;}");
 
-    insertTimestampLine(cursor, timestamp, textEdit->font(), isDark);
+    insertTimestampLine(cursor, timestamp, textEdit->font(), isDark, isSent);
 
     textEdit->setTextCursor(cursor);
 } //appendMessage
