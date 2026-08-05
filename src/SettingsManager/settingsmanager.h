@@ -32,6 +32,8 @@ class QString;
  * and user identity settings used by the application at runtime.
  */
 struct Settings {
+    int sessionLogRetentionDays = 0;
+
     /** @brief Path to the selected stylesheet (.qss) file. */
     QString stylesheetName;
 

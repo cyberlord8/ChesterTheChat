@@ -34,6 +34,15 @@
 class ChatSessionLogger
 {
 public:
+
+    /**
+     * @brief Deletes expired Chester session logs.
+     * @param baseDirectory Directory containing Chester's logs subdirectory.
+     * @param retentionDays Maximum log age in days; zero keeps logs forever.
+     * @return true if cleanup completed without errors.
+     */
+    bool purgeOldLogs(const QString &baseDirectory, int retentionDays);
+
     /**
      * @brief Identifies the local perspective of a logged message.
      */
@@ -100,6 +109,7 @@ public:
     QString lastError() const;
 
 private:
+
     /**
      * @brief Escapes characters that would disrupt the one-entry-per-line format.
      */

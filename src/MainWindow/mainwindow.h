@@ -354,6 +354,8 @@ private slots:
 
     void on_comboBoxSelectBackground_currentTextChanged(const QString &arg1);
 
+    void on_spinBoxDaysToKeepLogs_valueChanged(int arg1);
+
 signals:
     /// Requests the main window to switch to the Chat tab.
     void signalRequestTabSwitchToChat();

@@ -55,6 +55,12 @@ void SettingsManager::load(Settings &s)
 
     //Test Features
     s.b_enableTestFeatures = settings.value("EnableTestFeatures", false).toBool();
+
+    s.sessionLogRetentionDays =
+        settings.value("SessionLogRetentionDays", 0).toInt();
+
+    if (s.sessionLogRetentionDays < 0)
+        s.sessionLogRetentionDays = 0;
 }//load
 
 void SettingsManager::save(const Settings &s)
@@ -86,6 +92,9 @@ void SettingsManager::save(const Settings &s)
 
     //Test Features
     settings.setValue("EnableTestFeatures", s.b_enableTestFeatures);
+
+    settings.setValue("SessionLogRetentionDays",
+                      s.sessionLogRetentionDays);
 }//save
 
 void SettingsManager::saveGeometry(const QByteArray &geometry)

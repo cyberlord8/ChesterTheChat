@@ -28,7 +28,7 @@
  * If defined, the application checks its build age and prevents execution
  * if the allowed period has passed.
  */
-// #define EXPIRES
+#define EXPIRES
 
 /**
  * @def VERSION
@@ -37,15 +37,15 @@
  * Only one version should be active at a time. The expiration period is determined
  * based on whether it is an alpha or beta build.
  */
-#define VERSION "release"
-// #define VERSION "alpha"
+// #define VERSION "release"
+#define VERSION "alpha"
 // #define VERSION "beta"
 
 /**
  * @def ALPHA_TIME
  * @brief If EXPIRES is #defined, Number of days after build date that an alpha version remains valid.
  */
-#define ALPHA_TIME 39
+#define ALPHA_TIME 90
 
 /**
  * @def BETA_TIME

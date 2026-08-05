@@ -254,6 +254,8 @@ void MainWindow::updateUIWidgets()
     //Enable Test Features
     ui->checkBoxSpecialFeatures->setChecked(configSettings.b_enableTestFeatures);
     ui->tabWidget->setTabVisible(1,configSettings.b_enableTestFeatures); // Hide Special tab
+
+    ui->spinBoxDaysToKeepLogs->setValue(configSettings.sessionLogRetentionDays);
 } // updateUIWidgets
 
 void MainWindow::setStyleSheet()
@@ -601,6 +603,13 @@ MainWindow::MainWindow(QWidget *parent)
     autoTestMessageTimer.setTimerType(Qt::PreciseTimer);
 
     connect(&autoTestMessageTimer, &QTimer::timeout, this, &MainWindow::sendAutoTestMessage);
+
+
+    if (!chatSessionLogger.purgeOldLogs(
+            QCoreApplication::applicationDirPath(),
+            configSettings.sessionLogRetentionDays)) {
+        LOG_DEBUG(chatSessionLogger.lastError());
+    }
 
     isApplicationStarting = false;
 } // MainWindow
@@ -1480,3 +1489,10 @@ void MainWindow::on_comboBoxSelectBackground_currentTextChanged(const QString &a
     // showBackgroundImage(filePath);
     // setBackgroundImage(filePath);
 } //on_comboBoxSelectBackground_currentTextChanged
+
+void MainWindow::on_spinBoxDaysToKeepLogs_valueChanged(int arg1)
+{
+    settingsManager->update(configSettings.sessionLogRetentionDays, arg1);
+    settingsManager->save(configSettings);
+
+} //on_spinBoxDaysToKeepLogs_valueChanged

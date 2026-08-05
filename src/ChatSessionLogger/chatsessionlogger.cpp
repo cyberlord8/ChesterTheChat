@@ -21,6 +21,8 @@
 #include <QByteArray>
 #include <QDir>
 #include <QIODevice>
+#include <QFileInfo>
+#include <QStringList>
 
 namespace {
 
@@ -35,6 +37,113 @@ QString formatUtcTimestamp(const QDateTime &timestamp)
 
 } // namespace
 
+bool ChatSessionLogger::purgeOldLogs(const QString &baseDirectory,
+                                     int retentionDays)
+{
+    m_lastError.clear();
+
+    if (retentionDays < 0) {
+        m_lastError = "Session-log retention days cannot be negative.";
+        return false;
+    }
+
+    // Zero means keep all session logs indefinitely.
+    if (retentionDays == 0)
+        return true;
+
+    const QString logDirectoryPath =
+        QDir(baseDirectory).filePath("logs");
+
+    const QFileInfo logDirectoryInfo(logDirectoryPath);
+
+    // Nothing needs to be purged if the directory does not exist yet.
+    if (!logDirectoryInfo.exists())
+        return true;
+
+    if (!logDirectoryInfo.isDir()) {
+        m_lastError = QString("Session-log path is not a directory: %1")
+        .arg(logDirectoryPath);
+        return false;
+    }
+
+    if (!logDirectoryInfo.isReadable()) {
+        m_lastError = QString("Session-log directory is not readable: %1")
+        .arg(logDirectoryPath);
+        return false;
+    }
+
+    QDir logDirectory(logDirectoryPath);
+
+    const QFileInfoList logFiles =
+        logDirectory.entryInfoList(
+            QStringList() << "ChesterChat_*.log",
+            QDir::Files | QDir::NoSymLinks,
+            QDir::Name);
+
+    const QDateTime cutoff =
+        QDateTime::currentDateTimeUtc().addDays(
+            -static_cast<qint64>(retentionDays));
+
+    if (!cutoff.isValid()) {
+        m_lastError = QString("Invalid session-log retention period: %1 days")
+        .arg(retentionDays);
+        return false;
+    }
+
+    const QString activeLogPath =
+        isActive()
+            ? QDir::cleanPath(QFileInfo(m_logFilePath).absoluteFilePath())
+            : QString();
+
+    QStringList deletionErrors;
+
+    for (const QFileInfo &fileInfo : logFiles) {
+        const QString fileName = fileInfo.fileName();
+
+        // Enforce an exact, case-sensitive Chester filename match.
+        if (!fileName.startsWith("ChesterChat_")
+            || !fileName.endsWith(".log")) {
+            continue;
+        }
+
+        const QString candidatePath =
+            QDir::cleanPath(fileInfo.absoluteFilePath());
+
+        // Never delete the currently active session log.
+        if (!activeLogPath.isEmpty()
+            && candidatePath == activeLogPath) {
+            continue;
+        }
+
+        const QDateTime lastModified =
+            fileInfo.lastModified().toUTC();
+
+        if (!lastModified.isValid() || lastModified >= cutoff)
+            continue;
+
+        QFile oldLog(candidatePath);
+
+        if (!oldLog.remove()) {
+            // Another Chester instance might have deleted it after
+            // this instance enumerated the directory.
+            if (!QFileInfo::exists(candidatePath))
+                continue;
+
+            deletionErrors.append(
+                QString("%1 (%2)")
+                    .arg(fileName, oldLog.errorString()));
+        }
+    }
+
+    if (!deletionErrors.isEmpty()) {
+        m_lastError =
+            QString("Unable to delete one or more expired session logs: %1")
+                .arg(deletionErrors.join("; "));
+        return false;
+    }
+
+    return true;
+} //purgeOldLogs
 ChatSessionLogger::ChatSessionLogger() = default;
 
 ChatSessionLogger::~ChatSessionLogger()
@@ -68,11 +177,11 @@ bool ChatSessionLogger::startSession(const QString &baseDirectory,
     const QString baseFileName
         = QString("ChesterChat_%1_instance_%2").arg(fileTimestamp).arg(instanceId);
 
-    QString fileName = baseFileName + ".txt";
+    QString fileName = baseFileName + ".log";
     int suffix = 2;
 
     while (QFile::exists(QDir(logDirectoryPath).filePath(fileName))) {
-        fileName = QString("%1_%2.txt").arg(baseFileName).arg(suffix++);
+        fileName = QString("%1_%2.log").arg(baseFileName).arg(suffix++);
     }
 
     m_logFilePath = QDir(logDirectoryPath).filePath(fileName);
