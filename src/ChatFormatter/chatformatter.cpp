@@ -18,7 +18,6 @@
 
 #include "chatformatter.h"
 
-
 #include "qapplication.h"
 #include "qtextcursor.h"
 
@@ -28,7 +27,6 @@ ChatFormatter::ChatFormatter(QObject *parent)
     : QObject(parent)
 {
     LOG_DEBUG(Q_FUNC_INFO);
-
 }
 
 int ChatFormatter::calculateDynamicMargin(QTextEdit *textEdit, double percent, int fallback) const
@@ -42,7 +40,7 @@ int ChatFormatter::calculateDynamicMargin(QTextEdit *textEdit, double percent, i
     return static_cast<int>(editorWidth * percent);
 } //calculateDynamicMargin
 
-void ChatFormatter::insertBlock(QTextEdit * textEdit, QTextCursor &cursor, bool isSent)
+void ChatFormatter::insertBlock(QTextEdit *textEdit, QTextCursor &cursor, bool isSent)
 {
     // LOG_DEBUG(Q_FUNC_INFO);
 
@@ -107,6 +105,8 @@ void ChatFormatter::insertTimestampLine(QTextCursor &cursor,
                                         bool isSent)
 {
     // LOG_DEBUG(Q_FUNC_INFO);
+    Q_UNUSED(isSent)
+
 
     QTextCharFormat fmt;
     fmt.setForeground(isDark ? Qt::gray : Qt::darkGray);
@@ -115,11 +115,16 @@ void ChatFormatter::insertTimestampLine(QTextCursor &cursor,
     f.setPointSize(10);
     fmt.setFont(f);
 
-    const QString direction = isSent ? "Sent" : "Received";
-    cursor.insertText(QString("%1 — %2").arg(direction, ts.toString("hh:mmZ")), fmt);
+    // const QString direction = isSent ? "Sent" : "Received";
+    // cursor.insertText(QString("%1 — %2").arg(direction, ts.toString("hh:mmZ")), fmt);
+    cursor.insertText(ts.toString("hh:mmZ"), fmt);
 } //insertTimestampLine
 
-void ChatFormatter::appendMessage(QTextEdit *textEdit, const QString &user, const QString &message, const QDateTime &timestamp, bool isSent)
+void ChatFormatter::appendMessage(QTextEdit *textEdit,
+                                  const QString &user,
+                                  const QString &message,
+                                  const QDateTime &timestamp,
+                                  bool isSent)
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
@@ -166,7 +171,7 @@ void ChatFormatter::insertLastReadMarker(QTextEdit *textEdit)
 
     cursor.insertText("──────────── Last Read ────────────\n", charFmt);
     textEdit->setTextCursor(cursor);
-}//insertLastReadMarker
+} //insertLastReadMarker
 
 QColor ChatFormatter::generateColorForUser(const QString &user)
 {

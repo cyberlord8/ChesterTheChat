@@ -26,6 +26,7 @@ FORMS += \
 HEADERS += \
     ../Utils/debugmacros.h \
     src/ChatPager/chatpager.h \
+    src/ChatSessionLogger/chatsessionlogger.h \
     src/DemoChatSimulator/demochatsimulator.h \
     src/InstanceIdManager/instanceidmanager.h \
     src/MainWindow/mainwindow.h \
@@ -43,6 +44,7 @@ HEADERS += \
 
 SOURCES += \
     src/ChatPager/chatpager.cpp \
+    src/ChatSessionLogger/chatsessionlogger.cpp \
     src/DemoChatSimulator/demochatsimulator.cpp \
     src/InstanceIdManager/instanceidmanager.cpp \
     src/MessageStore/messagestore.cpp \

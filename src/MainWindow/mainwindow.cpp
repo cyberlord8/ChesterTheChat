@@ -450,18 +450,48 @@ void MainWindow::connectSignals()
 {
     LOG_DEBUG(Q_FUNC_INFO);
 
+    // connect(udpManager,
+    //         &UdpChatSocketManager::messageReceived,
+    //         this,
+    //         [this](const QString &user, const QString &msg) {
+    //             const QDateTime timestamp = QDateTime::currentDateTimeUtc();
+    //             messageStore->insertMessage(user, msg, timestamp, false);
+    //             m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, false);
+    //             ui->textEditChat->moveCursor(QTextCursor::End);
+
+    //             if (isMinimized() || !isVisible() || !isActiveWindow()) {
+    //                 QApplication::alert(this, 3000);
+    //                 new ToastNotification(QString("%1: %2").arg(user, msg), this);
+    //             }
+    //         });
     connect(udpManager,
             &UdpChatSocketManager::messageReceived,
             this,
             [this](const QString &user, const QString &msg) {
                 const QDateTime timestamp = QDateTime::currentDateTimeUtc();
+
                 messageStore->insertMessage(user, msg, timestamp, false);
-                m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, false);
+                m_formatter->appendMessage(
+                    ui->textEditChat, user, msg, timestamp, false);
+
+                if (chatSessionLogger.isActive()
+                    && !chatSessionLogger.logMessage(
+                        ChatSessionLogger::Direction::Received,
+                        user,
+                        msg,
+                        timestamp)) {
+                    ui->labelStatus->setText(
+                        tr("Message received, but the session log could not "
+                           "be updated: %1")
+                            .arg(chatSessionLogger.lastError()));
+                }
+
                 ui->textEditChat->moveCursor(QTextCursor::End);
 
                 if (isMinimized() || !isVisible() || !isActiveWindow()) {
                     QApplication::alert(this, 3000);
-                    new ToastNotification(QString("%1: %2").arg(user, msg), this);
+                    new ToastNotification(
+                        QString("%1: %2").arg(user, msg), this);
                 }
             });
 
@@ -578,6 +608,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     LOG_DEBUG(Q_FUNC_INFO);
+    chatSessionLogger.endSession();
 
 #ifdef ENABLE_DEMO_MODE
     if (isDemoRunning)
@@ -592,6 +623,7 @@ MainWindow::~MainWindow()
 
     if (instanceID > 0 && instanceIdManager)
         instanceIdManager->release(instanceID);
+
 
     delete ui;
     ui = nullptr;
@@ -621,6 +653,17 @@ void MainWindow::storeAndDisplaySentMessage(const QString &user,
 
     messageStore->insertMessage(user, msg, timestamp, true);
     m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, true);
+
+    if (chatSessionLogger.isActive()
+        && !chatSessionLogger.logMessage(
+            ChatSessionLogger::Direction::Sent,
+            user,
+            msg,
+            timestamp)) {
+        ui->labelStatus->setText(
+            tr("Message sent, but the session log could not be updated: %1")
+                .arg(chatSessionLogger.lastError()));
+    }
 } // storeAndDisplaySentMessage
 
 void MainWindow::on_pushButtonSend_clicked()
@@ -707,8 +750,38 @@ void MainWindow::on_pushButtonConnect_clicked()
         return;
     }
 
+    bool remotePortOk = false;
+    const quint16 remotePort = ui->lineEditRemoteUDPPort->text().toUShort(&remotePortOk);
+
+    if (!remotePortOk || remotePort == 0) {
+        ui->labelStatus->setText(tr("Invalid remote UDP port."));
+        return;
+    }
+
+    // if (bindUdpSockets(localAddress, groupAddress, port)) {
+    //     updateUiOnConnectSuccess();
+    // } else {
+    //     ui->labelStatus->setText(tr("Failed to bind one or both sockets."));
+    // }
+
     if (bindUdpSockets(localAddress, groupAddress, port)) {
         updateUiOnConnectSuccess();
+
+        if (!chatSessionLogger.startSession(
+                QCoreApplication::applicationDirPath(),
+                instanceID,
+                ui->lineEditUserName->text().trimmed(),
+                localAddress.toString(),
+                port,
+                groupAddress.toString(),
+                remotePort)) {
+            QMessageBox::warning(
+                this,
+                tr("Chat Session Log"),
+                tr("The network connection succeeded, but the session log "
+                   "could not be created:\n\n%1")
+                    .arg(chatSessionLogger.lastError()));
+        }
     } else {
         ui->labelStatus->setText(tr("Failed to bind one or both sockets."));
     }
@@ -746,6 +819,7 @@ void MainWindow::on_pushButtonDisconnect_clicked()
     if (udpManager)
         udpManager->closeSockets();
 
+    chatSessionLogger.endSession();
     resetUiAfterDisconnect();
     ui->labelStatus->setText(tr("Disconnected from network."));
 } // on_pushButtonDisconnect_clicked
@@ -1064,7 +1138,7 @@ void MainWindow::sendIncrementalMessageSizes(int firstSize, int lastSize)
             ui->labelStatus->setText(error);
         }
     }
-} //
+} //sendIncrementalMessageSizes
 
 int MainWindow::autoTestMessageIntervalMs() const
 {
@@ -1078,7 +1152,7 @@ int MainWindow::autoTestMessageIntervalMs() const
         return static_cast<int>(intervalValue * 60000);
 
     return static_cast<int>(intervalValue * 1000);
-} //
+} //autoTestMessageIntervalMs
 
 void MainWindow::sendAutoTestMessage()
 {
@@ -1122,7 +1196,7 @@ void MainWindow::sendAutoTestMessage()
         ui->labelStatus->setText(error);
         stopAutoTestMessages();
     }
-} //
+} //sendAutoTestMessage
 
 void MainWindow::stopAutoTestMessages()
 {
@@ -1134,7 +1208,7 @@ void MainWindow::stopAutoTestMessages()
     ui->radioButtonAutoSeconds->setEnabled(true);
     ui->radioButtonAutoMinutes->setEnabled(true);
     ui->lineEditAutoSchedule->setEnabled(true);
-} //
+} //stopAutoTestMessages
 
 void MainWindow::on_pushButtonStartAutoSchedule_clicked()
 {
@@ -1162,12 +1236,12 @@ void MainWindow::on_pushButtonStartAutoSchedule_clicked()
     sendAutoTestMessage();   // Sends the first one immediately.
     ui->tabWidget->setCurrentIndex(0);
 
-} //
+} //on_pushButtonStartAutoSchedule_clicked
 
 void MainWindow::on_pushButtonStopAutoSchedule_clicked()
 {
     stopAutoTestMessages();
-} //
+} //on_pushButtonStopAutoSchedule_clicked
 
 void MainWindow::on_pushButtonTestMsg_clicked()
 {
@@ -1339,7 +1413,7 @@ void MainWindow::on_pushButtonStartIncrementalMessages_clicked()
     sendIncrementalMessageSizes(ui->lineEditMinSize->text().toUInt(),
                                 ui->lineEditMaxSize->text().toUInt());
     ui->tabWidget->setCurrentIndex(0);
-} //
+} //on_pushButtonStartIncrementalMessages_clicked
 
 // void MainWindow::on_pushButtonStartAutoSchedule_clicked()
 // {

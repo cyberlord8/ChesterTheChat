@@ -28,8 +28,9 @@
 #include "../StyleRotator/stylerotator.h"
 #include "../StyleManager/stylemanager.h"
 #include "../InstanceIdManager/instanceidmanager.h"
-
 #include "../ChatPager/chatpager.h"
+
+#include "../ChatSessionLogger/chatsessionlogger.h"
 
 #include <QScrollBar>
 #include <QWheelEvent>
@@ -123,12 +124,14 @@ private:
     
     /// Sends automatic test messages at the selected interval.
     QTimer autoTestMessageTimer;
+
     /** @name Chat Message Components
-     *  Objects related to message formatting and persistence.
-     */
+ *  Objects related to message formatting, persistence, and session logging.
+ */
     ///@{
-    ChatFormatter   *m_formatter      = nullptr; ///< Formats messages for display.
-    MessageStore    *messageStore     = nullptr; ///< Persists chat history.
+    ChatFormatter     *m_formatter      = nullptr; ///< Formats messages for display.
+    MessageStore      *messageStore     = nullptr; ///< Persists chat history.
+    ChatSessionLogger  chatSessionLogger;          ///< Writes the active chat transcript.
     ///@}
 
     /** @name UDP Communication
@@ -284,6 +287,7 @@ private:
     void setBackgroundImage(QString filePath);
     QString chatBackgroundStyle(QString filePath) const;
     void loadBackgroundImageFolder();
+
 private slots:
     /** @name Help & About Slots */
     ///@{
