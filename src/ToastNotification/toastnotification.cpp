@@ -27,7 +27,7 @@
 
 void ToastNotification::setupLabel(const QString &text)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     label = new QLabel(text, this);
     label->setStyleSheet(R"(
@@ -40,7 +40,7 @@ void ToastNotification::setupLabel(const QString &text)
 
 void ToastNotification::setupLayout()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(label);
@@ -50,7 +50,7 @@ void ToastNotification::setupLayout()
 
 void ToastNotification::positionBottomRight()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (QScreen *screen = QGuiApplication::primaryScreen()) {
         const QRect screenGeometry = screen->availableGeometry();
@@ -62,7 +62,7 @@ void ToastNotification::positionBottomRight()
 ToastNotification::ToastNotification(const QString &text, QWidget *parent)
     : QWidget(parent, Qt::ToolTip | Qt::FramelessWindowHint)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     setAttribute(Qt::WA_TransparentForMouseEvents);
     setAttribute(Qt::WA_ShowWithoutActivating);

@@ -33,14 +33,14 @@ DemoChatSimulator::DemoChatSimulator(QTextEdit *display, ChatFormatter *formatte
     , chatDisplay(display)
     , formatter(formatter)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     connect(&messageTimer, &QTimer::timeout, this, &DemoChatSimulator::showNextMessage);
 }//DemoChatSimulator
 
 bool DemoChatSimulator::startDemo()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!queueMessages())
         return false;
@@ -55,7 +55,7 @@ bool DemoChatSimulator::startDemo()
 
 void DemoChatSimulator::stopDemo()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     messageTimer.stop();
     disconnect();  // Disconnects all slots from this object
@@ -69,7 +69,7 @@ void DemoChatSimulator::stopDemo()
 
 void DemoChatSimulator::loadDemoFileList(const QString &directory)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QDir dir(directory);
     if (!dir.exists()) {
@@ -89,7 +89,7 @@ void DemoChatSimulator::loadDemoFileList(const QString &directory)
 
 bool DemoChatSimulator::queueMessages()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString demoDir = QCoreApplication::applicationDirPath() + "/demofiles";
 
@@ -117,10 +117,10 @@ bool DemoChatSimulator::queueMessages()
 
 void DemoChatSimulator::showNextMessage()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (currentIndex >= messageQueue.size()) {
-        LOG_DEBUG(Q_FUNC_INFO);
+        LOG_DEBUG("");
         messageTimer.stop();
 
 
@@ -178,7 +178,7 @@ void DemoChatSimulator::showNextMessage()
 
 int DemoChatSimulator::calculateDynamicDelay(const QString &text) const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const int baseDelay = 500;
     const double readSpeedCharsPerSec = 5.0;
@@ -192,7 +192,7 @@ int DemoChatSimulator::calculateDynamicDelay(const QString &text) const
 } //calculateDynamicDelay
 
 void DemoChatSimulator::loadMessagesFromCsv(const QString &filePath) {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {

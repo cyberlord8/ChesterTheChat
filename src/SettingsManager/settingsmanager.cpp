@@ -22,13 +22,13 @@
 SettingsManager::SettingsManager(int instanceID, const QString &appPath, QObject *parent)
     : QObject(parent), m_instanceID(instanceID), m_appPath(appPath)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
 }
 
 void SettingsManager::load(Settings &s)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString settingsFile = QString("%1/instance_%2_settings.ini")
     .arg(m_appPath)
@@ -43,9 +43,9 @@ void SettingsManager::load(Settings &s)
     s.backgroundImageName = settings.value("BackgroundImageName").toString();
     // Network settings
     s.localUDPAddress = settings.value("LocalUDPAddress", "0.0.0.0").toString();
-    s.remoteUDPAddress = settings.value("RemoteUDPAddress", "224.0.0.2").toString();
+    s.remoteUDPAddress = settings.value("RemoteUDPAddress", "127.0.0.1").toString();
     s.localUDPPort = settings.value("LocalUDPPort", 9998).toUInt();
-    s.remoteUDPPort = settings.value("RemoteUDPPort", 9998).toUInt();
+    s.remoteUDPPort = settings.value("RemoteUDPPort", 9997).toUInt();
     s.udpTTL = settings.value("UdpTTL", 5).toInt();
     // s.b_multicast = settings.value("Multicast", true).toBool();
     s.b_loopback = settings.value("Loopback", true).toBool();
@@ -65,7 +65,7 @@ void SettingsManager::load(Settings &s)
 
 void SettingsManager::save(const Settings &s)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString settingsFile = QString("%1/instance_%2_settings.ini")
     .arg(m_appPath)
@@ -99,7 +99,7 @@ void SettingsManager::save(const Settings &s)
 
 void SettingsManager::saveGeometry(const QByteArray &geometry)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QSettings settings(m_appPath + QString("/instance_%1_settings.ini").arg(m_instanceID), QSettings::IniFormat);
     settings.setValue("WindowGeometry", geometry);
@@ -107,7 +107,7 @@ void SettingsManager::saveGeometry(const QByteArray &geometry)
 
 QByteArray SettingsManager::loadGeometry() const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QSettings settings(m_appPath + QString("/instance_%1_settings.ini").arg(m_instanceID), QSettings::IniFormat);
     return settings.value("WindowGeometry").toByteArray();

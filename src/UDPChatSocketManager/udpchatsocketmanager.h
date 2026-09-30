@@ -142,13 +142,13 @@ private:
      * @param port The UDP port to bind.
      * @return True on success, false on failure.
      */
-    bool createAndBindReceiveSocket(const QHostAddress &localAddress, quint16 port);
+    bool createAndBindReceiveSocket(const QHostAddress &localAddress, const QHostAddress &groupAddress, quint16 port);
 
     /**
      * @brief Joins a multicast group if the address is valid.
      * @param groupAddress The multicast address to join.
      */
-    void joinMulticastGroupSafely(const QHostAddress &groupAddress);
+    bool joinMulticastGroupSafely(const QHostAddress &groupAddress);
 
     /**
      * @brief Closes and deletes the given socket safely.

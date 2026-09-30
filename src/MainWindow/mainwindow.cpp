@@ -24,7 +24,7 @@
 
 QString MainWindow::buildVersionSuffix(const QString &version) const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (version.contains("alpha", Qt::CaseInsensitive)) {
         QString buildDate = tr(BUILDDATE);
@@ -44,7 +44,7 @@ QString MainWindow::buildVersionSuffix(const QString &version) const
 
 void MainWindow::setAppWindowTitle()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString userName = configSettings.userName;
     const QString baseTitle = tr(APP_NAME)
@@ -57,7 +57,7 @@ void MainWindow::setAppWindowTitle()
 
 QString MainWindow::buildAppVersionString() const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QString version = VERSION;
 
@@ -71,7 +71,7 @@ QString MainWindow::buildAppVersionString() const
 
 QString MainWindow::detectCompilerInfo() const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
 #ifdef ENV32
     return QString("Qt %1 - MinGW (32-bit)").arg(qVersion());
@@ -85,7 +85,7 @@ QString MainWindow::buildAboutText(const QString &version,
                                    const QString &releaseDate,
                                    const QString &compilerInfo) const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QString about;
     const QString separator = tr("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
@@ -112,7 +112,7 @@ QString MainWindow::buildAboutText(const QString &version,
 
 void MainWindow::on_actionAbout_triggered()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString version = buildAppVersionString();
     const QString compileDate = QStringLiteral(__DATE__); // e.g. "May 23 2025"
@@ -130,14 +130,14 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionAbout_Qt_triggered()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     qApp->aboutQt();
 } // on_actionAbout_Qt_triggered
 
 bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &targetPath)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QFile resourceFile(resourcePath);
     QFile targetFile(targetPath);
@@ -173,7 +173,7 @@ bool MainWindow::copyResourceToFile(const QString &resourcePath, const QString &
 
 void MainWindow::openResourceFile(const QString &fileName)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString resourcePath = QStringLiteral(":/resources") + fileName;
     const QString targetPath = qApp->applicationDirPath() + QDir::separator() + fileName;
@@ -190,28 +190,28 @@ void MainWindow::openResourceFile(const QString &fileName)
 
 void MainWindow::on_actionQt_License_triggered()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     openResourceFile("/LGPLv3.pdf");
 } // on_actionQt_License_triggered
 
 void MainWindow::on_actionUser_Manual_triggered()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     openResourceFile("/UserManual.pdf");
 } // on_actionUser_Manual_triggered
 
 bool MainWindow::isValidIPv4Address(const QString &ip) const
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     return !ip.contains(":") && !ip.startsWith("169.254");
 } // isValidIPv4Address
 
 void MainWindow::fillNetworkWidgets()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     ui->comboBoxLocalUDPNetwork->clear();
     ui->comboBoxLocalUDPNetwork->addItem("ANY");
@@ -229,7 +229,7 @@ void MainWindow::fillNetworkWidgets()
 
 void MainWindow::updateUIWidgets()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     // Network Settings
     ui->lineEditUserName->setText(configSettings.userName);
@@ -260,7 +260,7 @@ void MainWindow::updateUIWidgets()
 
 void MainWindow::setStyleSheet()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!configSettings.b_loadStyleSheet) {
         qDebug() << "[setStyleSheet] Skipping stylesheet load: setting disabled.";
@@ -281,7 +281,7 @@ void MainWindow::setStyleSheet()
 
 QString MainWindow::chatBackgroundStyle() const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 #ifdef AMC_VERSION
     return QStringLiteral("QTextEdit#textEditChat { "
                           "border-image: url(:/images/AMC_LOGO_DARK.png); "
@@ -295,7 +295,7 @@ QString MainWindow::chatBackgroundStyle() const
 
 QString MainWindow::chatBackgroundStyle(QString filePath) const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     return QStringLiteral(
                "QTextEdit#textEditChat { "
@@ -306,7 +306,7 @@ QString MainWindow::chatBackgroundStyle(QString filePath) const
 
 void MainWindow::setBackgroundImage(QString filePath)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (configSettings.b_displayBackgroundImage) {
         QString styleSheetString = chatBackgroundStyle(filePath);
@@ -319,7 +319,7 @@ void MainWindow::setBackgroundImage(QString filePath)
 
 // void MainWindow::setBackgroundImage()
 // {
-//     LOG_DEBUG(Q_FUNC_INFO);
+//     LOG_DEBUG("");
 
 //     if (configSettings.b_displayBackgroundImage) {
 //         ui->textEditChat->setStyleSheet(chatBackgroundStyle());
@@ -330,7 +330,7 @@ void MainWindow::setBackgroundImage(QString filePath)
 
 void MainWindow::displayMessages(const QList<Message> &messages)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     // visibleOffset = currentOffset;
     // visibleLimit = messages.count();
@@ -352,7 +352,7 @@ void MainWindow::displayMessages(const QList<Message> &messages)
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     if (obj == ui->textEditChat->verticalScrollBar() && event->type() == QEvent::Type::Wheel) {
         QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
@@ -411,13 +411,15 @@ void MainWindow::displayIsTooOld(int days, QString fileDate)
 } // displayIsTooOld
 #endif
 
-void MainWindow::initializeManagers()
+bool MainWindow::initializeManagers()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     //instanceManager always first - it's a dependency
     instanceIdManager = std::make_unique<InstanceIdManager>(QCoreApplication::applicationDirPath());
     instanceID = instanceIdManager->acquire();
+
+    if(instanceID < 1) return false;
 
     settingsManager = new SettingsManager(instanceID, QCoreApplication::applicationDirPath(), this);
     udpManager = new UdpChatSocketManager(this);
@@ -429,11 +431,12 @@ void MainWindow::initializeManagers()
 
     chatPager = std::make_unique<ChatPager>(messageStore, m_formatter, this);
 
+    return true;
 } // initializeManagers
 
 void MainWindow::initializeUi()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
 #ifndef ENABLE_DEMO_MODE
     ui->groupBoxDemoMode->hide();
@@ -450,7 +453,7 @@ void MainWindow::initializeUi()
 
 void MainWindow::connectSignals()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     // connect(udpManager,
     //         &UdpChatSocketManager::messageReceived,
@@ -532,7 +535,7 @@ void MainWindow::connectSignals()
 
 void MainWindow::loadInitialState()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     settingsManager->load(configSettings);
     restoreGeometry(settingsManager->loadGeometry());
@@ -555,7 +558,7 @@ void MainWindow::loadInitialState()
 
 void MainWindow::initializeDatabase()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!messageStore->open()) {
         qCritical() << "Unable to load message database.";
@@ -573,7 +576,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     ui->setupUi(this);
 
@@ -583,11 +586,15 @@ MainWindow::MainWindow(QWidget *parent)
     }
 #endif
 
+    if (!initializeManagers())
+        return;
+
+    // Continue the rest of startup...
+    m_startupSucceeded = true;
     isApplicationStarting = true;
 
     styleManager = std::make_unique<StyleManager>();
 
-    initializeManagers();
     initializeUi();
     connectSignals();
     loadInitialState();
@@ -616,7 +623,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
     chatSessionLogger.endSession();
 
 #ifdef ENABLE_DEMO_MODE
@@ -640,7 +647,7 @@ MainWindow::~MainWindow()
 
 QByteArray MainWindow::buildRawUdpPayload(const QString &user, const QString &msg) const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
     QByteArray returnArray = ui->checkBoxIncludeName->isChecked()
                                  ? QString("%1 - %2").arg(user, msg).toUtf8()
                                  : QString("%2").arg(msg).toUtf8();
@@ -649,7 +656,7 @@ QByteArray MainWindow::buildRawUdpPayload(const QString &user, const QString &ms
 
 bool MainWindow::sendUdpMessage(const QByteArray &data, const QHostAddress &address, quint16 port)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     return udpManager->sendMessage(data, address, port) == data.size();
 } // sendUdpMessage
@@ -658,7 +665,7 @@ void MainWindow::storeAndDisplaySentMessage(const QString &user,
                                             const QString &msg,
                                             const QDateTime &timestamp)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     messageStore->insertMessage(user, msg, timestamp, true);
     m_formatter->appendMessage(ui->textEditChat, user, msg, timestamp, true);
@@ -677,7 +684,7 @@ void MainWindow::storeAndDisplaySentMessage(const QString &user,
 
 void MainWindow::on_pushButtonSend_clicked()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!udpManager)
         return;
@@ -712,7 +719,7 @@ void MainWindow::on_pushButtonSend_clicked()
 
 void MainWindow::updateUiOnConnectSuccess()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     ui->labelStatus->setText(tr("Connection established."));
     ui->pushButtonConnect->setEnabled(false);
@@ -727,7 +734,7 @@ void MainWindow::updateUiOnConnectSuccess()
 
 QHostAddress MainWindow::parseLocalAddress() const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString text = ui->comboBoxLocalUDPNetwork->currentText().trimmed();
     return (text == "ANY") ? QHostAddress(QHostAddress::AnyIPv4) : QHostAddress(text);
@@ -735,7 +742,7 @@ QHostAddress MainWindow::parseLocalAddress() const
 
 bool MainWindow::bindUdpSockets(const QHostAddress &local, const QHostAddress &remote, quint16 port)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     bool recvBound = udpManager->bindReceiveSocket(local, remote, port);
     bool sendBound = udpManager->bindSendSocket(local);
@@ -744,7 +751,7 @@ bool MainWindow::bindUdpSockets(const QHostAddress &local, const QHostAddress &r
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!udpManager)
         return;
@@ -798,7 +805,7 @@ void MainWindow::on_pushButtonConnect_clicked()
 
 void MainWindow::on_lineEditChatText_returnPressed()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (ui->pushButtonSend->isEnabled()) {
         on_pushButtonSend_clicked();
@@ -807,7 +814,7 @@ void MainWindow::on_lineEditChatText_returnPressed()
 
 void MainWindow::resetUiAfterDisconnect()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     ui->pushButtonConnect->setEnabled(true);
     ui->pushButtonDisconnect->setEnabled(false);
@@ -821,7 +828,7 @@ void MainWindow::resetUiAfterDisconnect()
 
 void MainWindow::on_pushButtonDisconnect_clicked()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     stopAutoTestMessages();
 
@@ -835,7 +842,7 @@ void MainWindow::on_pushButtonDisconnect_clicked()
 
 void MainWindow::on_checkBoxMulticast_clicked(bool checked)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
@@ -846,7 +853,7 @@ void MainWindow::on_checkBoxMulticast_clicked(bool checked)
 
 void MainWindow::on_checkBoxLoopback_clicked(bool checked)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
@@ -857,7 +864,7 @@ void MainWindow::on_checkBoxLoopback_clicked(bool checked)
 
 void MainWindow::on_comboBoxLocalUDPNetwork_currentTextChanged(const QString &arg1)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
@@ -868,7 +875,7 @@ void MainWindow::on_comboBoxLocalUDPNetwork_currentTextChanged(const QString &ar
 
 void MainWindow::on_lineEditLocalUDPPort_textChanged(const QString &arg1)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
@@ -879,18 +886,23 @@ void MainWindow::on_lineEditLocalUDPPort_textChanged(const QString &arg1)
 
 void MainWindow::on_lineEditRemoteUDPNetwork_textChanged(const QString &arg1)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
 
     SettingsManager::update(configSettings.remoteUDPAddress, arg1);
 
+    QHostAddress groupAddress(arg1);
+
+    if(groupAddress.isMulticast())
+        ui->comboBoxLocalUDPNetwork->setCurrentText("ANY");
+
 } // on_lineEditRemoteUDPNetwork_textChanged
 
 void MainWindow::on_lineEditRemoteUDPPort_textChanged(const QString &arg1)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
@@ -901,7 +913,7 @@ void MainWindow::on_lineEditRemoteUDPPort_textChanged(const QString &arg1)
 
 void MainWindow::on_spinBoxTTL_valueChanged(int arg1)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
@@ -912,7 +924,7 @@ void MainWindow::on_spinBoxTTL_valueChanged(int arg1)
 
 void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &styleName)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
@@ -939,7 +951,7 @@ void MainWindow::on_comboBoxSelectStyleSheet_currentTextChanged(const QString &s
 
 void MainWindow::populateStyleSheetMap(const QString &folderPath)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QDirIterator it(folderPath, QStringList() << "*.qss", QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
@@ -950,7 +962,7 @@ void MainWindow::populateStyleSheetMap(const QString &folderPath)
 
 void MainWindow::populateStyleSheetComboBox()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     ui->comboBoxSelectStyleSheet->clear();
     QSignalBlocker block(ui->comboBoxSelectStyleSheet);
@@ -960,7 +972,7 @@ void MainWindow::populateStyleSheetComboBox()
 
 void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting) {
         return;
@@ -971,7 +983,7 @@ void MainWindow::on_checkBoxLoadStyleSheet_clicked(bool checked)
 
 void MainWindow::loadQStyleSheetFolder()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString styleFolder = QApplication::applicationDirPath() + "/../QStyleSheets";
     QStyleSheetMap.clear(); // clear existing entries
@@ -983,7 +995,7 @@ void MainWindow::loadQStyleSheetFolder()
 
 void MainWindow::redrawCurrentMessages()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QList<Message> messages = messageStore->fetchLastMessages(chatPager->messagesPerPage());
 
@@ -1008,7 +1020,7 @@ void MainWindow::loadBackgroundImageFolder()
 
 void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
@@ -1021,7 +1033,7 @@ void MainWindow::on_checkBoxDisplayBackgroundImage_clicked(bool checked)
 
 void MainWindow::on_lineEditUserName_textChanged(const QString &newUserName)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;
@@ -1046,7 +1058,7 @@ void MainWindow::on_lineEditUserName_textChanged(const QString &newUserName)
 
 QString MainWindow::generateNextTestMessage()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     // static uint msgNumber = 1;
     return QString("Test %1").arg(msgNumber++);
@@ -1111,7 +1123,7 @@ QStringList MainWindow::buildRandomIncrementalPayloads(int firstSize, int lastSi
 
 void MainWindow::sendIncrementalMessageSizes(int firstSize, int lastSize)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
     QStringList payloads;
     const QString userName = ui->lineEditUserName->text().trimmed();
 
@@ -1254,7 +1266,7 @@ void MainWindow::on_pushButtonStopAutoSchedule_clicked()
 
 void MainWindow::on_pushButtonTestMsg_clicked()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
     ui->lineEditChatText->setText(generateNextTestMessage());
 
     // if(ui->checkBoxIncrementSize->isChecked()){
@@ -1267,7 +1279,7 @@ void MainWindow::on_pushButtonTestMsg_clicked()
 
 void MainWindow::on_pushButtonDeleteDatabase_clicked()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QMessageBox::StandardButton reply
         = QMessageBox::question(this,
@@ -1290,7 +1302,7 @@ void MainWindow::on_pushButtonDeleteDatabase_clicked()
 #ifdef ENABLE_DEMO_MODE
 void MainWindow::stopDemoModeUiReset()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (demoSimulator) {
         demoSimulator->stopDemo();
@@ -1326,7 +1338,7 @@ void MainWindow::stopDemoModeUiReset()
 
 void MainWindow::startDemoModeUiSetup()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     isDemoRunning = true;
 
@@ -1349,7 +1361,7 @@ void MainWindow::startDemoModeUiSetup()
 
 void MainWindow::on_pushButtonStartStopDemo_clicked()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!styleRotator || !udpManager)
         return;
@@ -1404,7 +1416,7 @@ void MainWindow::on_pushButtonResetMsgSeq_clicked()
 
 void MainWindow::on_checkBoxSpecialFeatures_clicked(bool checked)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!udpManager)
         return;
@@ -1452,7 +1464,7 @@ void MainWindow::showBackgroundImage(QString filePath)
 
 void MainWindow::on_comboBoxSelectBackground_currentTextChanged(const QString &arg1)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (isApplicationStarting)
         return;

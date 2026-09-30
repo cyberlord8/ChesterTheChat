@@ -29,7 +29,7 @@ MessageStore::MessageStore(const QString &dbPath, int m_instanceID, QObject *par
     : QObject(parent)
     , m_connectionName(QString("chatdb_connection_%1").arg(m_instanceID))
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
         qCritical() << "[MessageStore] SQLite driver not available!";
@@ -46,7 +46,7 @@ MessageStore::MessageStore(const QString &dbPath, int m_instanceID, QObject *par
 
 MessageStore::~MessageStore()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!QSqlDatabase::contains(m_connectionName))
         return;
@@ -65,21 +65,21 @@ MessageStore::~MessageStore()
 
 void MessageStore::logDatabaseOpenError() const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     qCritical() << "[MessageStore] Failed to open database:" << db.lastError().text();
 }//logDatabaseOpenError
 
 bool MessageStore::open()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     return initializeConnection() && initializeSchema();
 }//open
 
 bool MessageStore::initializeConnection()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!db.open()) {
         logDatabaseOpenError();
@@ -90,7 +90,7 @@ bool MessageStore::initializeConnection()
 
 bool MessageStore::initializeSchema()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString createSql = R"(
         CREATE TABLE IF NOT EXISTS messages (
@@ -178,7 +178,7 @@ bool MessageStore::initializeSchema()
 
 void MessageStore::insertMessage(const QString &user, const QString &text, const QDateTime &timestamp, bool isSent)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QSqlQuery query(conn());
     query.prepare(R"(
@@ -198,7 +198,7 @@ void MessageStore::insertMessage(const QString &user, const QString &text, const
 
 Message MessageStore::extractMessageFromQuery(const QSqlQuery &query) const
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     Message m;
     m.user = query.value(0).toString();
@@ -210,7 +210,7 @@ Message MessageStore::extractMessageFromQuery(const QSqlQuery &query) const
 
 QList<Message> MessageStore::fetchLastMessages(int count)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QList<Message> messages;
     QSqlQuery query(conn());
@@ -238,7 +238,7 @@ QList<Message> MessageStore::fetchLastMessages(int count)
 
 QList<Message> MessageStore::fetchMessages(int offset, int limit)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QList<Message> messages;
     QSqlQuery query(conn());
@@ -267,7 +267,7 @@ QList<Message> MessageStore::fetchMessages(int offset, int limit)
 
 int MessageStore::messageCount() const
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     QSqlQuery query("SELECT COUNT(*) FROM messages", conn());
     return query.next() ? query.value(0).toInt() : 0;
@@ -275,7 +275,7 @@ int MessageStore::messageCount() const
 
 bool MessageStore::clearMessages()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QSqlQuery query("DELETE FROM messages", conn());
     if (!query.exec()) {

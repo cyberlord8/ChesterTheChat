@@ -26,12 +26,12 @@
 ChatFormatter::ChatFormatter(QObject *parent)
     : QObject(parent)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 }
 
 int ChatFormatter::calculateDynamicMargin(QTextEdit *textEdit, double percent, int fallback) const
 {
-    //LOG_DEBUG(Q_FUNC_INFO);
+    //LOG_DEBUG("");
 
     if (!textEdit || !textEdit->viewport())
         return fallback;
@@ -42,7 +42,7 @@ int ChatFormatter::calculateDynamicMargin(QTextEdit *textEdit, double percent, i
 
 void ChatFormatter::insertBlock(QTextEdit *textEdit, QTextCursor &cursor, bool isSent)
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     QTextBlockFormat blockFmt;
     blockFmt.setAlignment(isSent ? Qt::AlignRight : Qt::AlignLeft);
@@ -61,7 +61,7 @@ void ChatFormatter::insertBlock(QTextEdit *textEdit, QTextCursor &cursor, bool i
 
 QColor ChatFormatter::generateUserColor(const QString &user)
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     if (!userColorMap.contains(user)) {
         userColorMap.insert(user, generateColorForUser(user));
@@ -71,14 +71,14 @@ QColor ChatFormatter::generateUserColor(const QString &user)
 
 QColor ChatFormatter::resolveUserColor(const QString &user, bool isSent)
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     return isSent ? QColorConstants::Cyan : generateUserColor(user);
 }
 
 void ChatFormatter::insertUserLine(QTextCursor &cursor, const QString &user, const QColor &color)
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     QTextCharFormat fmt;
     fmt.setForeground(color);
@@ -90,7 +90,7 @@ void ChatFormatter::insertUserLine(QTextCursor &cursor, const QString &user, con
 
 void ChatFormatter::insertMessageLine(QTextCursor &cursor, const QString &message)
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     QTextCharFormat fmt;
     fmt.setFontPointSize(14);
@@ -104,7 +104,7 @@ void ChatFormatter::insertTimestampLine(QTextCursor &cursor,
                                         const bool &isDark,
                                         bool isSent)
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
     Q_UNUSED(isSent)
 
 
@@ -126,7 +126,7 @@ void ChatFormatter::appendMessage(QTextEdit *textEdit,
                                   const QDateTime &timestamp,
                                   bool isSent)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QTextCursor cursor(textEdit->document());
     cursor.movePosition(QTextCursor::End);
@@ -152,7 +152,7 @@ void ChatFormatter::appendMessage(QTextEdit *textEdit,
 
 void ChatFormatter::insertLastReadMarker(QTextEdit *textEdit)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!textEdit)
         return;
@@ -175,7 +175,7 @@ void ChatFormatter::insertLastReadMarker(QTextEdit *textEdit)
 
 QColor ChatFormatter::generateColorForUser(const QString &user)
 {
-    // LOG_DEBUG(Q_FUNC_INFO);
+    // LOG_DEBUG("");
 
     // deterministic hash → HSV color
     QByteArray data = user.toUtf8();

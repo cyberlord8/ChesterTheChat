@@ -25,7 +25,7 @@
 #include <QDateTime>
 
 bool UdpChatSocketManager::isConnected() const {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     return (sendSocket && sendSocket->state() == QAbstractSocket::BoundState) &&
            (recvSocket && recvSocket->state() == QAbstractSocket::BoundState);
@@ -34,20 +34,20 @@ bool UdpChatSocketManager::isConnected() const {
 UdpChatSocketManager::UdpChatSocketManager(QObject *parent)
     : QObject(parent)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
 }//UdpChatSocketManager
 
 UdpChatSocketManager::~UdpChatSocketManager()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     closeSockets();
 }//UdpChatSocketManager
 
 bool UdpChatSocketManager::bindSendSocket(const QHostAddress &localAddress)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (sendSocket) {
         sendSocket->close();
@@ -72,7 +72,7 @@ bool UdpChatSocketManager::bindSendSocket(const QHostAddress &localAddress)
 
 void UdpChatSocketManager::cleanupReceiveSocket()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (recvSocket) {
         recvSocket->close();
@@ -81,14 +81,22 @@ void UdpChatSocketManager::cleanupReceiveSocket()
     }
 }//cleanupReceiveSocket
 
-bool UdpChatSocketManager::createAndBindReceiveSocket(const QHostAddress &localAddress, quint16 port)
+bool UdpChatSocketManager::createAndBindReceiveSocket(const QHostAddress &localAddress,
+                                                      const QHostAddress &groupAddress,
+                                                      quint16 port)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     recvSocket = new QUdpSocket(this);
 
-    const bool success = recvSocket->bind(localAddress, port,
-                                          QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint);
+    const bool multicast = groupAddress.isMulticast();
+    const QHostAddress bindAddress =
+        multicast ? QHostAddress::AnyIPv4 : localAddress;
+
+    bool success = recvSocket->bind(
+        bindAddress,
+        port,
+        QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint);
 
     if (!success) {
         qCritical().nospace() << "[UdpChatSocketManager] Failed to bind receive socket on "
@@ -101,29 +109,35 @@ bool UdpChatSocketManager::createAndBindReceiveSocket(const QHostAddress &localA
     return success;
 }//createAndBindReceiveSocket
 
-void UdpChatSocketManager::joinMulticastGroupSafely(const QHostAddress &groupAddress)
+bool UdpChatSocketManager::joinMulticastGroupSafely(const QHostAddress &groupAddress)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!recvSocket->joinMulticastGroup(groupAddress)) {
         qWarning().nospace() << "[UdpChatSocketManager] Failed to join multicast group "
                              << groupAddress.toString() << ": " << recvSocket->errorString();
+        return false;
     }
+    return true;
 }//joinMulticastGroupSafely
 
 bool UdpChatSocketManager::bindReceiveSocket(const QHostAddress &localAddress,
                                              const QHostAddress &groupAddress,
                                              quint16 port)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     cleanupReceiveSocket();
 
-    if (!createAndBindReceiveSocket(localAddress, port))
+    if (!createAndBindReceiveSocket(localAddress, groupAddress, port))
         return false;
 
-    if (groupAddress.isMulticast())
-        joinMulticastGroupSafely(groupAddress);
+    if (groupAddress.isMulticast()){
+        if(!joinMulticastGroupSafely(groupAddress)){
+            cleanupReceiveSocket();
+            return false;
+        }
+    }
 
     connect(recvSocket, &QUdpSocket::readyRead,
             this, &UdpChatSocketManager::processPendingDatagrams);
@@ -133,7 +147,7 @@ bool UdpChatSocketManager::bindReceiveSocket(const QHostAddress &localAddress,
 
 qint64 UdpChatSocketManager::sendMessage(const QByteArray &data, const QHostAddress &targetAddress, quint16 targetPort)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!sendSocket) {
         qWarning() << "[UdpChatSocketManager] Send failed: sendSocket is null.";
@@ -155,7 +169,7 @@ qint64 UdpChatSocketManager::sendMessage(const QByteArray &data, const QHostAddr
 
 void UdpChatSocketManager::cleanupSocket(QUdpSocket *&socket)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (socket) {
         socket->close();
@@ -166,7 +180,7 @@ void UdpChatSocketManager::cleanupSocket(QUdpSocket *&socket)
 
 void UdpChatSocketManager::closeSockets()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     cleanupSocket(recvSocket);
     cleanupSocket(sendSocket);
@@ -174,7 +188,7 @@ void UdpChatSocketManager::closeSockets()
 
 QByteArray UdpChatSocketManager::receiveDatagram(QHostAddress &sender, quint16 &port)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     QByteArray datagram;
     datagram.resize(int(recvSocket->pendingDatagramSize()));
@@ -184,7 +198,7 @@ QByteArray UdpChatSocketManager::receiveDatagram(QHostAddress &sender, quint16 &
 
 bool UdpChatSocketManager::isSelfEcho(const QByteArray &datagram) const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const int echoSuppressionMs = 250;
 
@@ -197,7 +211,7 @@ bool UdpChatSocketManager::isSelfEcho(const QByteArray &datagram) const
 
 std::pair<QString, QString> UdpChatSocketManager::parseUserMessage(const QByteArray &raw) const
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     const QString fallbackText = QString::fromUtf8(raw);
     const QStringList parts = fallbackText.split(" - ", Qt::KeepEmptyParts);
@@ -213,7 +227,7 @@ std::pair<QString, QString> UdpChatSocketManager::parseUserMessage(const QByteAr
 
 void UdpChatSocketManager::processPendingDatagrams()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (!recvSocket)
         return;
@@ -235,7 +249,7 @@ void UdpChatSocketManager::processPendingDatagrams()
 }//processPendingDatagrams
 
 QString UdpChatSocketManager::lastError() const {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     return sendSocket ? sendSocket->errorString() : "No socket";
 }//lastError

@@ -19,19 +19,22 @@
 #include "stylerotator.h"
 #include "../Utils/debugmacros.h"
 
+#include <QDir>
+#include <QStringList>
+
 StyleRotator::StyleRotator(QComboBox *comboBox, QMap<QString, QString> styleMap, QObject *parent)
     : QObject(parent)
     , comboBox(comboBox)
     , styleSheetMap(styleMap)
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     connect(&rotateTimer, &QTimer::timeout, this, &StyleRotator::applyNextStyle);
 }//StyleRotator
 
 void StyleRotator::start()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     if (styleSheetMap.isEmpty())
         return;
@@ -42,31 +45,54 @@ void StyleRotator::start()
 
 void StyleRotator::stop()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
+    LOG_DEBUG("");
 
     rotateTimer.stop();
 }//stop
 
 void StyleRotator::applyNextStyle()
 {
-    LOG_DEBUG(Q_FUNC_INFO);
-
-    if (styleSheetMap.isEmpty())
+    if (styleSheetMap.isEmpty() || !comboBox)
         return;
 
-    static uint index = 0;
-    while (!styleSheetMap.value(styleSheetMap.keys().at(index)).contains("/Chester/")) {
+    const QStringList keys = styleSheetMap.keys();
 
-        index++;
+    for (int checked = 0; checked < keys.size(); ++checked) {
+        const int index = (currentIndex + checked) % keys.size();
+        const QString &key = keys.at(index);
+        const QString path =
+            QDir::fromNativeSeparators(styleSheetMap.value(key));
 
-        if(index >= styleSheetMap.size()){
-            index = 0;
+        if (path.contains("/Chester/")) {
+            comboBox->setCurrentText(key);
+            currentIndex = (index + 1) % keys.size();
+            return;
         }
     }
 
-    comboBox->setCurrentText(styleSheetMap.keys().at(index++));
+    // No eligible stylesheet; leave the current style unchanged.
+} // applyNextStyle
 
-    if(index >= styleSheetMap.size()){
-        index = 0;
-    }
-}//applyNextStyle
+// void StyleRotator::applyNextStyle()
+// {
+//     LOG_DEBUG("");
+
+//     if (styleSheetMap.isEmpty())
+//         return;
+
+//     static uint index = 0;
+//     while (!styleSheetMap.value(styleSheetMap.keys().at(index)).contains("/Chester/")) {
+
+//         index++;
+
+//         if(index >= styleSheetMap.size()){
+//             index = 0;
+//         }
+//     }
+
+//     comboBox->setCurrentText(styleSheetMap.keys().at(index++));
+
+//     if(index >= styleSheetMap.size()){
+//         index = 0;
+//     }
+// }//applyNextStyle

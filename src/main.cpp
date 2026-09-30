@@ -32,6 +32,13 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
 
+    if (!w.startupSucceeded()) {
+        QMessageBox::critical(
+            nullptr, "Startup Error",
+            "Could not acquire an application instance ID.");
+        return EXIT_FAILURE;
+    }
+
     QPixmap pixmap(":/images/ChesterBGND.png");
     pixmap = pixmap.scaled(512,512,Qt::KeepAspectRatio);
 

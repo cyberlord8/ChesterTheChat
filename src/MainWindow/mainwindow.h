@@ -22,23 +22,23 @@
 #include "../globals.h"
 
 #include "../ChatFormatter/chatformatter.h"
+#include "../ChatPager/chatpager.h"
+#include "../InstanceIdManager/instanceidmanager.h"
 #include "../MessageStore/messagestore.h"
 #include "../SettingsManager/settingsmanager.h"
-#include "../UDPChatSocketManager/udpchatsocketmanager.h"
-#include "../StyleRotator/stylerotator.h"
 #include "../StyleManager/stylemanager.h"
-#include "../InstanceIdManager/instanceidmanager.h"
-#include "../ChatPager/chatpager.h"
+#include "../StyleRotator/stylerotator.h"
+#include "../UDPChatSocketManager/udpchatsocketmanager.h"
 
 #include "../ChatSessionLogger/chatsessionlogger.h"
 
-#include <QScrollBar>
-#include <QWheelEvent>
+#include <QDesktopServices>
+#include <QDirIterator>
 #include <QMainWindow>
 #include <QMessageBox>
-#include <QDesktopServices>
 #include <QNetworkInterface>
-#include <QDirIterator>
+#include <QScrollBar>
+#include <QWheelEvent>
 
 #include <QRandomGenerator>
 #include <QString>
@@ -72,7 +72,7 @@ public:
      * @param parent Optional parent widget.
      */
     explicit MainWindow(QWidget *parent = nullptr);
-
+    bool startupSucceeded() const { return m_startupSucceeded; }
     /**
      * @brief Tears down the main window, saving settings and releasing resources.
      */
@@ -88,6 +88,7 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
+    bool m_startupSucceeded = false;
     /// Manages dynamic application stylesheets.
     std::unique_ptr<StyleManager> styleManager;
 
@@ -106,14 +107,14 @@ private:
 
     /// Simulator for automated themed chat sequences.
     QScopedPointer<DemoChatSimulator> demoSimulator;
-        /**
+    /**
      * @brief Automatically rotates through available Chester stylesheets.
      *
      * This object cycles through all registered `.qss` themes via the stylesheet
      * combo box. It's used to demonstrate the appearance of different UI themes
      * during demo mode, highlighting light and dark theme support.
      */
-        StyleRotator *styleRotator = nullptr;
+    StyleRotator *styleRotator = nullptr;
 #endif
 
     /// Stores the real stylesheet name when switching in demo mode.
@@ -121,7 +122,7 @@ private:
 
     /// Timer to debounce saving the username setting.
     QTimer userNameSaveDebounceTimer;
-    
+
     /// Sends automatic test messages at the selected interval.
     QTimer autoTestMessageTimer;
 
@@ -129,29 +130,29 @@ private:
  *  Objects related to message formatting, persistence, and session logging.
  */
     ///@{
-    ChatFormatter     *m_formatter      = nullptr; ///< Formats messages for display.
-    MessageStore      *messageStore     = nullptr; ///< Persists chat history.
-    ChatSessionLogger  chatSessionLogger;          ///< Writes the active chat transcript.
+    ChatFormatter *m_formatter = nullptr; ///< Formats messages for display.
+    MessageStore *messageStore = nullptr; ///< Persists chat history.
+    ChatSessionLogger chatSessionLogger;  ///< Writes the active chat transcript.
     ///@}
 
     /** @name UDP Communication
      *  Handles sending and receiving chat packets over the network.
      */
     ///@{
-    UdpChatSocketManager *udpManager  = nullptr; ///< Manages UDP sockets.
+    UdpChatSocketManager *udpManager = nullptr; ///< Manages UDP sockets.
     ///@}
 
     /** @name Application Configuration
      *  Settings, managers, and instance-specific data.
      */
     ///@{
-    Settings         configSettings;            ///< Loaded user/config settings.
+    Settings configSettings;                    ///< Loaded user/config settings.
     SettingsManager *settingsManager = nullptr; ///< Persists Settings to disk.
-    int              instanceID      = 0;       ///< Unique ID for this app instance.
+    int instanceID = 0;                         ///< Unique ID for this app instance.
     uint msgNumber = 1;
-    bool             isApplicationStarting = false; ///< Flag suppressing signals during init.
-    QMap<QString, QString> QStyleSheetMap;      ///< Maps display names to .qss file paths.
-    QMap<QString, QString> backgroundImageMap;      ///< Maps display names to .qss file paths.
+    bool isApplicationStarting = false;        ///< Flag suppressing signals during init.
+    QMap<QString, QString> QStyleSheetMap;     ///< Maps display names to .qss file paths.
+    QMap<QString, QString> backgroundImageMap; ///< Maps display names to .qss file paths.
     ///@}
 
 #ifdef EXPIRES
@@ -178,19 +179,19 @@ private:
      *  One-time setup methods called during construction.
      */
     ///@{
-    void initializeManagers();    ///< Creates managers for settings, networking, etc.
-    void initializeUi();          ///< Configures UI elements and event filters.
-    void initializeDatabase();    ///< Opens message DB and loads initial messages.
-    void connectSignals();        ///< Connects internal signals and slots.
-    void loadInitialState();      ///< Applies saved settings and loads UI state.
+    bool initializeManagers(); ///< Creates managers for settings, networking, etc.
+    void initializeUi();       ///< Configures UI elements and event filters.
+    void initializeDatabase(); ///< Opens message DB and loads initial messages.
+    void connectSignals();     ///< Connects internal signals and slots.
+    void loadInitialState();   ///< Applies saved settings and loads UI state.
     ///@}
 
     /** @name UI Population and Sync
      *  Methods to populate and refresh UI controls.
      */
     ///@{
-    void fillNetworkWidgets();    ///< Lists valid IPv4 interfaces in network combo box.
-    void updateUIWidgets();       ///< Syncs widget values from current Settings.
+    void fillNetworkWidgets(); ///< Lists valid IPv4 interfaces in network combo box.
+    void updateUIWidgets();    ///< Syncs widget values from current Settings.
     ///@}
 
     /** @name Chat Display
@@ -208,11 +209,11 @@ private:
      *  Dynamic loading and application of stylesheets and backgrounds.
      */
     ///@{
-    void setStyleSheet();         ///< Applies selected .qss if enabled.
+    void setStyleSheet(); ///< Applies selected .qss if enabled.
     // void setBackgroundImage();    ///< Toggles background graphic in chat.
-    void loadQStyleSheetFolder(); ///< Scans directory for .qss files.
-    void populateStyleSheetMap(const QString &folderPath);     ///< Fills QStyleSheetMap.
-    void populateStyleSheetComboBox();                        ///< Populates UI combo box.
+    void loadQStyleSheetFolder();                          ///< Scans directory for .qss files.
+    void populateStyleSheetMap(const QString &folderPath); ///< Fills QStyleSheetMap.
+    void populateStyleSheetComboBox();                     ///< Populates UI combo box.
     QString chatBackgroundStyle() const; ///< Returns CSS snippet for chat background.
     ///@}
 
@@ -220,10 +221,10 @@ private:
      *  Methods for title, version, and About dialog composition.
      */
     ///@{
-    void setAppWindowTitle();     ///< Builds and sets the window title string.
+    void setAppWindowTitle(); ///< Builds and sets the window title string.
     QString buildVersionSuffix(const QString &version) const; ///< Formats version suffix.
-    QString buildAppVersionString() const;   ///< Constructs full version string.
-    QString detectCompilerInfo() const;      ///< Returns Qt/minGW build info.
+    QString buildAppVersionString() const;                    ///< Constructs full version string.
+    QString detectCompilerInfo() const;                       ///< Returns Qt/minGW build info.
     QString buildAboutText(const QString &version,
                            const QString &compileDate,
                            const QString &releaseDate,
@@ -234,7 +235,8 @@ private:
      *  Encoding, sending, and storing chat packets.
      */
     ///@{
-    QByteArray buildRawUdpPayload(const QString &user, const QString &msg) const; ///< Encodes "user - msg".
+    QByteArray buildRawUdpPayload(const QString &user,
+                                  const QString &msg) const; ///< Encodes "user - msg".
     bool sendUdpMessage(const QByteArray &data,
                         const QHostAddress &address,
                         quint16 port); ///< Sends datagram, returns success.
@@ -244,11 +246,11 @@ private:
     QHostAddress parseLocalAddress() const; ///< Parses selected local address ("ANY" ⇒ AnyIPv4).
     bool bindUdpSockets(const QHostAddress &local,
                         const QHostAddress &remote,
-                        quint16 port); ///< Binds receive/send sockets.
-    void updateUiOnConnectSuccess();         ///< Adjusts UI on socket bind success.
-    void resetUiAfterDisconnect();           ///< Restores UI on disconnect.
+                        quint16 port);                ///< Binds receive/send sockets.
+    void updateUiOnConnectSuccess();                  ///< Adjusts UI on socket bind success.
+    void resetUiAfterDisconnect();                    ///< Restores UI on disconnect.
     bool isValidIPv4Address(const QString &ip) const; ///< Validates non-link-local IPv4.
-    QString generateNextTestMessage();       ///< Produces sequenced test messages.
+    QString generateNextTestMessage();                ///< Produces sequenced test messages.
     ///@}
 
     /** @name Resource Utilities
@@ -256,7 +258,8 @@ private:
      */
     ///@{
     void openResourceFile(const QString &fileName); ///< Copies & opens a resource.
-    bool copyResourceToFile(const QString &resourcePath, const QString &targetPath); ///< Overwrites target.
+    bool copyResourceToFile(const QString &resourcePath,
+                            const QString &targetPath); ///< Overwrites target.
     ///@}
 
     /**
@@ -291,17 +294,17 @@ private:
 private slots:
     /** @name Help & About Slots */
     ///@{
-    void on_actionAbout_triggered();    ///< Shows custom About dialog.
-    void on_actionAbout_Qt_triggered(); ///< Shows Qt About dialog.
-    void on_actionQt_License_triggered(); ///< Opens Qt license PDF.
+    void on_actionAbout_triggered();       ///< Shows custom About dialog.
+    void on_actionAbout_Qt_triggered();    ///< Shows Qt About dialog.
+    void on_actionQt_License_triggered();  ///< Opens Qt license PDF.
     void on_actionUser_Manual_triggered(); ///< Opens user manual PDF.
     ///@}
 
     /** @name Chat Interaction Slots */
     ///@{
-    void on_pushButtonSend_clicked();      ///< Sends chat text on Send button.
+    void on_pushButtonSend_clicked();         ///< Sends chat text on Send button.
     void on_lineEditChatText_returnPressed(); ///< Sends on <Enter> in text field.
-    void on_pushButtonTestMsg_clicked();   ///< Inserts a test message into input.
+    void on_pushButtonTestMsg_clicked();      ///< Inserts a test message into input.
     ///@}
 
     /** @name Connection Control Slots */
@@ -312,19 +315,19 @@ private slots:
 
     /** @name Network Settings Slots */
     ///@{
-    void on_checkBoxMulticast_clicked(bool checked);           ///< Toggles multicast mode.
-    void on_checkBoxLoopback_clicked(bool checked);            ///< Toggles UDP loopback.
-    void on_spinBoxTTL_valueChanged(int arg1);                 ///< Updates UDP TTL.
+    void on_checkBoxMulticast_clicked(bool checked); ///< Toggles multicast mode.
+    void on_checkBoxLoopback_clicked(bool checked);  ///< Toggles UDP loopback.
+    void on_spinBoxTTL_valueChanged(int arg1);       ///< Updates UDP TTL.
     void on_comboBoxLocalUDPNetwork_currentTextChanged(const QString &arg1); ///< Updates local IP.
-    void on_lineEditLocalUDPPort_textChanged(const QString &arg1); ///< Updates local port.
+    void on_lineEditLocalUDPPort_textChanged(const QString &arg1);     ///< Updates local port.
     void on_lineEditRemoteUDPNetwork_textChanged(const QString &arg1); ///< Updates remote IP.
-    void on_lineEditRemoteUDPPort_textChanged(const QString &arg1); ///< Updates remote port.
+    void on_lineEditRemoteUDPPort_textChanged(const QString &arg1);    ///< Updates remote port.
     ///@}
 
     /** @name Appearance Settings Slots */
     ///@{
     void on_comboBoxSelectStyleSheet_currentTextChanged(const QString &arg1); ///< Selects theme.
-    void on_checkBoxLoadStyleSheet_clicked(bool checked); ///< Enables/disables stylesheet.
+    void on_checkBoxLoadStyleSheet_clicked(bool checked);         ///< Enables/disables stylesheet.
     void on_checkBoxDisplayBackgroundImage_clicked(bool checked); ///< Toggles background image.
     ///@}
 
@@ -362,7 +365,6 @@ signals:
 
     /// Requests the current messages be re-rendered in the chat view.
     void signalRequestRedrawCurrentMessages();
-
 };
 
 #endif // MAINWINDOW_H
