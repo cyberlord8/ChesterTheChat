@@ -38,8 +38,8 @@
  * based on whether it is an alpha or beta build.
  */
 // #define VERSION "release"
-#define VERSION "alpha"
-// #define VERSION "beta"
+// #define VERSION "alpha"
+#define VERSION "beta"
 
 /**
  * @def ALPHA_TIME
