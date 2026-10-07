@@ -2,71 +2,80 @@
 
 **Chester The Chat** is a lightweight IP/UDP-based local network chat application built with the Qt Framework (C++). It's designed to support multiple instances on the same machine, each with isolated configuration, making it ideal for local testing or LAN-based messaging scenarios.
 
+# Stylesheets
+
 ## Stylesheets
+
 ### Alice Stylesheet
 
-![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Alice.png)
-
+<img src="Alice.png" alt="Alice Stylesheet">
 
 ### Caterpiller Stylesheet
 
-![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Caterpillar.png)
-
+<img src="Caterpillar.png" alt="Caterpillar Stylesheet">
 
 ### Jabberwocky Stylesheet
 
-![image](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/screenshots/Jabberwocky.png)
+<img src="Jabberwocky.png" alt="Jabberwocky Stylesheet">
 
-
----
 
 ## Features
 
 - Send and receive chat messages over UDP multicast or unicast.
+
 - Supports multiple instances with auto-assigned configuration files.
+
 - Optional custom stylesheets (`.qss`) for a personalized look.
+
 - Optional background image toggle.
+
 - Configurable TTL, ports, network interfaces.
-- Persistent settings per instance (`instance_X_settings.ini`).
+
+- Persistent settings per instance (`instance\_X\_settings.ini`).
+
 - Built with Qt (C++), cross-platform compatible.
 
 ## User Manual
-[User Manual](https://github.com/cyberlord8/ChesterTheChat/blob/main/resources/UserManual.pdf)
 
----
+[UserManual.pdf](../../resources/UserManual.pdf)
+
 
 ## Build Instructions
 
 ### Requirements
 
 - Qt 5.15+ or Qt 6.x
+
 - C++17 (or higher)
+
 - Qt Creator or any CMake/qmake-based setup
+
 - MinGW 64 (or equivalent compiler)
 
 ### Build using Qt Creator
 
 1. Open `ChesterTheChat.pro` in Qt Creator.
+
 2. Configure your desired kit (MinGW or MSVC).
+
 3. Build and run.
 
 ### Run multiple instances
 
-Each instance creates its own `.ini` file (`instance_1_settings.ini`, `instance_2_settings.ini`, etc.) in the executable directory. This allows running multiple sessions concurrently from the same folder.
+Each instance creates its own `.ini` file (`instance\_1\_settings.ini`, `instance\_2\_settings.ini`, etc.) in the executable directory. This allows running multiple sessions concurrently from the same folder.
 
----
 
 ## License
+
 Licensed under the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.html).
 
----
 
 ## Acknowledgements
 
 - Developed using the **Qt Framework**
+
 - Based on C++ best practices and Qt design patterns
 
----
 
 ## About the Author
 
